@@ -9,7 +9,7 @@ non-market damages at the country-level, and the effects of eight
 climate tipping points that have been implemented in the climate
 economics literature.
 
-META 2021 is introduced in **Dietz et al. (2021)**.
+META 2021 is introduced in **Dietz et al. (2021). Economic impacts of tipping points in the climate system. PNAS.**.
 
 See that paper and its supplemental information for more information.
 
