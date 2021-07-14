@@ -9,9 +9,9 @@ non-market damages at the country-level, and the effects of eight
 climate tipping points that have been implemented in the climate
 economics literature.
 
-META 2021 is introduced in **Dietz et al. (2021). Economic impacts of tipping points in the climate system. PNAS.**.
+META 2021 is introduced in **Dietz, Rising, Stoerk, and Wagner (2021): "Economic impacts of tipping points in the climate system", PNAS.** [LINK TO DOI]
 
-See that paper and its supplemental information for more information.
+See that paper and its supplemental information for more information. Please cite that paper when using META in your research.
 
 ## Installation and Use
 
@@ -50,4 +50,4 @@ The main model includes links to the other files in the `Model` folder.
 
 ## Computing the social cost of carbon
 
-To calculate the SCC, run the model without the additional tonne of CO2 (set `Settings` cell C14 to `No`) and record welfare (`Welfare & SCCO2 calculator` cell C2). Then run the model again with the additional tonne of CO2 (set `Settings` cell C14 to `Yes`) and record welfare (`Welfare & SCCO2 calculator` cell C2 again). Calculate the difference in welfare. Then divide by ∂W/∂C(2020), using world mean consumption/capita in `Welfare & SCCO2 calculator` cell C3. You may wish to inflate the resulting number to current dollars!
+To calculate the SCC, run the model without the additional pulse of CO2 (set `Settings` cell C14 to `No`) and record welfare (`Welfare & SCCO2 calculator` cell C2). Then run the model again with the additional pulse of CO2 (set `Settings` cell C14 to `Yes`) and record welfare (`Welfare & SCCO2 calculator` cell C2 again). Calculate the difference in welfare. Then divide by ∂W/∂C(2020), using world mean consumption/capita in `Welfare & SCCO2 calculator` cell C3. You may wish to inflate the resulting number to current dollars!
