@@ -9,6 +9,8 @@ See that paper and its supplementary information for further details. Please cit
 
 ## Installation and Use
 
+It is recommended that you download this entire repository to use META, since the model relies on a number of linked files. You can do this at the `Code` link above or download a [zip archive](https://github.com/openmodels/META-2021/archive/refs/heads/master.zip).
+
 The main model is implemented as an Excel spreadsheet, which uses [@RISK](https://www.palisade.com/risk/) for Monte Carlo analysis. You should have @RISK installed to use META 2021.
 
 To open the model, first load @RISK, and within @RISK load `Model/META model July 2021.xlsx`.
