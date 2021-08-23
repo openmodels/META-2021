@@ -3,7 +3,7 @@ The Model for Economic Tipping point Analysis
 
 META 2021 is an advanced integrated assessment model (SC-IAM), designed as a model-based meta-analysis of the effects of tipping points on the social cost of carbon (SCC). The model simulates greenhouse gas emissions, temperature and sea-level rise, and market and non-market damages at the country-level, and the effects of eight climate tipping points that have been studied in the climate economics literature.
 
-META 2021 is introduced in; **Dietz, Rising, Stoerk, and Wagner (2021): "Economic impacts of tipping points in the climate system", PNAS.** [LINK TO DOI]
+META 2021 is introduced in; **Dietz, Rising, Stoerk, and Wagner (2021): "Economic impacts of tipping points in the climate system", PNAS.** [https://doi.org/10.1073/pnas.2103081118]
 
 See that paper and its supplementary information for further details. Please cite the paper when using META in your research.
 
