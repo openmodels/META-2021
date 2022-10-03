@@ -1,0 +1,9 @@
+Parameter,Nordhaus central value,Robinson,Non-linear equilibrium function,Ice/SLR low,Ice/SLR high,Notes
+meltmult,1,,,1,1,
+volzero,0.999,,,0.999,0.999,
+avoldot0,-0.0000106,-0.0000088,-0.00001166,-9.64352E-06,-1.15565E-05,Nordhaus quantifies s.e. of this parameter as 2.44E-05 (/5/100). This comes out of regressing the equation determining T*(t) on data from Robinson et al. (2012). Should be used with tmaxa=3.4 only. Nordhaus also carries out sensitivity analysis with double melt rate but says this is beyond any reported estimates in AR5. Note low and high scenarios defined as 2.5% and 97.5% of distribution.
+avoldot,-0.0000106,,,-9.64352E-06,-1.15565E-05,
+tmaxa,3.4,1.8,,3.4,3.4,
+slrgis,7,,,7,7,
+expvol,0.2,,,0.2,0.2,
+exptstar,1,,0.5,1,1,

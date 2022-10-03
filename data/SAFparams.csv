@@ -1,0 +1,15 @@
+Parameter,Distribution mean
+ECS-average SAF (W/m2/degC),0.349590471
+SAF_mean_quad_segment: T^2 coeff (W/m2/K3),-0.001958477
+SAF_mean_quad_segment: T^1 coeff (W/m2/K2),-0.006387192
+SAF_mean_quad_segment: T^0 coeff (W/m2/K),0.363696355
+SAF_std_quad_segment (W/m2/K),0.109096643
+Forcing slope (W/m2),5.5
+Nonlinear SAF,0
+Warming half-life,28.33333333
+Linear SAF Mean,0.063605129
+Linear SAF Std. Dev.,0.029077492
+ECS,3.25312
+Segment switch FSAF,2.664778184
+T_AT_2010,0.854
+Base year FSAF (from pre-ind) (W/m2),0.307860943

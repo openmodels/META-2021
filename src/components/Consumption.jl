@@ -1,0 +1,178 @@
+include("../lib/gdppc.jl")
+include("../lib/damages.jl")
+include("../lib/saverate.jl")
+
+@defcomp Consumption begin
+    # Variables
+    gdppc_region = Variable(index=[time, region], unit="2010 USD PPP")
+    gdppc_ratio_region = Variable(index=[time, region])
+    gdppc_growth_region = Variable(index=[time, region])
+
+    gdppc_growth = Variable(index=[time, country])
+    gdppc = Variable(index=[time, country], unit="2010 USD PPP")
+    conspc_preadj = Variable(index=[time, country], unit="2010 USD PPP") # previous year's
+    conspc = Variable(index=[time, country], unit="2010 USD PPP")
+
+    # Parameters
+    ssp = Parameter{String}()
+
+    # Based on SSP
+    convergerate_gdppc = Parameter()
+    decayrate_gdppc = Parameter()
+    popweights_region = Parameter(index=[region])
+
+    # Based on historical data
+    gdppc_2009 = Parameter(index=[country], unit="2010 USD PPP")
+    saverate = Parameter(index=[country])
+
+    # Based on damage specification
+    seeds = Parameter{Int64}(index=[country])
+    beta1 = Parameter(index=[country], unit="1/degC")
+    beta2 = Parameter(index=[country], unit="1/degC^2")
+
+    T_country_1990 = Parameter(index=[country], unit="degC")
+
+    # slruniforms = Parameter(index=[country])
+    slrcoeff = Parameter(index=[country], unit="1/m")
+
+    # Damage configuration
+    damagepersist = Parameter(default=0.5)
+    min_conspc = Parameter(unit="2010 USD PPP", default=1)
+
+    # Inputs from other components
+    T_country = Parameter(index=[time, country], unit="degC")
+    SLR = Parameter(index=[time], unit="m")
+
+    function init(pp, vv, dd)
+        for cc in dd.country
+            if pp.seeds[cc] != 0
+                betaboths = getbhmbetas(dim_keys(model, :country)[cc], "distribution", pp.seeds[cc])
+                pp.beta1[cc] = betaboths[1]
+                pp.beta2[cc] = betaboths[2]
+            end
+        end
+    end
+
+    function run_timestep(pp, vv, dd, tt)
+        isos = dim_keys(model, :country)
+
+        if is_first(tt)
+            for rr in dd.region
+                vv.gdppc_region[tt, rr] = getgdppc_ssp(dim_keys(model, :region)[rr], pp.ssp, 2010)
+                if ismissing(vv.gdppc_region[tt, rr])
+                    vv.gdppc_region[tt, rr] = 0
+                end
+                vv.gdppc_ratio_region[tt, rr] = 1
+                vv.gdppc_growth_region[tt, rr] = 0 # ignored
+            end
+
+            for cc in dd.country
+                gdppc = getgdppc(isos[cc], 2010)
+                if ismissing(gdppc)
+                    if isos[cc] == "DJI"
+                        vv.gdppc[tt, cc] = getgdppc(isos[cc], 2011)
+                        vv.gdppc_growth[tt, cc] = vv.gdppc[tt, cc] / pp.gdppc_2009[cc] - 1
+                    else
+                        vv.gdppc[tt, cc] = vv.gdppc_growth[tt, cc] = 0
+                    end
+                else
+                    vv.gdppc[tt, cc] = gdppc
+                    vv.gdppc_growth[tt, cc] = vv.gdppc[tt, cc] / pp.gdppc_2009[cc] - 1
+                end
+
+                vv.conspc_preadj[tt, cc] = (1-pp.saverate[cc])*pp.gdppc_2009[cc]
+            end
+        else
+            for rr in dd.region
+                vv.gdppc_region[tt, rr] = getgdppc_ssp(dim_keys(model, :region)[rr], pp.ssp, gettime(tt))
+                vv.gdppc_ratio_region[tt, rr] = vv.gdppc_region[tt, rr] / vv.gdppc_region[TimestepIndex(1), rr]
+                if gettime(tt) <= 2100
+                    vv.gdppc_growth_region[tt, rr] = vv.gdppc_ratio_region[tt, rr] / vv.gdppc_ratio_region[tt-1, rr] - 1
+                else
+                    vv.gdppc_growth_region[tt, rr] = (1-pp.convergerate_gdppc-pp.decayrate_gdppc)*vv.gdppc_growth_region[tt-1, rr]+pp.decayrate_gdppc*sum(vv.gdppc_growth_region[tt-1, :] .* pp.popweights_region)
+                end
+            end
+
+            for cc in dd.country
+                region = getregion(isos[cc])
+                if ismissing(region)
+                    growth = 0
+                else
+                    rr = findfirst(dim_keys(model, :region) .== region)
+                    growth = vv.gdppc_growth_region[tt, rr]
+                end
+
+                vv.gdppc_growth[tt, cc] = growth
+                vv.gdppc[tt, cc] = vv.gdppc[tt-1, cc] * (1 + growth)
+
+                if vv.conspc[tt-1, cc] == 0 || vv.gdppc[tt, cc] == 0
+                    vv.conspc_preadj[tt, cc] = 0
+                else
+                    vv.conspc_preadj[tt, cc] = pp.damagepersist*(1-pp.saverate[cc])*vv.gdppc[tt-1, cc]+(1-pp.damagepersist)*vv.conspc[tt-1, cc]
+                end
+            end
+        end
+
+        for cc in dd.country
+            vv.conspc[tt, cc] = vv.conspc_preadj[tt, cc]*(1+(vv.gdppc_growth[tt, cc]-pp.beta1[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])-pp.beta2[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])^2))*(1-pp.SLR[tt]*pp.slrcoeff[cc])
+
+            if vv.conspc[tt, cc] <= pp.min_conspc
+                vv.conspc[tt, cc] = pp.min_conspc
+            end
+        end
+    end
+end
+
+function addConsumption(model, toption, slroption, ssp)
+    if toption ∉ ["none", "distribution", "pointestimate", "low", "high"]
+        throw(ArgumentError("Unknown Consumption toption"))
+    end
+    if slroption ∉ ["none", "distribution", "mode", "low", "high"]
+        throw(ArgumentError("Unknown Consumption slroption"))
+    end
+
+    cons = add_comp!(model, Consumption)
+
+    cons[:ssp] = ssp
+
+    sspextend = CSV.read("../data/sspextend-gdppc.csv", DataFrame)
+    cons[:convergerate_gdppc] = sspextend[sspextend.SSP .== ssp, "Convergence rate"][1]
+    cons[:decayrate_gdppc] = sspextend[sspextend.SSP .== ssp, "Decay rate"][1]
+
+    cons[:popweights_region] = [getpopweight_ssp(region, ssp) for region in dim_keys(model, :region)]
+
+    isos = dim_keys(model, :country)
+
+    if toption == "none"
+        cons[:seeds] = [0 for iso in isos]
+        cons[:beta1] = zeros(length(isos))
+        cons[:beta2] = zeros(length(isos))
+    elseif toption != "distribution"
+        betaboths = [getbhmbetas(iso, toption) for iso in isos]
+        cons[:seeds] = [0 for iso in isos]
+        cons[:beta1] = [betaboth[1] for betaboth in betaboths]
+        cons[:beta2] = [betaboth[2] for betaboth in betaboths]
+    else
+        cons[:beta1] = zeros(length(isos))
+        cons[:beta2] = zeros(length(isos))
+    end
+
+    if slroption == "none"
+        cons[:slrcoeff] = zeros(length(isos))
+    elseif toption != "distribution"
+        cons[:slrcoeff] = [getslrcoeff(iso, slroption) for iso in isos]
+    else
+
+        # cons[:slrcoeff] = [getslrcoeff_distribution(isos[cc], slroption, pp.slruniforms[cc]) for cc in 1:length(isos)]
+    end
+
+    cons[:saverate] = [getsaverate(iso) for iso in isos]
+    gdppc_2009 = [getgdppc(iso, 2009) for iso in isos]
+    gdppc_2009[ismissing.(gdppc_2009)] .= 0
+    gdppc_2009[isos .== "DJI"] .= 2700
+    cons[:gdppc_2009] = gdppc_2009
+    cons[:T_country_1990] = [gettemp1990(iso) for iso in isos]
+
+    cons
+end
+
