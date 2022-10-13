@@ -16,7 +16,7 @@ function myupdate_param!(model, comp, param, value)
 end
 
 for rr in 1:nrow(benchmark)
-    model = full_model()
+    global model = full_model() # XXX: Consumption currently refers to this...
 
     ## Fill in values
     beta1indexes = findall(x -> occursin("beta1dist", x), names(benchmark))
