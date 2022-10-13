@@ -13,7 +13,7 @@
     ch4_conc_rcp = Parameter(index=[time], unit="ppb")
     n2o_conc_rcp = Parameter(index=[time], unit="ppb")
 
-    alpha = Parameter(default=0.036)
+    ch4_alpha = Parameter(default=0.036)
     fMN_parameter1 = Parameter(default=0.0000201)
     fMN_parameter2 = Parameter(default=0.00000000000000531)
     decay_rate = Parameter(default=1/12.4)
@@ -33,7 +33,7 @@ function run_timestep(pp, vv, dd, tt)
         end
 
         vv.I_CH4_N2O[tt] = 0.47*log(1+pp.fMN_parameter1*(vv.CH4_concentration[tt]*vv.N2O_initial_concentration[TimestepIndex(1)])^(0.75)+pp.fMN_parameter2*vv.CH4_concentration[tt]*(vv.CH4_concentration[tt]*vv.N2O_initial_concentration[TimestepIndex(1)])^(1.52))
-        vv.F_CH4[tt] = pp.alpha*(sqrt(vv.CH4_concentration[tt])-sqrt(pp.CH4_conc_preindustrial))-(vv.I_CH4_N2O[tt]-vv.fMN_2010[TimestepIndex(1)])
+        vv.F_CH4[tt] = pp.ch4_alpha*(sqrt(vv.CH4_concentration[tt])-sqrt(pp.CH4_conc_preindustrial))-(vv.I_CH4_N2O[tt]-vv.fMN_2010[TimestepIndex(1)])
     end
 end
 
@@ -41,13 +41,13 @@ function addCH4Model(model, ch4calib)
     ch4model = add_comp!(model, CH4Model)
 
     if ch4calib == "default"
-        ch4model[:alpha] = 0.036
+        ch4model[:ch4_alpha] = 0.036
 
     elseif ch4calib == "low"
-        ch4model[:alpha] = 0.0319967
+        ch4model[:ch4_alpha] = 0.0319967
 
     elseif ch4calib == "high"
-        ch4model[:alpha] = 0.0400033
+        ch4model[:ch4_alpha] = 0.0400033
 
     elseif ch4calib == "Distribution"
         error("Distribution CH4 cycle not implemented")

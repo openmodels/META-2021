@@ -20,9 +20,9 @@
     beta_0 = Parameter(default=0.363696355, unit="W/m^2/K") # T^0 coefficient for the SAF quadratic
     gamma = Parameter(default=0.109096643, unit="W/m^2/K") # standard deviation of the SAF quadratic
     F_sl = Parameter(default=5.5, unit="W/m^2") # forcing slope
-    delta = Parameter() # non-linearity of the SAF
+    saf_delta = Parameter() # non-linearity of the SAF
     FRT = Parameter(unit="years") # warming halflife
-    alpha = Parameter(default=0.063605129) # linear SAF segment mean
+    saf_alpha = Parameter(default=0.063605129) # linear SAF segment mean
     sigma = Parameter(default=0.029077492) # linear SAF segment standard deviation
     ECS = Parameter()
 
@@ -30,8 +30,8 @@
 
     function run_timestep(pp, vv, dd, tt)
 
-        psi = pp.beta_2 * (10 ^ 3) / 3 + pp.beta_1 * (10 ^ 2) / 2 + pp.beta_0 * 10 + pp.gamma * 10 * pp.delta # integration constant for SAF forcing at the segment switch point
-        FSAF_0 = pp.beta_2 * (pp.T_AT_2010 ^ 3) / 3 + pp.beta_1 * (pp.T_AT_2010 ^ 2) / 2 + pp.beta_0 * pp.T_AT_2010 + pp.gamma * pp.T_AT_2010 * pp.delta # base year SAF forcing (W/m2)
+        psi = pp.beta_2 * (10 ^ 3) / 3 + pp.beta_1 * (10 ^ 2) / 2 + pp.beta_0 * 10 + pp.gamma * 10 * pp.saf_delta # integration constant for SAF forcing at the segment switch point
+        FSAF_0 = pp.beta_2 * (pp.T_AT_2010 ^ 3) / 3 + pp.beta_1 * (pp.T_AT_2010 ^ 2) / 2 + pp.beta_0 * pp.T_AT_2010 + pp.gamma * pp.T_AT_2010 * pp.saf_delta # base year SAF forcing (W/m2)
 
         if is_first(tt)
 
@@ -41,17 +41,17 @@
 
         else
             vv.T_AT_PAGE1[tt] = vv.T_AT_PAGE1[tt-1] + (pp.ECS * pp.F[tt-1] / (pp.F_sl * log(2)) - pp.FRT * pp.ECS * (pp.F[tt] - pp.F[tt-1]) / (pp.F_sl * log(2)) - vv.T_AT_PAGE1[tt-1]) * (1 - exp(-1 / pp.FRT)) + pp.ECS * (pp.F[tt] - pp.F[tt-1]) / (pp.F_sl * log(2))
-            vv.SAF_approx[tt] = ((pp.beta_2 * (vv.T_AT_PAGE1[tt] ^ 3) / 3 + pp.beta_1 * (vv.T_AT_PAGE1[tt] ^ 2) / 2 + pp.beta_0 * vv.T_AT_PAGE1[tt]) + pp.gamma * vv.T_AT_PAGE1[tt] * pp.delta - FSAF_0) / (vv.T_AT_PAGE1[tt] - pp.T_AT_2010)
+            vv.SAF_approx[tt] = ((pp.beta_2 * (vv.T_AT_PAGE1[tt] ^ 3) / 3 + pp.beta_1 * (vv.T_AT_PAGE1[tt] ^ 2) / 2 + pp.beta_0 * vv.T_AT_PAGE1[tt]) + pp.gamma * vv.T_AT_PAGE1[tt] * pp.saf_delta - FSAF_0) / (vv.T_AT_PAGE1[tt] - pp.T_AT_2010)
             vv.ECS_adjusted[tt] = pp.ECS / (1 - pp.ECS * (vv.SAF_approx[tt] - pp.SAF_bar) / (log(2) * pp.F_sl))
             vv.FRT_adjusted[tt] = pp.FRT / (1 - pp.ECS * (vv.SAF_approx[tt] - pp.SAF_bar) / (log(2) * pp.F_sl))
 
             if vv.T_AT_PAGE2[tt-1] < 10
 
-                vv.deltaFSAF[tt] = pp.beta_2 * (vv.T_AT_PAGE2[tt-1] ^ 3) / 3 + pp.beta_1 * (vv.T_AT_PAGE2[tt-1] ^ 2) / 2 + pp.beta_0 * vv.T_AT_PAGE2[tt-1] + pp.gamma * vv.T_AT_PAGE2[tt-1] * pp.delta - vv.SAF_approx[tt] * vv.T_AT_PAGE2[tt-1]
+                vv.deltaFSAF[tt] = pp.beta_2 * (vv.T_AT_PAGE2[tt-1] ^ 3) / 3 + pp.beta_1 * (vv.T_AT_PAGE2[tt-1] ^ 2) / 2 + pp.beta_0 * vv.T_AT_PAGE2[tt-1] + pp.gamma * vv.T_AT_PAGE2[tt-1] * pp.saf_delta - vv.SAF_approx[tt] * vv.T_AT_PAGE2[tt-1]
 
             else
 
-                vv.deltaFSAF[tt] = psi + pp.alpha * (vv.T_AT_PAGE2[tt-1] - 10) + pp.sigma * (vv.T_AT_PAGE2[tt-1] - 10) * pp.delta - vv.SAF_approx[tt] * vv.T_AT_PAGE2[tt-1]
+                vv.deltaFSAF[tt] = psi + pp.saf_alpha * (vv.T_AT_PAGE2[tt-1] - 10) + pp.sigma * (vv.T_AT_PAGE2[tt-1] - 10) * pp.saf_delta - vv.SAF_approx[tt] * vv.T_AT_PAGE2[tt-1]
 
             end
 
@@ -81,9 +81,9 @@ function addSAFModel(model, safcalib)
     #safmodel[:beta_0] = params[params.Parameter .== "SAF_mean_quad_segment: T^0 coeff (W/m2/K)", safcalib][1]
     #safmodel[:gamma] = params[params.Parameter .== "SAF_std_quad_segment (W/m2/K)", safcalib][1]
     #safmodel[:F_sl] = params[params.Parameter .== "Forcing slope (W/m2)", safcalib][1]
-    safmodel[:delta] = params[params.Parameter .== "Nonlinear SAF", safcalib][1]
+    safmodel[:saf_delta] = params[params.Parameter .== "Nonlinear SAF", safcalib][1]
     safmodel[:FRT] = params[params.Parameter .== "Warming half-life", safcalib][1]
-    #safmodel[:alpha] = params[params.Parameter .== "Linear SAF Mean", safcalib][1]
+    #safmodel[:saf_alpha] = params[params.Parameter .== "Linear SAF Mean", safcalib][1]
     #safmodel[:sigma] = params[params.Parameter .== "Linear SAF Std. Dev.", safcalib][1]
     safmodel[:ECS] = params[params.Parameter .== "ECS", safcalib][1]
 

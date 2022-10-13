@@ -27,7 +27,7 @@ function base_model()
 
     RCPmodel = addRCP(model, "RCP8.5");
     co2model = addCO2Model(model, "Expectation");
-    CH4model = addCH4Model(model, "Value");
+    CH4model = addCH4Model(model, "default");
     forcing = addForcing(model, "Best fit multi-model mean");
     temperaturemodel = addTemperatureModel(model, "Best fit multi-model mean");
     posttemp = addPostTemperature(model, "Expectation");
@@ -99,7 +99,7 @@ function full_model()
     co2model[:co2_rcp] = RCPmodel[:co2_rcp];
     co2model[:co2_pcf] = pcfmodel[:CO2_PF];
     co2model[:co2_amazon] = amaz[:CO2_AMAZ];
-    co2model[:alpha] = posttemp[:alpha];
+    co2model[:co2_alpha] = posttemp[:alpha];
 
     # Setup CH4 model
     CH4model[:ch4_rcp] = RCPmodel[:ch4_rcp];
@@ -183,8 +183,8 @@ function full_model()
     model
 end
 
-model = base_model()
-run(model)
+# model = base_model()
+# run(model)
 
-model = full_model()
-run(model)
+# model = full_model()
+# run(model)

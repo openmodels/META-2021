@@ -63,7 +63,7 @@ end
 function addInteractions(model)
     interact = add_comp!(model, Interactions)
 
-    allinteractrates((symbol, ratemu, ratese) -> set_param!(model, :Interactions, symbol, ratemu))
+    allinteractrates((symbol, ratemu, ratese) -> interact[symbol] = ratemu)
 
     interact
 end

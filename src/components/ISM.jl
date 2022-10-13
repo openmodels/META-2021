@@ -28,7 +28,7 @@
     Pwet_0 = Parameter(default=9, unit="mm/day")
     pinit_0 = Parameter(default=0.75)
     p_m = Parameter(default=0.82)
-    delta = Parameter(default=16, unit="days")
+    ism_delta = Parameter(default=16, unit="days")
     pdoubleprime = Parameter(default=0.42, unit="mm/day")
     p_0 = Parameter(default=0.2)
     pprime = Parameter(default=0.41)
@@ -94,7 +94,7 @@
 
 #            for n in 5:N # rainfall during the remainder of the season
 
-#                ISM_daily_rainfall_draws[n] < max(min(1 / pp.delta * (sum(dailyrainfall[n-4:n-1]) * 4 - pp.Pdry) / (vv.Pwet[tt] - pp.Pdry), pp.p_m), 1 - pp.p_m) ? dailyrainfall[n] = vv.Pwet[tt] : pp.Pdry
+#                ISM_daily_rainfall_draws[n] < max(min(1 / pp.ism_delta * (sum(dailyrainfall[n-4:n-1]) * 4 - pp.Pdry) / (vv.Pwet[tt] - pp.Pdry), pp.p_m), 1 - pp.p_m) ? dailyrainfall[n] = vv.Pwet[tt] : pp.Pdry
 
 #            end
 
@@ -106,7 +106,7 @@
                 if ss <= 4
                     ISM_daily_rainfall_draws = pp.uniforms[tt, ss] > 1 - vv.pinit[tt]
                 else
-                    ISM_daily_rainfall_draws = pp.uniforms[tt, ss] < max(min(1 / pp.delta * (sum(vv.dailyrainfall[tt, ss-4:ss-1]) * 4 - pp.Pdry) / (vv.Pwet[tt] - pp.Pdry), pp.p_m), 1 - pp.p_m)
+                    ISM_daily_rainfall_draws = pp.uniforms[tt, ss] < max(min(1 / pp.ism_delta * (sum(vv.dailyrainfall[tt, ss-4:ss-1]) * 4 - pp.Pdry) / (vv.Pwet[tt] - pp.Pdry), pp.p_m), 1 - pp.p_m)
                 end
 
                 # Calculate rainfall for each period of days in year t
