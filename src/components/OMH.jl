@@ -35,13 +35,13 @@
     end
 end
 
-function addOMH(model, calibration)
+function addOMH(model, calibration, before=nothing, after=nothing)
     params = CSV.read("../data/OMH.csv", DataFrame)
     if calibration ∉ params.Calibration
         throw(ArgumentError("Unknown OMH calibration"))
     end
 
-    omh = add_comp!(model, OMH)
+    omh = add_comp!(model, OMH, before=before, after=after)
     omh[:b_OMH] = params[params.Calibration .== calibration, "b_OMH"][1]
     omh[:max_CH4_OMH] = params[params.Calibration .== calibration, "CH4_OMH max (MtCH4)"][1]
     omh[:Delta_OMH] = params[params.Calibration .== calibration, "Delta_OMH"][1]

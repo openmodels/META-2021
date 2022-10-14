@@ -42,15 +42,15 @@ for rr in 1:nrow(benchmark)
     myupdate_param!(model, :Forcing, :F_2xCO2, benchmark.F_2XCO2[rr])
     myupdate_param!(model, :CH4Model, :ch4_alpha, benchmark."Dataset 1"[rr])
 
-    myupdate_param!(model, :PCFModel, :propCH4, parse(Float64, benchmark."propCH4 / Kessler probabilistic"[rr][1:end-1]))
-    myupdate_param!(model, :PCFModel, :beta_PF, benchmark."beta_PF / Kessler probabilistic"[rr])
-    myupdate_param!(model, :PCFModel, :C_PF, benchmark."C_PF (GtC) / Kessler probabilistic"[rr])
-    myupdate_param!(model, :PCFModel, :propPassive, benchmark."propPassive / Kessler probabilistic"[rr])
-    myupdate_param!(model, :PCFModel, :tau, benchmark."tau (years) / Kessler probabilistic"[rr])
+    # myupdate_param!(model, :PCFModel, :propCH4, parse(Float64, benchmark."propCH4 / Kessler probabilistic"[rr][1:end-1]))
+    # myupdate_param!(model, :PCFModel, :beta_PF, benchmark."beta_PF / Kessler probabilistic"[rr])
+    # myupdate_param!(model, :PCFModel, :C_PF, benchmark."C_PF (GtC) / Kessler probabilistic"[rr])
+    # myupdate_param!(model, :PCFModel, :propPassive, benchmark."propPassive / Kessler probabilistic"[rr])
+    # myupdate_param!(model, :PCFModel, :tau, benchmark."tau (years) / Kessler probabilistic"[rr])
 
-    myupdate_param!(model, :AmazonDieback, :Delta_AMAZ, benchmark."Delta_AMAZ / Distribution"[rr])
+    # myupdate_param!(model, :AmazonDieback, :Delta_AMAZ, benchmark."Delta_AMAZ / Distribution"[rr])
 
-    myupdate_param!(model, :GISModel, :avoldot, benchmark."avoldot0 / Distribution"[rr])
+    # myupdate_param!(model, :GISModel, :avoldot, benchmark."avoldot0 / Distribution"[rr])
 
     myupdate_param!(model, :WAISmodel, :waisrate, benchmark."waisrate / Distribution"[rr])
 
@@ -74,21 +74,15 @@ for rr in 1:nrow(benchmark)
 
     allinteractcalls(callback)
 
-    if benchmark."Levels/growth damages weight / ALB"[rr] != "Error"
-        myupdate_param!(model, :Consumption, :damagepersist, benchmark."Levels/growth damages weight / ALB"[rr])
-    end
+    myupdate_param!(model, :Consumption, :damagepersist, 0.5)
 
     slrindexes = findfirst(names(benchmark) .== "Distribution / AFG"):findfirst(names(benchmark) .== "Distribution / ZWE")
     countries = [x[end-2:end] for x in names(benchmark)[slrindexes]]
     slrcoeffs = convert(Array, benchmark[rr, slrindexes])
     myupdate_param!(model, :Consumption, :slrcoeff, [slrcoeffs[findfirst(countries .== country)] for country in dim_keys(model, :country)])
 
-    if benchmark."Elasticity of marginal utility of consumption / ALB"[rr] != "Error"
-        myupdate_param!(model, :Utility, :EMUC, benchmark."Elasticity of marginal utility of consumption / ALB"[rr])
-    end
-    if benchmark."PRTP / ALB"[rr] != "Error"
-        myupdate_param!(model, :Utility, :PRTP, benchmark."PRTP / ALB"[rr])
-    end
+    myupdate_param!(model, :Utility, :EMUC, 1.5)
+    myupdate_param!(model, :Utility, :PRTP, 0.01)
 
     bindrawstarts = findall(x -> occursin("2010 / Binomial draw", x), names(benchmark))
     bindrawends = findall(x -> occursin("2200 / Binomial draw", x), names(benchmark))

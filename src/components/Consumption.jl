@@ -123,12 +123,12 @@ include("../lib/saverate.jl")
     end
 end
 
-function addConsumption(model, toption, slroption, ssp)
-    if toption ∉ ["none", "distribution", "pointestimate", "low", "high"]
-        throw(ArgumentError("Unknown Consumption toption"))
+function addConsumption(model, tdamage, slrdamage, ssp)
+    if tdamage ∉ ["none", "distribution", "pointestimate", "low", "high"]
+        throw(ArgumentError("Unknown Consumption tdamage"))
     end
-    if slroption ∉ ["none", "distribution", "mode", "low", "high"]
-        throw(ArgumentError("Unknown Consumption slroption"))
+    if slrdamage ∉ ["none", "distribution", "mode", "low", "high"]
+        throw(ArgumentError("Unknown Consumption slrdamage"))
     end
 
     cons = add_comp!(model, Consumption)
@@ -143,12 +143,12 @@ function addConsumption(model, toption, slroption, ssp)
 
     isos = dim_keys(model, :country)
 
-    if toption == "none"
+    if tdamage == "none"
         cons[:seeds] = [0 for iso in isos]
         cons[:beta1] = zeros(length(isos))
         cons[:beta2] = zeros(length(isos))
-    elseif toption != "distribution"
-        betaboths = [getbhmbetas(iso, toption) for iso in isos]
+    elseif tdamage != "distribution"
+        betaboths = [getbhmbetas(iso, tdamage) for iso in isos]
         cons[:seeds] = [0 for iso in isos]
         cons[:beta1] = [betaboth[1] for betaboth in betaboths]
         cons[:beta2] = [betaboth[2] for betaboth in betaboths]
@@ -157,13 +157,12 @@ function addConsumption(model, toption, slroption, ssp)
         cons[:beta2] = zeros(length(isos))
     end
 
-    if slroption == "none"
+    if slrdamage == "none"
         cons[:slrcoeff] = zeros(length(isos))
-    elseif toption != "distribution"
-        cons[:slrcoeff] = [getslrcoeff(iso, slroption) for iso in isos]
+    elseif tdamage != "distribution"
+        cons[:slrcoeff] = [getslrcoeff(iso, slrdamage) for iso in isos]
     else
-
-        # cons[:slrcoeff] = [getslrcoeff_distribution(isos[cc], slroption, pp.slruniforms[cc]) for cc in 1:length(isos)]
+        # cons[:slrcoeff] = [getslrcoeff_distribution(isos[cc], slrdamage, pp.slruniforms[cc]) for cc in 1:length(isos)]
     end
 
     cons[:saverate] = [getsaverate(iso) for iso in isos]

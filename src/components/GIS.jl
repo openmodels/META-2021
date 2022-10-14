@@ -45,7 +45,7 @@
 
 end
 
-function addGISModel(model, giscalib)
+function addGISModel(model, giscalib, before=nothing, after=nothing)
 
     params = CSV.read("../data/GISparams.csv", DataFrame)
 
@@ -53,7 +53,7 @@ function addGISModel(model, giscalib)
         throw(ArgumentError("Unknown GIS model calibration"))
     end
 
-    gismodel = add_comp!(model, GISModel)
+    gismodel = add_comp!(model, GISModel, before=before, after=after)
 
     #gismodel[:meltmult] = params[params.Parameter .== "meltmult", giscalib][1]
     #gismodel[:volzero] = params[params.Parameter .== "volzero", giscalib][1]

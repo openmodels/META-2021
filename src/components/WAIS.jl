@@ -49,11 +49,11 @@
     end
 end
 
-function addWAISmodel(model, default)
+function addWAISmodel(model, default, before=nothing, after=nothing)
 
     #if WAIScalib == "Distribution"
     #    error("Distribution WAIS model not implemented")
     #end
 
-    add_comp!(model, WAISmodel)
+    add_comp!(model, WAISmodel, before=before, after=after)
 end

@@ -65,7 +65,7 @@
 
 end
 
-function addSAFModel(model, safcalib)
+function addSAFModel(model, safcalib, before=nothing, after=nothing)
 
     params = CSV.read("../data/SAFparams.csv", DataFrame)
 
@@ -73,7 +73,7 @@ function addSAFModel(model, safcalib)
         throw(ArgumentError("Unknown SAF model calibration"))
     end
 
-    safmodel = add_comp!(model, SAFModel)
+    safmodel = add_comp!(model, SAFModel, before=before, after=after)
 
     #safmodel[:SAF_bar] = params[params.Parameter .== "ECS-average SAF (W/m2/degC)", safcalib][1]
     #safmodel[:beta_2] = params[params.Parameter .== "SAF_mean_quad_segment: T^2 coeff (W/m2/K3)", safcalib][1]

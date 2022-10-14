@@ -128,7 +128,7 @@
 
 end
 
-function addISMModel(model, ismcalib)
+function addISMModel(model, ismcalib, before=nothing, after=nothing)
 
     params = CSV.read("../data/ISMparams.csv", DataFrame)
 
@@ -136,7 +136,7 @@ function addISMModel(model, ismcalib)
         throw(ArgumentError("Unknown ISM model calibration"))
     end
 
-    ismmodel = add_comp!(model, ISMModel)
+    ismmodel = add_comp!(model, ISMModel, before=before, after=after)
 
     ismmodel
 

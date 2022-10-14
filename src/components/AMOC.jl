@@ -53,14 +53,14 @@ end
 b_AMOC_calibs = Dict{String, Float64}("Hadley" => 0.135, "BCM" => 0.611,
 	                              "IPSL" => 0.54, "HADCM" => 1.6)
 
-function addAMOC(model, calibration)
+function addAMOC(model, calibration, before=nothing, after=nothing)
     if calibration ∉ keys(b_AMOC_calibs)
         throw(ArgumentError("Unknown AMOC model calibration"))
     end
 
     params = CSV.read("../data/AMOCparams.csv", DataFrame)
 
-    amoc = add_comp!(model, AMOC)
+    amoc = add_comp!(model, AMOC, before=before, after=after)
     amoc[:b_AMOC] = b_AMOC_calibs[calibration]
     amoc[:max_deltaT_country_AMOC] = params[!, calibration]
 

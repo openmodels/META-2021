@@ -37,13 +37,13 @@
     end
 end
 
-function addAmazonDieback(model, calibration)
+function addAmazonDieback(model, calibration, before=nothing, after=nothing)
     params = CSV.read("../data/AMAZparams.csv", DataFrame)
     if calibration ∉ params.Calibration
         throw(ArgumentError("Unknown AMAZ calibration"))
     end
 
-    amazon = add_comp!(model, AmazonDieback)
+    amazon = add_comp!(model, AmazonDieback, before=before, after=after)
     amazon[:b_AMAZ] = params[params.Calibration .== calibration, "b_AMAZ"][1]
     amazon[:max_CO2_AMAZ] = params[params.Calibration .== calibration, "CO2_AMAZ max (GtCO2)"][1]
     amazon[:Delta_AMAZ] = params[params.Calibration .== calibration, "Delta_AMAZ"][1]

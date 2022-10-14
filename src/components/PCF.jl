@@ -47,7 +47,7 @@
     end
 end
 
-function addPCFModel(model, pcfcalib)
+function addPCFModel(model, pcfcalib, before=nothing, after=nothing)
 
     params = CSV.read("../data/PCFparams.csv", DataFrame)
 
@@ -55,7 +55,7 @@ function addPCFModel(model, pcfcalib)
         throw(ArgumentError("Unknown pcf model calibration"))
     end
 
-    pcfmodel = add_comp!(model, PCFModel)
+    pcfmodel = add_comp!(model, PCFModel, before=before, after=after)
 
     pcfmodel[:beta_PF] = params[params.Parameter .== "beta_PF", pcfcalib][1]
     pcfmodel[:C_PF] = params[params.Parameter .== "C_PF", pcfcalib][1]
