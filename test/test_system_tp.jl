@@ -2,7 +2,7 @@ using Test, CSV, DataFrames
 include("../src/MimiMETA.jl")
 import Mimi.has_parameter
 
-benchmark = CSV.read("../data/benchmark/ExcelMETA.csv", DataFrame)
+benchmark = CSV.read("../data/benchmark/ExcelMETA-alltp.csv", DataFrame)
 
 ## Setup the model
 
