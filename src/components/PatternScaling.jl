@@ -2,6 +2,7 @@
     country = Index()
 
     # Variables
+    scale_country = Variable(index=[time, country])
     T_country = Variable(index=[time, country], unit="degC")
 
     # Parameters
@@ -17,7 +18,8 @@
 
     function run_timestep(pp, vv, dd, tt)
         for cc in dd.country
-            vv.T_country[tt, cc] = pp.ps_alpha[cc] + pp.ps_beta[cc] * log(pp.GMST_2010 + pp.T_AT[tt] - pp.T_AT_2010 - 18.825)
+            vv.scale_country[tt, cc] = pp.ps_alpha[cc] + pp.ps_beta[cc] * log(pp.GMST_2010 + pp.T_AT[tt] - pp.T_AT_2010 - 18.825)
+            vv.T_country[tt, cc] = (pp.GMST_2010+pp.T_AT[tt]-pp.T_AT[TimestepIndex(1)])*vv.scale_country[tt, cc]
         end
     end
 end

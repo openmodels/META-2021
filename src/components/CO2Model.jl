@@ -1,5 +1,6 @@
 @defcomp CO2Model begin
     # Variables
+    a2 = Variable()
     s0 = Variable(index=[time], unit="GtCO2")
     s1 = Variable(index=[time], unit="GtCO2")
     s2 = Variable(index=[time], unit="GtCO2")
@@ -21,7 +22,6 @@
 
     a0 = Parameter()
     a1 = Parameter()
-    a2 = Parameter()
     a3 = Parameter()
     rho0 = Parameter()
     rho1 = Parameter()
@@ -35,6 +35,10 @@
     ppm_preind = Parameter(unit="ppm")
     ppm_to_gtco2 = Parameter(unit="GtCO2/ppm")
     c_to2010 = Parameter(unit="GtC")
+
+    function init(pp, vv, dd)
+        vv.a2 = 1 - pp.a0 - pp.a1 - pp.a3
+    end
 
     function run_timestep(pp, vv, dd, tt)
         if is_first(tt)
@@ -50,7 +54,7 @@
 
             vv.s0[tt] = pp.a0 * vv.co2_total[tt] + (1 - pp.rho0/pp.co2_alpha[tt-1]) * vv.s0[tt-1]
             vv.s1[tt] = pp.a1 * vv.co2_total[tt] + (1 - pp.rho1/pp.co2_alpha[tt-1]) * vv.s1[tt-1]
-            vv.s2[tt] = pp.a2 * vv.co2_total[tt] + (1 - pp.rho2/pp.co2_alpha[tt-1]) * vv.s2[tt-1]
+            vv.s2[tt] = vv.a2 * vv.co2_total[tt] + (1 - pp.rho2/pp.co2_alpha[tt-1]) * vv.s2[tt-1]
             vv.s3[tt] = pp.a3 * vv.co2_total[tt] + (1 - pp.rho3/pp.co2_alpha[tt-1]) * vv.s3[tt-1]
 
             vv.co2_cum_ppm[tt] = vv.co2_total[tt] + vv.co2_cum_ppm[tt-1]
@@ -80,7 +84,7 @@ function addCO2Model(model, co2calib)
 
     co2model[:a0] = params[params.Parameter .== "a_0", co2calib][1]
     co2model[:a1] = params[params.Parameter .== "a_1", co2calib][1]
-    co2model[:a2] = params[params.Parameter .== "a_2", co2calib][1]
+    # co2model[:a2] = params[params.Parameter .== "a_2", co2calib][1]
     co2model[:a3] = params[params.Parameter .== "a_3", co2calib][1]
     co2model[:rho0] = params[params.Parameter .== "rho_0", co2calib][1]
     co2model[:rho1] = params[params.Parameter .== "rho_1", co2calib][1]

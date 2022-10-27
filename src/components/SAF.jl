@@ -65,7 +65,7 @@
 
 end
 
-function addSAFModel(model, safcalib, before=nothing, after=nothing)
+function addSAFModel(model, safcalib; before=nothing, after=nothing)
 
     params = CSV.read("../data/SAFparams.csv", DataFrame)
 

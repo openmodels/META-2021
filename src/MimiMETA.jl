@@ -22,7 +22,7 @@ include("../src/components/Consumption.jl")
 include("../src/components/NonMarketDamages.jl")
 include("../src/components/Utility.jl")
 
-function base_model(rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
+function base_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
     model = test_model();
 
     rcpmodel = addRCP(model, rcp);
@@ -38,7 +38,7 @@ function base_model(rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", 
 
     # Setup CO2 model
     co2model[:co2_rcp] = rcpmodel[:co2_rcp];
-    co2model[:alpha] = posttemp[:alpha];
+    co2model[:co2_alpha] = posttemp[:alpha];
 
     # Setup CH4 model
     ch4model[:ch4_rcp] = rcpmodel[:ch4_rcp];
@@ -71,7 +71,7 @@ function base_model(rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", 
     model
 end
 
-function full_model(rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
+function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
     model = base_model(rcp=rcp, ssp=ssp, co2=co2, ch4=ch4, warming=warming, tdamage=tdamage, slrdamage=slrdamage);
 
     if saf != false

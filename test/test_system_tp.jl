@@ -16,6 +16,7 @@ function myupdate_param!(model, comp, param, value)
 end
 
 for rr in 1:nrow(benchmark)
+    println(rr)
     global model = full_model() # XXX: Consumption currently refers to this...
 
     ## Fill in values
@@ -28,7 +29,7 @@ for rr in 1:nrow(benchmark)
     myupdate_param!(model, :Consumption, :seeds, zeros(dim_count(model, :country)))
     myupdate_param!(model, :Consumption, :beta1, [beta1s[findfirst(countries .== country)] for country in dim_keys(model, :country)])
     myupdate_param!(model, :Consumption, :beta2, [beta2s[findfirst(countries .== country)] for country in dim_keys(model, :country)])
-    
+
     myupdate_param!(model, :CO2Model, :a0, benchmark.a_0[rr])
     myupdate_param!(model, :CO2Model, :a1, benchmark.a_1[rr])
     myupdate_param!(model, :CO2Model, :a3, benchmark.a_3[rr])
@@ -39,6 +40,10 @@ for rr in 1:nrow(benchmark)
     myupdate_param!(model, :PostTemperature, :r_C, benchmark."r_{C} / Distribution"[rr])
     myupdate_param!(model, :PostTemperature, :r_T, benchmark."r_{T} / Distribution"[rr])
     myupdate_param!(model, :TemperatureModel, :xi_1, benchmark.xi_1[rr])
+    myupdate_param!(model, :TemperatureModel, :F_2xCO2, benchmark.F_2XCO2[rr])
+    myupdate_param!(model, :TemperatureModel, :fair_ECS, benchmark.T_2xCO2[rr])
+    myupdate_param!(model, :TemperatureModel, :fair_gamma, benchmark.gamma[rr])
+    myupdate_param!(model, :TemperatureModel, :fair_C_0, benchmark.C0[rr])
     myupdate_param!(model, :Forcing, :F_2xCO2, benchmark.F_2XCO2[rr])
     myupdate_param!(model, :CH4Model, :ch4_alpha, benchmark."Dataset 1"[rr])
 
@@ -103,15 +108,15 @@ for rr in 1:nrow(benchmark)
     T_AT = model[:TemperatureModel, :T_AT][11:10:191]
     T_AT_compare = convert(Array, benchmark[rr, 2:20])
 
-    @test T_AT ≈ T_AT_compare
+    @test T_AT ≈ T_AT_compare atol=1e-4
 
     SLR = model[:SLRModel, :SLR][11:10:191]
     SLR_compare = convert(Array, benchmark[rr, 21:39])
 
-    @test SLR ≈ SLR_compare
+    @test SLR ≈ SLR_compare atol=1e-4
 
     globalwelfare = sum(model[:Utility, :world_disc_utility][11:191])
     globalwelfare_compare = benchmark."Global welfare"[rr]
 
-    @test globalwelfare ≈ globalwelfare_compare
+    @test globalwelfare ≈ globalwelfare_compare rtol=1e-4
 end

@@ -13,6 +13,9 @@ include("../lib/saverate.jl")
     conspc_preadj = Variable(index=[time, country], unit="2010 USD PPP") # previous year's
     conspc = Variable(index=[time, country], unit="2010 USD PPP")
 
+    test1 = Variable(index=[time, country])
+    test2 = Variable(index=[time, country])
+
     # Parameters
     ssp = Parameter{String}()
 
@@ -114,9 +117,11 @@ include("../lib/saverate.jl")
         end
 
         for cc in dd.country
+            vv.test1[tt, cc] = (1+(vv.gdppc_growth[tt, cc]-pp.beta1[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])-pp.beta2[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])^2))
+            vv.test2[tt, cc] = (1-pp.SLR[tt]*pp.slrcoeff[cc])
             vv.conspc[tt, cc] = vv.conspc_preadj[tt, cc]*(1+(vv.gdppc_growth[tt, cc]-pp.beta1[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])-pp.beta2[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])^2))*(1-pp.SLR[tt]*pp.slrcoeff[cc])
 
-            if vv.conspc[tt, cc] <= pp.min_conspc
+            if vv.conspc[tt, cc] <= pp.min_conspc && vv.conspc[TimestepIndex(1), cc] != 0
                 vv.conspc[tt, cc] = pp.min_conspc
             end
         end
