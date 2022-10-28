@@ -128,7 +128,7 @@
 
 end
 
-function addISMModel(model, ismcalib, before=nothing, after=nothing)
+function addISMModel(model, ismcalib; before=nothing, after=nothing)
 
     params = CSV.read("../data/ISMparams.csv", DataFrame)
 

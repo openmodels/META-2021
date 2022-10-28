@@ -45,7 +45,7 @@
 
 end
 
-function addGISModel(model, giscalib, before=nothing, after=nothing)
+function addGISModel(model, giscalib; before=nothing, after=nothing)
 
     params = CSV.read("../data/GISparams.csv", DataFrame)
 

@@ -22,9 +22,9 @@ for rr in 1:nrow(benchmark)
     ## Fill in values
     beta1indexes = findall(x -> occursin("beta1dist", x), names(benchmark))
     countries = [x[1:3] for x in names(benchmark)[beta1indexes]]
-    beta1s = convert(Array, benchmark[rr, beta1indexes])
+    beta1s = collect(benchmark[rr, beta1indexes])
     beta2indexes = findall(x -> occursin("beta2dist", x), names(benchmark))
-    beta2s = convert(Array, benchmark[rr, beta2indexes])
+    beta2s = collect(benchmark[rr, beta2indexes])
 
     myupdate_param!(model, :Consumption, :seeds, zeros(dim_count(model, :country)))
     myupdate_param!(model, :Consumption, :beta1, [beta1s[findfirst(countries .== country)] for country in dim_keys(model, :country)])
@@ -83,7 +83,7 @@ for rr in 1:nrow(benchmark)
 
     slrindexes = findfirst(names(benchmark) .== "Distribution / AFG"):findfirst(names(benchmark) .== "Distribution / ZWE")
     countries = [x[end-2:end] for x in names(benchmark)[slrindexes]]
-    slrcoeffs = convert(Array, benchmark[rr, slrindexes])
+    slrcoeffs = collect(benchmark[rr, slrindexes])
     myupdate_param!(model, :Consumption, :slrcoeff, [slrcoeffs[findfirst(countries .== country)] for country in dim_keys(model, :country)])
 
     myupdate_param!(model, :Utility, :EMUC, 1.5)
@@ -93,12 +93,12 @@ for rr in 1:nrow(benchmark)
     bindrawends = findall(x -> occursin("2200 / Binomial draw", x), names(benchmark))
     bindrawcomps = [:OMH, :AmazonDieback, :WAISmodel, :AMOC]
     for cc in 1:length(bindrawcomps)
-        myupdate_param!(model, bindrawcomps[cc], :uniforms, convert(Array, benchmark[rr, bindrawstarts[cc]:bindrawends[cc]]))
+        myupdate_param!(model, bindrawcomps[cc], :uniforms, collect(benchmark[rr, bindrawstarts[cc]:bindrawends[cc]]))
     end
 
     raindrawstart = findfirst(names(benchmark) .== "2010 / Day")
     raindrawend = bindrawstarts[4] - 1
-    draws = reshape(convert(Array, benchmark[rr, raindrawstart:raindrawend]), (dim_count(model, :monsoonsteps), dim_count(model, :time)))'
+    draws = reshape(collect(benchmark[rr, raindrawstart:raindrawend]), (dim_count(model, :monsoonsteps), dim_count(model, :time)))'
     myupdate_param!(model, :ISMModel, :uniforms, draws)
 
     run(model)
@@ -106,12 +106,12 @@ for rr in 1:nrow(benchmark)
     ## Test the model
 
     T_AT = model[:TemperatureModel, :T_AT][11:10:191]
-    T_AT_compare = convert(Array, benchmark[rr, 2:20])
+    T_AT_compare = collect(benchmark[rr, 2:20])
 
     @test T_AT ≈ T_AT_compare atol=1e-4
 
     SLR = model[:SLRModel, :SLR][11:10:191]
-    SLR_compare = convert(Array, benchmark[rr, 21:39])
+    SLR_compare = collect(benchmark[rr, 21:39])
 
     @test SLR ≈ SLR_compare atol=1e-4
 

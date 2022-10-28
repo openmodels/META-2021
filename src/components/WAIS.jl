@@ -49,7 +49,7 @@
     end
 end
 
-function addWAISmodel(model, default, before=nothing, after=nothing)
+function addWAISmodel(model, default; before=nothing, after=nothing)
 
     #if WAIScalib == "Distribution"
     #    error("Distribution WAIS model not implemented")

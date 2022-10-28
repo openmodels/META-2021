@@ -60,7 +60,7 @@ include("../lib/interacts.jl")
     end
 end
 
-function addInteractions(model, before=nothing, after=nothing)
+function addInteractions(model; before=nothing, after=nothing)
     interact = add_comp!(model, Interactions, before=before, after=after)
 
     allinteractrates((symbol, ratemu, ratese) -> interact[symbol] = ratemu)

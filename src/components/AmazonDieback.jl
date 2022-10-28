@@ -37,7 +37,7 @@
     end
 end
 
-function addAmazonDieback(model, calibration, before=nothing, after=nothing)
+function addAmazonDieback(model, calibration; before=nothing, after=nothing)
     params = CSV.read("../data/AMAZparams.csv", DataFrame)
     if calibration ∉ params.Calibration
         throw(ArgumentError("Unknown AMAZ calibration"))

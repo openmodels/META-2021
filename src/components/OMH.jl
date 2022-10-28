@@ -35,7 +35,7 @@
     end
 end
 
-function addOMH(model, calibration, before=nothing, after=nothing)
+function addOMH(model, calibration; before=nothing, after=nothing)
     params = CSV.read("../data/OMH.csv", DataFrame)
     if calibration ∉ params.Calibration
         throw(ArgumentError("Unknown OMH calibration"))

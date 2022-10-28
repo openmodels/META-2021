@@ -77,8 +77,8 @@ function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
     if saf != false
         safmodel = addSAFModel(model, saf, before=:TemperatureModel);
 
-        connect_param!(model, :SAF=>:F, :Forcing=>:F);
-        connect_param!(model, :TemperatureModel=>:T_AT_adjustment, :SAF=>:T_AT_adjustment);
+        connect_param!(model, :SAFModel=>:F, :Forcing=>:F);
+        connect_param!(model, :TemperatureModel=>:T_AT_adjustment, :SAFModel=>:T_AT_adjustment);
     end
     if interaction != false
         interact = addInteractions(model, after=:PostTemperature);
@@ -113,7 +113,7 @@ function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
     if gis != false
         gismodel = addGISModel(model, gis, after=ifelse(interaction, :Interactions, :TemperatureModel));
 
-        connect_param!(model, :GIS=>:T_AT, :TemperatureModel=>:T_AT);
+        connect_param!(model, :GISModel=>:T_AT, :TemperatureModel=>:T_AT);
         if interaction != false
             gismodel[:f_GIS] = interact[:f_GIS];
         end
@@ -134,7 +134,7 @@ function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
         connect_param!(model, :ISMModel=>:st_ppm, :CO2Model=>:st_ppm);
         ismmodel[:uniforms] = reshape(rand(Uniform(0, 1), dim_count(model, :time) * dim_count(model, :monsoonsteps)),
                                       dim_count(model, :time), dim_count(model, :monsoonsteps));
-        connect_param!(model, :ISMModel=>:SO_2, :RCPModel=>:SO_2);
+        connect_param!(model, :ISMModel=>:SO_2, :RCP=>:SO_2);
         if interaction != false
             ismmodel[:f_NINO] = interact[:f_NINO];
         end

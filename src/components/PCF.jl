@@ -47,7 +47,7 @@
     end
 end
 
-function addPCFModel(model, pcfcalib, before=nothing, after=nothing)
+function addPCFModel(model, pcfcalib; before=nothing, after=nothing)
 
     params = CSV.read("../data/PCFparams.csv", DataFrame)
 
@@ -62,7 +62,7 @@ function addPCFModel(model, pcfcalib, before=nothing, after=nothing)
     pcfmodel[:propPassive] = params[params.Parameter .== "propPassive", pcfcalib][1]
     pcfmodel[:tau] = params[params.Parameter .== "tau", pcfcalib][1]
     pcfmodel[:propCH4] = params[params.Parameter .== "propCH4", pcfcalib][1]
-    
+
     # pcfmodel[:T_AT_2010] = params[params.Parameter .== "T_AT_2010", pcfcalib][1]
 
     pcfmodel
