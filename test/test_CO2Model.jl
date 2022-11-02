@@ -9,8 +9,8 @@ model = test_model()
 include("../src/components/CO2Model.jl")
 
 co2model = addCO2Model(model, "Expectation")
-co2model[:co2_rcp] = [benchmark."Emissions (GtCO2)"[2:end]; 0] # last value unused
-co2model[:alpha] = benchmark."alpha"
+co2model[:co2_rcp] = [benchmark."Emissions (GtCO2)"[2:end]; 0] * 1000 # last value unused
+co2model[:co2_alpha] = benchmark."alpha"
 
 run(model)
 

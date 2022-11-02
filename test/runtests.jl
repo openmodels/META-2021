@@ -19,4 +19,5 @@ using Test
     include("test_Consumption.jl")
     include("test_NonMarketDamages.jl")
     include("test_Utility.jl")
+    include("test_system_notp.jl")
 end

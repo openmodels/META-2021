@@ -63,6 +63,8 @@ function addGISModel(model, giscalib; before=nothing, after=nothing)
     #gismodel[:expvol] = params[params.Parameter .== "expvol", giscalib][1]
     gismodel[:exptstar] = params[params.Parameter .== "exptstar", giscalib][1]
 
+    gismodel[:f_GIS] = ones(dim_count(model, :time))
+
     gismodel
 
 end

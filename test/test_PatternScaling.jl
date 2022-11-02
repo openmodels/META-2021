@@ -16,7 +16,7 @@ run(model)
 
 ## Test the model
 
-scale = model[:PatternScaling,  :T_country]
+scale = model[:PatternScaling,  :scale_country]
 scale_compare = Matrix(benchmark[!, 3:end-1])
 
 @test scale ≈ scale_compare

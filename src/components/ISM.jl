@@ -137,6 +137,8 @@ function addISMModel(model, ismcalib; before=nothing, after=nothing)
     end
 
     ismmodel = add_comp!(model, ISMModel, before=before, after=after)
+    ismmodel[:f_NINO] = ones(dim_count(model, :time))
+    ismmodel
 
     ismmodel
 
