@@ -10,6 +10,7 @@
     ch4_rcp = Parameter(index=[time], unit="MtCH4") # Named based on James's variable from RCP.jl
     ch4_pcf = Parameter(index=[time], unit="MtCH4")
     ch4_omh = Parameter(index=[time], unit="MtCH4")
+    ch4_extra = Parameter(index=[time], unit="MtCH4")
     ch4_conc_rcp = Parameter(index=[time], unit="ppb")
     n2o_conc_rcp = Parameter(index=[time], unit="ppb")
 
@@ -28,7 +29,7 @@ function run_timestep(pp, vv, dd, tt)
             vv.fMN_2010[tt] = 0.47*log(1+pp.fMN_parameter1*(pp.CH4_conc_preindustrial*vv.N2O_initial_concentration[TimestepIndex(1)])^0.75+pp.fMN_parameter2*pp.CH4_conc_preindustrial*(pp.CH4_conc_preindustrial*vv.N2O_initial_concentration[TimestepIndex(1)])^1.52) #James suggested to put this calculation into an init() function that precedes run_timestep(), but I need the latter to grab the first element of the N2O concentration array.
 
         else
-            vv.CH4_concentration[tt] = pp.CH4_conc_preindustrial +(vv.CH4_concentration[tt-1]-pp.CH4_conc_preindustrial)*(1-pp.decay_rate)+(pp.ch4_rcp[tt-1]+pp.ch4_pcf[tt-1]+pp.ch4_omh[tt-1])/pp.conversion_ppb_Mt
+            vv.CH4_concentration[tt] = pp.CH4_conc_preindustrial +(vv.CH4_concentration[tt-1]-pp.CH4_conc_preindustrial)*(1-pp.decay_rate)+(pp.ch4_rcp[tt-1]+pp.ch4_pcf[tt-1]+pp.ch4_omh[tt-1]+pp.ch4_extra[tt-1])/pp.conversion_ppb_Mt
 
         end
 
@@ -56,6 +57,7 @@ function addCH4Model(model, ch4calib)
     #Prefill CH4 TPs with zeros until we have the components defined (change later once we link to PCF and OMH modules)
     ch4model[:ch4_pcf] = zeros(dim_count(model, :time))
     ch4model[:ch4_omh] = zeros(dim_count(model, :time))
+    ch4model[:ch4_extra] = zeros(dim_count(model, :time))
 
     ch4model
 end
