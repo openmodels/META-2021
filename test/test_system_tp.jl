@@ -47,15 +47,15 @@ for rr in 1:nrow(benchmark)
     myupdate_param!(model, :Forcing, :F_2xCO2, benchmark.F_2XCO2[rr])
     myupdate_param!(model, :CH4Model, :ch4_alpha, benchmark."Dataset 1"[rr])
 
-    # myupdate_param!(model, :PCFModel, :propCH4, parse(Float64, benchmark."propCH4 / Kessler probabilistic"[rr][1:end-1]))
-    # myupdate_param!(model, :PCFModel, :beta_PF, benchmark."beta_PF / Kessler probabilistic"[rr])
-    # myupdate_param!(model, :PCFModel, :C_PF, benchmark."C_PF (GtC) / Kessler probabilistic"[rr])
-    # myupdate_param!(model, :PCFModel, :propPassive, benchmark."propPassive / Kessler probabilistic"[rr])
-    # myupdate_param!(model, :PCFModel, :tau, benchmark."tau (years) / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :propCH4, benchmark."propCH4 / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :beta_PF, benchmark."beta_PF / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :C_PF, benchmark."C_PF (GtC) / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :propPassive, benchmark."propPassive / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :tau, benchmark."tau (years) / Kessler probabilistic"[rr])
 
-    # myupdate_param!(model, :AmazonDieback, :Delta_AMAZ, benchmark."Delta_AMAZ / Distribution"[rr])
+    myupdate_param!(model, :AmazonDieback, :Delta_AMAZ, benchmark."Delta_AMAZ / Distribution"[rr])
 
-    # myupdate_param!(model, :GISModel, :avoldot, benchmark."avoldot0 / Distribution"[rr])
+    myupdate_param!(model, :GISModel, :avoldot, benchmark."avoldot0 / Distribution"[rr])
 
     myupdate_param!(model, :WAISmodel, :waisrate, benchmark."waisrate / Distribution"[rr])
 
@@ -93,7 +93,7 @@ for rr in 1:nrow(benchmark)
     bindrawends = findall(x -> occursin("2200 / Binomial draw", x), names(benchmark))
     bindrawcomps = [:OMH, :AmazonDieback, :WAISmodel, :AMOC]
     for cc in 1:length(bindrawcomps)
-        myupdate_param!(model, bindrawcomps[cc], :uniforms, collect(benchmark[rr, bindrawstarts[cc]:bindrawends[cc]]))
+        myupdate_param!(model, bindrawcomps[cc], :uniforms, 1 .- collect(benchmark[rr, bindrawstarts[cc]:bindrawends[cc]]))
     end
 
     raindrawstart = findfirst(names(benchmark) .== "2010 / Day")
