@@ -14,7 +14,7 @@ include("../lib/interacts.jl")
     # Parameters
     I_AMOC = Parameter(index=[time])
     VGIS = Parameter(index=[time], unit="percent")
-    p_WAIS = Parameter(index=[time]) # Consider replacing with I_WAIS
+    I_WAIS = Parameter(index=[time])
     I_AMAZ = Parameter(index=[time])
     mNINO3pt4 = Parameter(index=[time], unit="MSLP")
 
@@ -50,12 +50,12 @@ include("../lib/interacts.jl")
             vv.p_GIS[tt-1] = 1 - pp.VGIS[tt-1]
             vv.p_NINO[tt-1] = max(min(10000 * (1 - pp.mNINO3pt4[tt-1] / pp.mNINO3pt4[TimestepIndex(1)]), 1), 0)
 
-            ## Template: (pp.amoc2foo^pp.I_AMOC[tt-1]) * (pp.gis2foo^vv.p_GIS[tt-1]) * (pp.wais2foo^pp.p_WAIS[tt-1]) * (pp.amaz2foo^pp.I_AMAZ[tt-1]) * (pp.nino2foo^vv.p_NINO[tt-1])
-            vv.f_AMOC[tt] = (pp.gis2amoc^vv.p_GIS[tt-1]) * (pp.wais2amoc^pp.p_WAIS[tt-1]) * (pp.amaz2amoc^pp.I_AMAZ[tt-1]) * (pp.nino2amoc^vv.p_NINO[tt-1])
-            vv.f_GIS[tt] = (pp.amoc2gis^pp.I_AMOC[tt-1]) * (pp.wais2gis^pp.p_WAIS[tt-1]) * (pp.amaz2gis^pp.I_AMAZ[tt-1]) * (pp.nino2gis^vv.p_NINO[tt-1])
+            ## Template: (pp.amoc2foo^pp.I_AMOC[tt-1]) * (pp.gis2foo^vv.p_GIS[tt-1]) * (pp.wais2foo^pp.I_WAIS[tt-1]) * (pp.amaz2foo^pp.I_AMAZ[tt-1]) * (pp.nino2foo^vv.p_NINO[tt-1])
+            vv.f_AMOC[tt] = (pp.gis2amoc^vv.p_GIS[tt-1]) * (pp.wais2amoc^pp.I_WAIS[tt-1]) * (pp.amaz2amoc^pp.I_AMAZ[tt-1]) * (pp.nino2amoc^vv.p_NINO[tt-1])
+            vv.f_GIS[tt] = (pp.amoc2gis^pp.I_AMOC[tt-1]) * (pp.wais2gis^pp.I_WAIS[tt-1]) * (pp.amaz2gis^pp.I_AMAZ[tt-1]) * (pp.nino2gis^vv.p_NINO[tt-1])
             vv.f_WAIS[tt] = (pp.amoc2wais^pp.I_AMOC[tt-1]) * (pp.gis2wais^vv.p_GIS[tt-1]) * (pp.amaz2wais^pp.I_AMAZ[tt-1]) * (pp.nino2wais^vv.p_NINO[tt-1])
-            vv.f_AMAZ[tt] = (pp.amoc2amaz^pp.I_AMOC[tt-1]) * (pp.gis2amaz^vv.p_GIS[tt-1]) * (pp.wais2amaz^pp.p_WAIS[tt-1]) * (pp.nino2amaz^vv.p_NINO[tt-1])
-            vv.f_NINO[tt] = (pp.amoc2nino^pp.I_AMOC[tt-1]) * (pp.gis2nino^vv.p_GIS[tt-1]) * (pp.wais2nino^pp.p_WAIS[tt-1]) * (pp.amaz2nino^pp.I_AMAZ[tt-1])
+            vv.f_AMAZ[tt] = (pp.amoc2amaz^pp.I_AMOC[tt-1]) * (pp.gis2amaz^vv.p_GIS[tt-1]) * (pp.wais2amaz^pp.I_WAIS[tt-1]) * (pp.nino2amaz^vv.p_NINO[tt-1])
+            vv.f_NINO[tt] = (pp.amoc2nino^pp.I_AMOC[tt-1]) * (pp.gis2nino^vv.p_GIS[tt-1]) * (pp.wais2nino^pp.I_WAIS[tt-1]) * (pp.amaz2nino^pp.I_AMAZ[tt-1])
         end
     end
 end

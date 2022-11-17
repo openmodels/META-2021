@@ -64,5 +64,7 @@ function addAMOC(model, calibration; before=nothing, after=nothing)
     amoc[:b_AMOC] = b_AMOC_calibs[calibration]
     amoc[:max_deltaT_country_AMOC] = params[!, calibration]
 
+    amoc[:f_AMOC] = ones(dim_count(model, :time))
+
     amoc
 end

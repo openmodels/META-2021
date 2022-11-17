@@ -48,5 +48,7 @@ function addAmazonDieback(model, calibration; before=nothing, after=nothing)
     amazon[:max_CO2_AMAZ] = params[params.Calibration .== calibration, "CO2_AMAZ max (GtCO2)"][1]
     amazon[:Delta_AMAZ] = params[params.Calibration .== calibration, "Delta_AMAZ"][1]
 
+    amazon[:probmult] = ones(dim_count(model, :time))
+
     amazon
 end

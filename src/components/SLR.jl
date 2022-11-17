@@ -5,8 +5,8 @@
 
     # Parameters
     T_AT = Parameter(index=[time], unit="degC") # Link manually to other input later
-    #SLR_GIS = Parameter(index=[time], unit="m") # Link manually to other input later
-    #SLR_WAIS = Parameter(index=[time], unit="m") # Link manually to other input later
+    SLR_GIS = Parameter(index=[time], unit="m") # Link manually to other input later
+    SLR_WAIS = Parameter(index=[time], unit="m") # Link manually to other input later
 
     r_TE = Parameter(default=0.000779) #SLR from thermal expansion
     r_GSIC = Parameter(default=0.0008164) #SLR from glaciers and small ice caps (Excel META: =0.0314/10*0.26)
@@ -22,7 +22,7 @@
             vv.SLR_therm[tt] = (pp.r_TE + pp.r_GSIC)*pp.T_AT[tt] + vv.SLR_therm[tt-1]
 
             # Calculate total SLR
-            vv.SLR[tt] = vv.SLR_therm[tt] #+ pp.SLR_GIS[tt] + pp.SLR_WAIS[tt]
+            vv.SLR[tt] = vv.SLR_therm[tt] + pp.SLR_GIS[tt] + pp.SLR_WAIS[tt]
         end
     end
 end
@@ -30,4 +30,8 @@ end
 function addSLR(model)
     slr = add_comp!(model, SLRModel)
 
+    slr[:SLR_GIS] = zeros(dim_count(model, :time))
+    slr[:SLR_WAIS] = zeros(dim_count(model, :time))
+
+    slr
 end
