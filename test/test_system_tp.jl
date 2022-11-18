@@ -47,18 +47,19 @@ for rr in 1:nrow(benchmark)
     myupdate_param!(model, :Forcing, :F_2xCO2, benchmark.F_2XCO2[rr])
     myupdate_param!(model, :CH4Model, :ch4_alpha, benchmark."Dataset 1"[rr])
 
-    # myupdate_param!(model, :PCFModel, :propCH4, parse(Float64, benchmark."propCH4 / Kessler probabilistic"[rr][1:end-1]))
-    # myupdate_param!(model, :PCFModel, :beta_PF, benchmark."beta_PF / Kessler probabilistic"[rr])
-    # myupdate_param!(model, :PCFModel, :C_PF, benchmark."C_PF (GtC) / Kessler probabilistic"[rr])
-    # myupdate_param!(model, :PCFModel, :propPassive, benchmark."propPassive / Kessler probabilistic"[rr])
-    # myupdate_param!(model, :PCFModel, :tau, benchmark."tau (years) / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :propCH4, benchmark."propCH4 / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :beta_PF, benchmark."beta_PF / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :C_PF, benchmark."C_PF (GtC) / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :propPassive, benchmark."propPassive / Kessler probabilistic"[rr])
+    myupdate_param!(model, :PCFModel, :tau, benchmark."tau (years) / Kessler probabilistic"[rr])
 
-    # myupdate_param!(model, :AmazonDieback, :Delta_AMAZ, benchmark."Delta_AMAZ / Distribution"[rr])
+    myupdate_param!(model, :AmazonDieback, :Delta_AMAZ, benchmark."Delta_AMAZ / Distribution"[rr])
 
-    # myupdate_param!(model, :GISModel, :avoldot, benchmark."avoldot0 / Distribution"[rr])
+    myupdate_param!(model, :GISModel, :avoldot0, benchmark."avoldot0 / Distribution"[rr])
 
-    myupdate_param!(model, :WAISmodel, :waisrate, benchmark."waisrate / Distribution"[rr])
+    myupdate_param!(model, :WAISmodel, :waisrate, benchmark."waisrate / Distribution"[rr] / 1000)
 
+    myupdate_param!(model, :SAFModel, :ECS, benchmark.T_2xCO2[rr])
     if benchmark."Nonlinear SAF / Distribution"[rr] != "Error"
         myupdate_param!(model, :SAFModel, :saf_delta, benchmark."Nonlinear SAF / Distribution"[rr])
     end
@@ -83,8 +84,8 @@ for rr in 1:nrow(benchmark)
 
     slrindexes = findfirst(names(benchmark) .== "Distribution / AFG"):findfirst(names(benchmark) .== "Distribution / ZWE")
     countries = [x[end-2:end] for x in names(benchmark)[slrindexes]]
-    slrcoeffs = collect(benchmark[rr, slrindexes])
-    myupdate_param!(model, :Consumption, :slrcoeff, [slrcoeffs[findfirst(countries .== country)] for country in dim_keys(model, :country)])
+    slrcoeffvalues = collect(benchmark[rr, slrindexes])
+    myupdate_param!(model, :Consumption, :slrcoeff, [slrcoeffvalues[findfirst(countries .== country)] for country in dim_keys(model, :country)])
 
     myupdate_param!(model, :Utility, :EMUC, 1.5)
     myupdate_param!(model, :Utility, :PRTP, 0.01)
@@ -93,7 +94,7 @@ for rr in 1:nrow(benchmark)
     bindrawends = findall(x -> occursin("2200 / Binomial draw", x), names(benchmark))
     bindrawcomps = [:OMH, :AmazonDieback, :WAISmodel, :AMOC]
     for cc in 1:length(bindrawcomps)
-        myupdate_param!(model, bindrawcomps[cc], :uniforms, collect(benchmark[rr, bindrawstarts[cc]:bindrawends[cc]]))
+        myupdate_param!(model, bindrawcomps[cc], :uniforms, 1 .- collect(benchmark[rr, bindrawstarts[cc]:bindrawends[cc]]))
     end
 
     raindrawstart = findfirst(names(benchmark) .== "2010 / Day")
@@ -108,15 +109,15 @@ for rr in 1:nrow(benchmark)
     T_AT = model[:TemperatureModel, :T_AT][11:10:191]
     T_AT_compare = collect(benchmark[rr, 2:20])
 
-    @test T_AT ≈ T_AT_compare atol=1e-4
+    @test maximum(abs.(T_AT .- T_AT_compare)) < .1
 
     SLR = model[:SLRModel, :SLR][11:10:191]
     SLR_compare = collect(benchmark[rr, 21:39])
 
-    @test SLR ≈ SLR_compare atol=1e-4
+    @test SLR ≈ SLR_compare atol=1e-1
 
     globalwelfare = sum(model[:Utility, :world_disc_utility][11:191])
     globalwelfare_compare = benchmark."Global welfare"[rr]
 
-    @test globalwelfare ≈ globalwelfare_compare rtol=1e-4
+    @test globalwelfare ≈ globalwelfare_compare rtol=1e-3
 end

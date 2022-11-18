@@ -32,7 +32,7 @@ end
 
 slrcoeffs = CSV.read("../data/SLRcoeffs.csv", DataFrame)
 
-function getslrcoeff(iso, option)
+function getslrcoeff(iso, option::String)
     if option == "mode"
         return slrcoeffs.mode[slrcoeffs.ISO .== iso][1]
     elseif option == "low"
@@ -44,7 +44,7 @@ function getslrcoeff(iso, option)
     end
 end
 
-function getslrcoeff_distribution(iso, option, qq)
+function getslrcoeff_distribution(iso, option::String, qq)
     low = slrcoeffs.low[slrcoeffs.ISO .== iso][1]
     mode = slrcoeffs.mode[slrcoeffs.ISO .== iso][1]
     high = slrcoeffs.hig[slrcoeffs.ISO .== iso][1]

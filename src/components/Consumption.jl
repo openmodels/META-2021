@@ -164,7 +164,7 @@ function addConsumption(model, tdamage, slrdamage, ssp)
 
     if slrdamage == "none"
         cons[:slrcoeff] = zeros(length(isos))
-    elseif tdamage != "distribution"
+    elseif slrdamage != "distribution"
         cons[:slrcoeff] = [getslrcoeff(iso, slrdamage) for iso in isos]
     else
         # cons[:slrcoeff] = [getslrcoeff_distribution(isos[cc], slrdamage, pp.slruniforms[cc]) for cc in 1:length(isos)]

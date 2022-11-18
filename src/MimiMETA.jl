@@ -22,6 +22,8 @@ include("../src/components/Consumption.jl")
 include("../src/components/NonMarketDamages.jl")
 include("../src/components/Utility.jl")
 
+do_May2022 = true
+
 function base_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
     model = test_model();
 
@@ -117,6 +119,7 @@ function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
         if interaction != false
             gismodel[:f_GIS] = interact[:f_GIS];
         end
+        connect_param!(model, :SLRModel=>:SLR_GIS, :GISModel=>:SLR_GIS);
     end
     if wais != false
         waismodel = addWAISmodel(model, wais, after=ifelse(interaction, :Interactions, :TemperatureModel));
@@ -126,6 +129,7 @@ function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
         if interaction != false
             waismodel[:f_WAIS] = interact[:f_WAIS];
         end
+        connect_param!(model, :SLRModel=>:SLR_WAIS, :WAISmodel=>:SLR_WAIS);
     end
     if ism != false
         ismmodel = addISMModel(model, ism, after=ifelse(interaction, :Interactions, :TemperatureModel));
@@ -167,7 +171,11 @@ function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
             interact[:VGIS] = gismodel[:VGIS];
         end
         if wais != false
-            interact[:p_WAIS] = waismodel[:p_WAIS];
+            if do_May2022 
+                interact[:I_WAIS] = waismodel[:p_WAIS];
+            else
+                interact[:I_WAIS] = waismodel[:I_WAIS];
+            end
         end
         if amaz != false
             interact[:I_AMAZ] = amazmodel[:I_AMAZ];

@@ -11,7 +11,7 @@ interact = addInteractions(model)
 
 interact[:I_AMOC] = benchmark.I_AMOC
 interact[:VGIS] = 1 .- benchmark."1 - V_GIS"
-interact[:p_WAIS] = benchmark.I_WAIS
+interact[:I_WAIS] = benchmark.I_WAIS
 interact[:I_AMAZ] = benchmark.I_AMAZ
 interact[:mNINO3pt4] = 1 .- benchmark."1 - m_NINO/m_0" ./ 10000
 

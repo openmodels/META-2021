@@ -20,12 +20,12 @@
 
     function run_timestep(pp, vv, dd, tt)
         if is_first(tt)
-            vv.p_WAIS[tt] = 0 # Likelihood of WAIS disintegration being triggered
+            vv.p_WAIS[tt] = min(pp.b_WAIS * (pp.T_AT[tt]-0.6)^2, 1) # Likelihood of WAIS disintegration being triggered
             vv.I_WAIS[tt] = 0 # Indicator function for WAIS disintegration is triggered
             vv.SLR_WAIS[tt] = 0 # Sea-level rise from WAIS melting (in m)
 
         else
-            vv.p_WAIS[tt] = min(pp.f_WAIS[tt] * (pp.b_WAIS*pp.T_AT[tt]-0.6)^2, 1)
+            vv.p_WAIS[tt] = min(pp.b_WAIS * pp.f_WAIS[tt] * (pp.T_AT[tt]-0.6)^2, 1)
 
             if vv.I_WAIS[tt-1] != 1
                 vv.I_WAIS[tt] = pp.uniforms[tt] < vv.p_WAIS[tt]
