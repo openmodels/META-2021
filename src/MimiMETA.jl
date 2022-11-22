@@ -24,7 +24,7 @@ include("../src/components/Utility.jl")
 
 do_May2022 = true
 
-function base_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
+function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
     model = test_model();
 
     rcpmodel = addRCP(model, rcp);
