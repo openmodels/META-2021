@@ -73,7 +73,7 @@ function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     model
 end
 
-function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
+function full_model(; rcp="NP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
     model = base_model(rcp=rcp, ssp=ssp, co2=co2, ch4=ch4, warming=warming, tdamage=tdamage, slrdamage=slrdamage);
 
     if saf != false
@@ -116,7 +116,7 @@ function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
         gismodel = addGISModel(model, gis, after=ifelse(interaction, :Interactions, :TemperatureModel));
 
         connect_param!(model, :GISModel=>:T_AT, :TemperatureModel=>:T_AT);
-        if interaction != false
+        if interaction != falsemo
             gismodel[:f_GIS] = interact[:f_GIS];
         end
         connect_param!(model, :SLRModel=>:SLR_GIS, :GISModel=>:SLR_GIS);
