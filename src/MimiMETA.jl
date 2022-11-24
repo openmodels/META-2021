@@ -116,7 +116,7 @@ function full_model(; rcp="NP-Base", ssp="SSP2", co2="Expectation", ch4="default
         gismodel = addGISModel(model, gis, after=ifelse(interaction, :Interactions, :TemperatureModel));
 
         connect_param!(model, :GISModel=>:T_AT, :TemperatureModel=>:T_AT);
-        if interaction != falsemo
+        if interaction != false
             gismodel[:f_GIS] = interact[:f_GIS];
         end
         connect_param!(model, :SLRModel=>:SLR_GIS, :GISModel=>:SLR_GIS);
