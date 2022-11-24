@@ -26,7 +26,7 @@
 
     function init(pp, vv, dd)
         vv.avoldot = pp.avoldot0 * pp.meltmult
-    end 
+    end
 
     function run_timestep(pp, vv, dd, tt)
 
@@ -39,7 +39,7 @@
         else
 
            vv.Diff_VGIS[tt] = vv.avoldot * sign(vv.TD[tt-1]) * vv.TD[tt-1] ^ 2 * vv.VGIS[tt-1] ^ pp.expvol
-           vv.Diff_VGIS[tt] < 0 ? vv.VGIS[tt] = vv.VGIS[tt-1] + vv.Diff_VGIS[tt]*pp.f_GIS[tt] : vv.VGIS[tt-1]
+           vv.VGIS[tt] = (vv.Diff_VGIS[tt] < 0 ? vv.VGIS[tt-1] + vv.Diff_VGIS[tt]*pp.f_GIS[tt] : vv.VGIS[tt-1])
            vv.T_GISstar[tt] = pp.tmaxa * (1 - vv.VGIS[tt]) ^ pp.exptstar
            vv.TD[tt] = pp.T_AT[tt] - vv.T_GISstar[tt] + 0.00001
 

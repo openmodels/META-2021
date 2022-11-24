@@ -18,3 +18,19 @@ end
 include("../src/MimiMETA.jl")
 model = base_model(; tdamage="pointestimate", slrdamage="mode")
 calculate_scc(model, 2020, 10., 1.5)
+
+function calculate_scc_mc(model::Model, preset_fill::Function, maxrr::Int64, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
+    sccs = []
+    for rr in 1:maxrr
+        println(rr)
+        preset_fill(rr)
+        push!(sccs, calculate_scc(model, 2020, 10., 1.5))
+    end
+    sccs
+end
+
+include("../src/lib/presets.jl")
+benchmark = CSV.read("../data/benchmark/ExcelMETA-alltp.csv", DataFrame)
+model = full_model()
+preset_fill(rr) = preset_fill_tp(model, benchmark, rr)
+calculate_scc_mc(model, preset_fill, nrow(benchmark), 2020, 10., 1.5)
