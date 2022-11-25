@@ -21,6 +21,7 @@ include("../src/components/Interactions.jl")
 include("../src/components/Consumption.jl")
 include("../src/components/NonMarketDamages.jl")
 include("../src/components/Utility.jl")
+include("../src/components/TotalDamages.jl")
 
 do_May2022 = true
 
@@ -37,6 +38,7 @@ function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     pattscale = addPatternScaling(model);
     cons = addConsumption(model, tdamage, slrdamage, ssp);
     utility = addUtility(model, ssp);
+    damages = addTotalDamages(model);
 
     # Setup CO2 model
     co2model[:co2_rcp] = rcpmodel[:co2_rcp];
@@ -69,6 +71,11 @@ function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
 
     # Setup Utility
     utility[:conspc] = cons[:conspc];
+
+    # Setup TotalDamages
+    damages[:population] = utility[:pop];
+    damages[:postdamage_consumption_percap_percountry] = cons[:conspc]
+    damages[:baseline_consumption_percap_percountry] = cons[:baseline_consumption_percap_percountry]
 
     model
 end
