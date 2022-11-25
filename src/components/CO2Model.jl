@@ -61,6 +61,9 @@
         end
 
         vv.st[tt] = vv.s0[tt] + vv.s1[tt] + vv.s2[tt] + vv.s3[tt] + pp.ppm_preind * pp.ppm_to_gtco2
+        if vv.st[tt] < 0
+            vv.st[tt] = 0
+        end
         vv.st_ppm[tt] = vv.st[tt] / pp.ppm_to_gtco2
         vv.co2_cum[tt] = vv.co2_cum_ppm[tt] * 12/44 + pp.c_to2010 - (vv.s0[tt] + vv.s1[tt] + vv.s2[tt] + vv.s3[tt]) * 12/44
     end

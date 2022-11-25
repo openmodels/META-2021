@@ -29,8 +29,12 @@ function run_timestep(pp, vv, dd, tt)
             vv.fMN_2010[tt] = 0.47*log(1+pp.fMN_parameter1*(pp.CH4_conc_preindustrial*vv.N2O_initial_concentration[TimestepIndex(1)])^0.75+pp.fMN_parameter2*pp.CH4_conc_preindustrial*(pp.CH4_conc_preindustrial*vv.N2O_initial_concentration[TimestepIndex(1)])^1.52) #James suggested to put this calculation into an init() function that precedes run_timestep(), but I need the latter to grab the first element of the N2O concentration array.
 
         else
-            vv.CH4_concentration[tt] = pp.CH4_conc_preindustrial +(vv.CH4_concentration[tt-1]-pp.CH4_conc_preindustrial)*(1-pp.decay_rate)+(pp.ch4_rcp[tt-1]+pp.ch4_pcf[tt-1]+pp.ch4_omh[tt-1]+pp.ch4_extra[tt-1])/pp.conversion_ppb_Mt
 
+        vv.CH4_concentration[tt] = pp.CH4_conc_preindustrial +(vv.CH4_concentration[tt-1]-pp.CH4_conc_preindustrial)*(1-pp.decay_rate)+(pp.ch4_rcp[tt-1]+pp.ch4_pcf[tt-1]+pp.ch4_omh[tt-1]+pp.ch4_extra[tt-1])/pp.conversion_ppb_Mt
+
+            if vv.CH4_concentration[tt] < 0
+                vv.CH4_concentration[tt] = 0
+            end
         end
 
         vv.I_CH4_N2O[tt] = 0.47*log(1+pp.fMN_parameter1*(vv.CH4_concentration[tt]*vv.N2O_initial_concentration[TimestepIndex(1)])^(0.75)+pp.fMN_parameter2*vv.CH4_concentration[tt]*(vv.CH4_concentration[tt]*vv.N2O_initial_concentration[TimestepIndex(1)])^(1.52))
