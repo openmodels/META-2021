@@ -9,7 +9,7 @@ function calculate_scc(model::Model, pulse_year::Int64, pulse_size::Float64, emu
     mm.modified[:CO2Model, :co2_extra][pulse_index] = pulse_size
     run(mm)
 
-    globalwelfare_marginal = sum(mm[:Utility, :world_disc_utility][pulse_index:181])
+    globalwelfare_marginal = sum(mm[:Utility, :world_disc_utility][pulse_index:191])
 
     global_conspc = sum(mm.base[:Consumption, :conspc][pulse_index, :] .* mm.base[:Utility, :pop][pulse_index, :]) / mm.base[:Utility, :world_population][pulse_index]
     -(globalwelfare_marginal / (global_conspc^-emuc)) / 1e9
@@ -34,4 +34,4 @@ include("../src/lib/presets.jl")
 benchmark = CSV.read("../data/benchmark/ExcelMETA-alltp.csv", DataFrame)
 model = full_model()
 preset_fill(rr) = preset_fill_tp(model, benchmark, rr)
-calculate_scc_mc(model, preset_fill, nrow(benchmark), 2020, 10., 1.5)
+calculate_scc_mc(model, preset_fill, nrow(benchmark), 2020, 10, 1.5) # Runs 500 MC reps.
