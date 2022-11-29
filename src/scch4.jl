@@ -18,7 +18,7 @@ end
 include("../src/MimiMETA.jl")
 model = base_model(; rcp="NP-Base", tdamage="pointestimate", slrdamage="mode")
 
-calculate_scch4(model, 2020, 0.36, 1.5)#360,000 tCH4 pulse
+#calculate_scch4(model, 2020, 0.36, 1.5)#360,000 tCH4 pulse
 
 function calculate_scch4_mc(model::Model, preset_fill::Function, maxrr::Int64, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
     scch4s = []
@@ -34,4 +34,4 @@ include("../src/lib/presets.jl")
 benchmark = CSV.read("../data/benchmark/ExcelMETA-alltp.csv", DataFrame)
 model = full_model(; rcp="CP-Base")
 preset_fill(rr) = preset_fill_tp(model, benchmark, rr)
-calculate_scch4_mc(model, preset_fill, 5#=nrow(benchmark)=#, 2020, 0.24, 1.5) # Runs 500 MC reps.
+#calculate_scch4_mc(model, preset_fill, nrow(benchmark), 2020, 0.24, 1.5) # Runs 500 MC reps.
