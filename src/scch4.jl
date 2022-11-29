@@ -32,6 +32,6 @@ end
 
 include("../src/lib/presets.jl")
 benchmark = CSV.read("../data/benchmark/ExcelMETA-alltp.csv", DataFrame)
-model = full_model()
+model = full_model(; rcp="CP-Base")
 preset_fill(rr) = preset_fill_tp(model, benchmark, rr)
-calculate_scch4_mc(model, preset_fill, 5, 2020, 0.36, 1.5) # Runs 500 MC reps.
+calculate_scch4_mc(model, preset_fill, 5#=nrow(benchmark)=#, 2020, 0.24, 1.5) # Runs 500 MC reps.
