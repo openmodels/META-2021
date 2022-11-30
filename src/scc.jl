@@ -24,7 +24,7 @@ function calculate_scc_mc(model::Model, preset_fill::Function, maxrr::Int64, pul
     for rr in 1:maxrr
         println(rr)
         preset_fill(rr)
-        push!(sccs, calculate_scc(model, 2020, 10., 1.5))
+        push!(sccs, calculate_scc(model, pulse_year, pulse_size, emuc))
     end
     sccs
 end
