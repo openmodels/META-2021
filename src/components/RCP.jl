@@ -6,6 +6,7 @@
     n2o_conc_rcp = Variable(index=[time], unit="ppb")
     F_EX = Variable(index=[time], unit="W/m^2")
     SO_2 = Variable(index=[time], unit="Mt")
+    SO_2_Asia = Variable(index=[time], unit="Mt")
 
     # ch4_conc_total = Variable(index=[time], unit="ppb")
 
@@ -21,18 +22,29 @@
     # ch4_extra = Parameter(index=[time], unit="MtCO2")
 
     function init(pp, vv, dd)
-        scenvals = CSV.read("../data/RCPs.csv", DataFrame, limit=1, header=0, missingstring="NA")
-        scenarios = [scenvals[1, col] for col in names(scenvals)]
-        rcps = CSV.read("../data/RCPs.csv", DataFrame, header=2, select=scenarios .== pp.scenario)
+        scenvals_rma = CSV.read("../data/Scenarios.csv", DataFrame, limit=1, header=0, missingstring="NA")
+        scenvals_rcp = CSV.read("../data/RCPs.csv", DataFrame, limit=1, header=0, missingstring="NA")
+
+        scenarios_rma = [scenvals_rma[1, col] for col in names(scenvals_rma)]
+        scenarios_rcp = [scenvals_rcp[1, col] for col in names(scenvals_rcp)]
+
+        if scenario ∈ scenarios_rma[2:end]
+            rcps = CSV.read("../data/Scenarios.csv", DataFrame, header=2, select=scenarios_rma .== pp.scenario)
+        else
+            rcps = CSV.read("../data/RCPs.csv", DataFrame, header=2, select=scenarios_rcp .== pp.scenario)
+        end
         colnames = replace.(names(rcps), r"_\d+" => "")
 
         for tt in dd.time
             vv.co2_rcp[tt] = rcps[tt.t, colnames .== "CO2 (Mt CO2/yr)"][1]
             vv.ch4_rcp[tt] = rcps[tt.t, colnames .== "CH4 (Mt CH4/yr)"][1]
-            vv.ch4_conc_rcp[tt] = rcps[tt.t, colnames .== "Concentration|CH4"][1]
-	    vv.n2o_conc_rcp[tt] = rcps[tt.t, colnames .== "Concentration|N2O"][1]
+            vv.ch4_conc_rcp[tt] = rcps[tt.t, colnames .== "Concentration|CH4 (ppm)"][1]
+	    vv.n2o_conc_rcp[tt] = rcps[tt.t, colnames .== "Concentration|N2O (ppm)"][1]
             vv.F_EX[tt] = rcps[tt.t, colnames .== "Forcing|other agents (W/m2)"][1]
-            vv.SO_2[tt] = rcps[tt.t, colnames .== "Emissions|Sulfur"][1]
+            vv.SO_2[tt] = rcps[tt.t, colnames .== "Emissions|Sulfur global (kt SO2/yr)"][1]
+            if scenario ∈ scenarios_rma[2:end]
+                vv.SO_2_Asia[tt] = rcps[tt.t, colnames .== "Emissions|Sulfur global (kt SO2/yr)"][1]
+            end
         end
     end
 
@@ -47,10 +59,13 @@
 end
 
 function addRCP(model, scenario)
-    scenvals = CSV.read("../data/RCPs.csv", DataFrame, limit=1, header=0, missingstring="NA")
-    scenarios = [scenvals[1, col] for col in names(scenvals)]
-    if scenario ∉ scenarios[2:end]
-        throw(ArgumentError("Unknown RCP scenario"))
+    scenvals_rma = CSV.read("../data/Scenarios.csv", DataFrame, limit=1, header=0, missingstring="NA")
+    scenvals_rcp = CSV.read("../data/RCPs.csv", DataFrame, limit=1, header=0, missingstring="NA")
+
+    scenarios_rma = [scenvals_rma[1, col] for col in names(scenvals_rma)]
+    scenarios_rcp = [scenvals_rcp[1, col] for col in names(scenvals_rcp)]
+    if (scenario ∉ scenarios_rma[2:end]) && (scenario ∉ scenarios_rcp[2:end])
+        throw(ArgumentError("Unknown scenario"))
     end
 
     emits = add_comp!(model, RCP)
