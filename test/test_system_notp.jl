@@ -1,5 +1,6 @@
 using Test, CSV, DataFrames
 include("../src/MimiMETA.jl")
+include("../src/presets.jl")
 
 benchmark = CSV.read("../data/benchmark/ExcelMETA-notp.csv", DataFrame)
 
