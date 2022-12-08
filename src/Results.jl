@@ -4,8 +4,9 @@ model = full_model(; rcp="CP-Base")
 
 # Run the model
 run(model)
-#explore(model) # Launches the Mimi Explorer, which is a graphical interface that lets me look at each computed component. 
+explore(model) # Launches the Mimi Explorer, which is a graphical interface that lets me look at each computed component. 
 
+#=
 #= Run with MC
 benchmark = CSV.read("../data/benchmark/ExcelMETA-alltp.csv", DataFrame)
 include("../src/lib/presets.jl")
@@ -36,4 +37,5 @@ CSV.write(raw"C:\Users\Thomas\Dropbox\Tipping points in climate change economics
 -SC-CO2 national
 -total damages national
 
+=#
 =#
