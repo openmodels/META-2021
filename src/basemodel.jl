@@ -1,6 +1,5 @@
 using Mimi
 using DataFrames, CSV
-
 countries = CSV.read("../data/pattern-scaling.csv", DataFrame).Country
 include("lib/gdppc.jl")
 

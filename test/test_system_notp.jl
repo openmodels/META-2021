@@ -14,17 +14,17 @@ for rr in 1:nrow(benchmark)
 
     ## Test the model
 
-    T_AT = model[:TemperatureModel, :T_AT][11:10:191]
+    T_AT = model[:TemperatureModel, :T_AT][11:10:181]
     T_AT_compare = collect(benchmark[rr, 2:20])
 
     @test T_AT ≈ T_AT_compare atol=1e-4
 
-    SLR = model[:SLRModel, :SLR][11:10:191]
+    SLR = model[:SLRModel, :SLR][11:10:181]
     SLR_compare = collect(benchmark[rr, 21:39])
 
     @test SLR ≈ SLR_compare atol=1e-4
 
-    globalwelfare = sum(model[:Utility, :world_disc_utility][11:191])
+    globalwelfare = sum(model[:Utility, :world_disc_utility][11:181])
     globalwelfare_compare = benchmark."Global welfare"[rr]
 
     @test globalwelfare ≈ globalwelfare_compare rtol=1e-4

@@ -21,10 +21,11 @@ include("../src/components/Interactions.jl")
 include("../src/components/Consumption.jl")
 include("../src/components/NonMarketDamages.jl")
 include("../src/components/Utility.jl")
+include("../src/components/TotalDamages.jl")
 
 do_May2022 = true
 
-function base_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
+function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
     model = test_model();
 
     rcpmodel = addRCP(model, rcp);
@@ -37,6 +38,7 @@ function base_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
     pattscale = addPatternScaling(model);
     cons = addConsumption(model, tdamage, slrdamage, ssp);
     utility = addUtility(model, ssp);
+    damages = addTotalDamages(model);
 
     # Setup CO2 model
     co2model[:co2_rcp] = rcpmodel[:co2_rcp];
@@ -70,10 +72,15 @@ function base_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
     # Setup Utility
     utility[:conspc] = cons[:conspc];
 
+    # Setup TotalDamages
+    damages[:population] = utility[:pop];
+    damages[:postdamage_consumption_percap_percountry] = cons[:conspc]
+    damages[:baseline_consumption_percap_percountry] = cons[:baseline_consumption_percap_percountry]
+
     model
 end
 
-function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
+function full_model(; rcp="NP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
     model = base_model(rcp=rcp, ssp=ssp, co2=co2, ch4=ch4, warming=warming, tdamage=tdamage, slrdamage=slrdamage);
 
     if saf != false
