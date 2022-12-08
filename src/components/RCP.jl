@@ -28,7 +28,7 @@
         scenarios_rma = [scenvals_rma[1, col] for col in names(scenvals_rma)]
         scenarios_rcp = [scenvals_rcp[1, col] for col in names(scenvals_rcp)]
 
-        if scenario ∈ scenarios_rma[2:end]
+        if pp.scenario ∈ scenarios_rma[2:end]
             rcps = CSV.read("../data/Scenarios.csv", DataFrame, header=2, select=scenarios_rma .== pp.scenario)
         else
             rcps = CSV.read("../data/RCPs.csv", DataFrame, header=2, select=scenarios_rcp .== pp.scenario)
@@ -42,7 +42,7 @@
 	    vv.n2o_conc_rcp[tt] = rcps[tt.t, colnames .== "Concentration|N2O (ppm)"][1]
             vv.F_EX[tt] = rcps[tt.t, colnames .== "Forcing|other agents (W/m2)"][1]
             vv.SO_2[tt] = rcps[tt.t, colnames .== "Emissions|Sulfur global (kt SO2/yr)"][1]
-            if scenario ∈ scenarios_rma[2:end]
+            if pp.scenario ∈ scenarios_rma[2:end]
                 vv.SO_2_Asia[tt] = rcps[tt.t, colnames .== "Emissions|Sulfur global (kt SO2/yr)"][1]
             end
         end
