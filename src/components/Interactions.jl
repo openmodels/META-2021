@@ -64,6 +64,11 @@ function addInteractions(model; before=nothing, after=nothing)
     interact = add_comp!(model, Interactions, before=before, after=after)
 
     allinteractrates((symbol, ratemu, ratese) -> interact[symbol] = ratemu)
-   
+    interact[:I_AMOC] = zeros(dim_count(model, :time))
+    interact[:VGIS] = ones(dim_count(model, :time))
+    interact[:I_WAIS] = zeros(dim_count(model, :time))
+    interact[:I_AMAZ] = zeros(dim_count(model, :time))
+    interact[:mNINO3pt4] = ones(dim_count(model, :time))
+
     interact
 end
