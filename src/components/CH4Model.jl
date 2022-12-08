@@ -17,7 +17,7 @@
     ch4_alpha = Parameter(default=0.036)
     fMN_parameter1 = Parameter(default=0.0000201)
     fMN_parameter2 = Parameter(default=0.00000000000000531)
-    decay_rate = Parameter(default=1/12.4)
+    decay_rate = Parameter(default=1/11.8) # Upgraded to 11.8 years of atmospheric residence time to reflect AR6. Previous AR5 value used in Dietz et al. 2021 PNAS is 12.4.
     conversion_ppb_Mt = Parameter(default=2.78)
     CH4_conc_preindustrial = Parameter(unit="ppb", default=722)
 
