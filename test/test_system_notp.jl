@@ -1,14 +1,14 @@
 using Test, CSV, DataFrames
 include("../src/MimiMETA.jl")
-include("../src/presets.jl")
+include("../src/lib/presets.jl")
 
 benchmark = CSV.read("../data/benchmark/ExcelMETA-notp.csv", DataFrame)
 
 ## Setup the model
+model = base_model(; rcp="RCP4.5")
 
 for rr in 1:nrow(benchmark)
     println(rr)
-    global model = base_model() # XXX: Consumption currently refers to this...
     preset_fill_notp(model, benchmark, rr)
 
     run(model)
