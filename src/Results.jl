@@ -2,6 +2,9 @@
 include("../src/MimiMETA.jl")
 model = full_model(; rcp="CP-Base")
 
+#Update persistence parameter phi (hard-coded default: 0.5)
+#myupdate_param!(model, :Consumption, :damagepersist, 0.25)
+
 # Run the model
 run(model)
 explore(model) # Launches the Mimi Explorer, which is a graphical interface that lets me look at each computed component. 
