@@ -28,6 +28,10 @@ using Mimi
     bge                                 = Variable(index =[time, region])  
 
     function run_timestep(pp, vv, dd, tt)
+        # Set up empty world utility var buckets
+        vv.world_utility_counterfactual[tt] = 0
+        vv.world_utility[tt] = 0
+
         #Calculate counterfactual utility of SSP no climate damages-scenario
         for cc in dd.country
 
@@ -49,10 +53,7 @@ using Mimi
             end
 
             # Calculate world utility
-            vv.world_utility_counterfactual[tt] = 0
             vv.world_utility_counterfactual[tt] += vv.utility_counterfactual[tt, cc]
-
-            vv.world_utility[tt] = 0
             vv.world_utility[tt] += pp.utility[tt, cc]
         end
                            
