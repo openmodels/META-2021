@@ -36,19 +36,16 @@ using Mimi
                 vv.utility_counterfactual[tt, cc] = 0
     
             else
-                
                 #Cut damage calculations in 2050 for methane paper
-                if tt > TimestepValue(2050)
-
-                    vv.utility_counterfactual[tt, cc] = 0 
-                    pp.utility[tt, cc] = 0
-
-                else
+                if tt <= TimestepValue(2050)
 
                     vv.utility_counterfactual[tt, cc] = (1 / (1 - pp.EMUC) * (max(pp.baseline_consumption_percap_percountry[tt, cc], 1) * pp.lossfactor[tt, cc]) ^ (1 - pp.EMUC)) * pp.pop[tt, cc]
+                                   
+                else
+                    vv.utility_counterfactual[tt, cc] = 0 
+                    pp.utility[tt, cc] = 0 
                                     
                 end
-               
             end
 
             # Calculate world utility
