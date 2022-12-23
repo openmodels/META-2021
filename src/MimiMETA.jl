@@ -22,8 +22,8 @@ include("../src/components/Consumption.jl")
 include("../src/components/NonMarketDamages.jl")
 include("../src/components/Utility.jl")
 include("../src/components/TotalDamages.jl")
-#include("../src/components/BGE.jl")
-include("../src/components/DEBUG.jl")
+include("../src/components/BGE.jl")
+#include("../src/components/DEBUG.jl")
 
 do_May2022 = true
 
@@ -41,8 +41,8 @@ function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     cons = addConsumption(model, tdamage, slrdamage, ssp);
     utility = addUtility(model, ssp);
     damages = addTotalDamages(model);
-    #bge_comp = addBGE(model)
-    debug = addDEBUG(model)
+    bge_comp = addBGE(model)
+    #debug = addDEBUG(model)
 
     # Setup CO2 model
     co2model[:co2_rcp] = rcpmodel[:co2_rcp];
@@ -82,9 +82,9 @@ function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     damages[:baseline_consumption_percap_percountry] = cons[:baseline_consumption_percap_percountry];
 
     # Setup BGE
-    #bge_comp[:pop] = utility[:pop];
-    #bge_comp[:utility] = utility[:utility];
-    #bge_comp[:baseline_consumption_percap_percountry] = cons[:baseline_consumption_percap_percountry];
+    bge_comp[:pop] = utility[:pop];
+    bge_comp[:utility] = utility[:utility];
+    bge_comp[:baseline_consumption_percap_percountry] = cons[:baseline_consumption_percap_percountry];
     
     model
 end

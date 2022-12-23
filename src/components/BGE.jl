@@ -1,60 +1,49 @@
 @defcomp BGE begin
 
     # Balanced growth equivalent inputs
-    world_utility                       = Variable(index =[time])# World utility
-    world_utility_counterfactual        = Variable(index =[time])# World utility of counterfactual no climate damages SSP consumption
-    world_disc_utility                  = Variable(index =[time]) # Calculate myself similar to utility module, but with variable cutoff year (2050).
-    world_disc_utility_counterfactual   = Variable(index =[time]) # Calculates utility for SSP scenario consumption without climate damages
+    world_utility                           = Variable(index =[time])# World utility
+    world_utility_counterfactual            = Variable(index =[time])# World utility of counterfactual no climate damages SSP consumption
+    world_disc_utility                      = Variable(index =[time]) # Calculate myself similar to utility module, but with variable cutoff year (2050).
+    world_disc_utility_counterfactual       = Variable(index =[time]) # Calculates utility for SSP scenario consumption without climate damages
+    sum_world_disc_utility                  = Variable() # Sum discounted world utility at present. Scalar
+    sum_world_disc_utility_counterfactual   = Variable() # Sum discounted counterfactual world utility at present. Scalar
         
-    utility                             = Parameter(index =[time, region])# Utility per country
-    utility_counterfactual              = Variable(index =[time, region])# Utility per country of counterfactual no climate damages SSP consumption
-    disc_utility                        = Variable(index =[time, region])
-    disc_utility_counterfactual         = Variable(index =[time, region]) 
+    utility                                 = Parameter(index =[time, country])# Utility per country
+    utility_counterfactual                  = Variable(index =[time, country])# Utility per country of counterfactual no climate damages SSP consumption
+    disc_utility                            = Variable(index =[time, country])
+    disc_utility_counterfactual             = Variable(index =[time, country]) 
+    sum_disc_utility                        = Variable(index =[country]) # Discounted utility at present. One-dimensional array
+    sum_disc_utility_counterfactual         = Variable(index =[country]) # Discounted utility at present. One-dimensional array
 
-    pop                                 = Parameter(index=[time, country], unit="inhabitants") # national population
+    pop                                     = Parameter(index=[time, country], unit="inhabitants") # national population
         
     # Utility parameters
-    EMUC                                = Parameter() # elasticity of marginal utility of consumption
-    PRTP                                = Parameter(unit ="pct") # pure rate of time preference
-    lossfactor                          = Parameter(index =[time, country]) # non-market loss factor
+    EMUC                                    = Parameter() # elasticity of marginal utility of consumption
+    PRTP                                    = Parameter(unit ="pct") # pure rate of time preference
+    lossfactor                              = Parameter(index =[time, country]) # non-market loss factor
     
 
     # Consumption variables
     baseline_consumption_percap_percountry = Parameter(index = [time, country], unit = "2010 USD PPP") # Counterfactual consumption per cap per country from SSPs
 
     # Balanced-growth equivalent outputs
-    world_bge                           = Variable(index =[time])
-    bge                                 = Variable(index =[time, region])  
+    world_bge                           = Variable()
+    bge                                 = Variable(index =[country])  
 
     function run_timestep(pp, vv, dd, tt)
         # Set up empty world utility var buckets
         vv.world_utility_counterfactual[tt] = 0
         vv.world_utility[tt] = 0
         
-        # Debugging
-        isos = dim_keys(model, :country) # Find out in which country the loop crashes
-        for cc in dd.country
-            println(isos[cc])
-            
-            vv.utility_counterfactual[tt, cc] = 0
-        end
-        
-
         #Calculate counterfactual utility of SSP no climate damages-scenario
-        #=for cc in dd.country
-            #println(isos[cc],": Loading.")
-            #vv.utility_counterfactual[tt, cc] = 0
-            #println(isos[cc],": Done.")
+        for cc in dd.country
+            
             if pp.baseline_consumption_percap_percountry[tt, cc] == 0
     
                 vv.utility_counterfactual[tt, cc] = 0
     
             else
-                #print("testing")
-                println(isos[cc])
-                vv.utility_counterfactual[tt, cc] = 0
-                println(isos[cc])
-                #=
+                
                 #Cut damage calculations in 2050 for methane paper
                 if tt <= TimestepValue(2050)
 
@@ -70,29 +59,23 @@
             # Calculate world utility
             vv.world_utility_counterfactual[tt] += vv.utility_counterfactual[tt, cc]
             vv.world_utility[tt] += pp.utility[tt, cc]
-            =#
         end
-        =#
-        
+                
         # Discount utility
-        vv.world_disc_utility_counterfactual[tt] = vv.world_utility_counterfactual[tt] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050?
-        vv.world_disc_utility[tt] = vv.world_utility[tt] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050? But how since this runs for the entire time of the model. Perhaps an if-else statement?  
+        vv.world_disc_utility_counterfactual[tt] = vv.world_utility_counterfactual[tt] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) 
+        vv.world_disc_utility[tt] = vv.world_utility[tt] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) 
 
         for cc in dd.country
-            vv.disc_utility_counterfactual[tt, cc] = vv.utility_counterfactual[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050?
-            vv.disc_utility[tt, cc] = pp.utility[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050? But how since this runs for the entire time of the model. Perhaps an if-else statement?  
+            vv.disc_utility_counterfactual[tt, cc] = vv.utility_counterfactual[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) 
+            vv.disc_utility[tt, cc] = pp.utility[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) 
         end
 
-        #= Marginal welfare change method
+                #= Marginal welfare change method
         vv.world_damages_marginalmethod[tt] = (world_disc_utility_counterfactual[tt] - world_disc_utility[tt])#(1/marginal utility of cosumption in 2010^-EMUC) WHERE TO FIND CONSUMPTION IN 2010? AND CAN I USE CONSUMPTION PER CAP?
         vv.damages_marginalmethod[tt, cc] = (disc_utility_counterfactual[tt, cc] - disc_utility[tt, cc])#(1/marginal utility of cosumption in 2010^-EMUC) WHERE TO FIND CONSUMPTION IN 2010? AND CAN I USE CONSUMPTION PER CAP?
         =#
 
-        # Apply BGE method (eq. 5 in Anthoff and Tol 2009 ERE)
-        vv.world_bge[tt] = (vv.world_disc_utility_counterfactual[tt]/vv.world_disc_utility[tt])^(1/(1-pp.EMUC)) -1 
-        for cc in dd.country
-            vv.bge[tt, cc] = (vv.disc_utility_counterfactual[tt, cc]/vv.disc_utility[tt, cc])^(1/(1-pp.EMUC))-1
-        end
+        
     end
 end
 
