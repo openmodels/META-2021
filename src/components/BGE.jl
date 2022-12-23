@@ -1,4 +1,3 @@
-using Mimi
 @defcomp BGE begin
 
     # Balanced growth equivalent inputs
@@ -31,15 +30,31 @@ using Mimi
         # Set up empty world utility var buckets
         vv.world_utility_counterfactual[tt] = 0
         vv.world_utility[tt] = 0
+        
+        # Debugging
+        isos = dim_keys(model, :country) # Find out in which country the loop crashes
+        for cc in dd.country
+            println(isos[cc])
+            
+            vv.utility_counterfactual[tt, cc] = 0
+        end
+        
 
         #Calculate counterfactual utility of SSP no climate damages-scenario
-        for cc in dd.country
-
+        #=for cc in dd.country
+            #println(isos[cc],": Loading.")
+            #vv.utility_counterfactual[tt, cc] = 0
+            #println(isos[cc],": Done.")
             if pp.baseline_consumption_percap_percountry[tt, cc] == 0
     
                 vv.utility_counterfactual[tt, cc] = 0
     
             else
+                #print("testing")
+                println(isos[cc])
+                vv.utility_counterfactual[tt, cc] = 0
+                println(isos[cc])
+                #=
                 #Cut damage calculations in 2050 for methane paper
                 if tt <= TimestepValue(2050)
 
@@ -55,14 +70,18 @@ using Mimi
             # Calculate world utility
             vv.world_utility_counterfactual[tt] += vv.utility_counterfactual[tt, cc]
             vv.world_utility[tt] += pp.utility[tt, cc]
+            =#
         end
-                           
+        =#
+        
         # Discount utility
         vv.world_disc_utility_counterfactual[tt] = vv.world_utility_counterfactual[tt] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050?
         vv.world_disc_utility[tt] = vv.world_utility[tt] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050? But how since this runs for the entire time of the model. Perhaps an if-else statement?  
 
-        vv.disc_utility_counterfactual[tt, cc] = vv.utility_counterfactual[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050?
-        vv.disc_utility[tt, cc] = pp.utility[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050? But how since this runs for the entire time of the model. Perhaps an if-else statement?  
+        for cc in dd.country
+            vv.disc_utility_counterfactual[tt, cc] = vv.utility_counterfactual[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050?
+            vv.disc_utility[tt, cc] = pp.utility[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020) # How to make sure this ends in a year I pass to the function? Or hard-code to 2050? But how since this runs for the entire time of the model. Perhaps an if-else statement?  
+        end
 
         #= Marginal welfare change method
         vv.world_damages_marginalmethod[tt] = (world_disc_utility_counterfactual[tt] - world_disc_utility[tt])#(1/marginal utility of cosumption in 2010^-EMUC) WHERE TO FIND CONSUMPTION IN 2010? AND CAN I USE CONSUMPTION PER CAP?
@@ -71,21 +90,23 @@ using Mimi
 
         # Apply BGE method (eq. 5 in Anthoff and Tol 2009 ERE)
         vv.world_bge[tt] = (vv.world_disc_utility_counterfactual[tt]/vv.world_disc_utility[tt])^(1/(1-pp.EMUC)) -1 
-        vv.bge[tt, cc] = (vv.disc_utility_counterfactual[tt, cc]/vv.disc_utility[tt, cc])^(1/(1-pp.EMUC))-1
+        for cc in dd.country
+            vv.bge[tt, cc] = (vv.disc_utility_counterfactual[tt, cc]/vv.disc_utility[tt, cc])^(1/(1-pp.EMUC))-1
+        end
     end
 end
 
 function addBGE(model)
 
-        params = CSV.read("../data/utilityparams.csv", DataFrame)
+    params = CSV.read("../data/utilityparams.csv", DataFrame)
     
-        bge_comp = add_comp!(model, BGE)
+    bge_comp = add_comp!(model, BGE)
 
-        #Grabbing these from Utility.jl via MimiMETA.jl somehow did not work
-        bge_comp[:EMUC] = params.Value[params.Parameter .== "EMUC"][1]
-        bge_comp[:PRTP] = params.Value[params.Parameter .== "PRTP"][1]
-        bge_comp[:lossfactor] = reshape(ones(dim_count(model, :time) * dim_count(model, :country)),
-        dim_count(model, :time), dim_count(model, :country))
+    #Grabbing these from Utility.jl via MimiMETA.jl somehow did not work
+    bge_comp[:EMUC] = params.Value[params.Parameter .== "EMUC"][1]
+    bge_comp[:PRTP] = params.Value[params.Parameter .== "PRTP"][1]
+    bge_comp[:lossfactor] = reshape(ones(dim_count(model, :time) * dim_count(model, :country)),
+    dim_count(model, :time), dim_count(model, :country))
         
-        bge_comp
+    bge_comp
 end
