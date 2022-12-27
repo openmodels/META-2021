@@ -25,7 +25,7 @@ include("../src/components/TotalDamages.jl")
 include("../src/components/BGE.jl")
 #include("../src/components/DEBUG.jl")
 
-do_May2022 = true
+do_May2022 = false
 
 function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
     model = test_model();

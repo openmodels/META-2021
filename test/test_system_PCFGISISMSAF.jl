@@ -6,6 +6,9 @@ benchmark = CSV.read("../data/benchmark/ExcelMETA-PCFGISISMSAF.csv", DataFrame)
 
 ## Setup the model
 
+alltmaxdiff = []
+allsmaxdiff = []
+allgweldiff = []
 for rr in 1:nrow(benchmark)
     println(rr)
     global model = full_model(; interaction=false, omh=false, amaz=false, wais=false, amoc=false) # XXX: Consumption currently refers to this...
@@ -53,5 +56,12 @@ for rr in 1:nrow(benchmark)
     globalwelfare = sum(model[:Utility, :world_disc_utility][11:191])
     globalwelfare_compare = benchmark."Global welfare"[rr]
 
-    @test globalwelfare ≈ globalwelfare_compare rtol=1e-1
+    @test globalwelfare ≈ globalwelfare_compare rtol=1e-2
+
+    push!(alltmaxdiff, (T_AT .- T_AT_compare)[findmax(abs.(T_AT .- T_AT_compare))[2]])
+    push!(allsmaxdiff, (SLR .- SLR_compare)[findmax(abs.(SLR .- SLR_compare))[2]])
+    push!(allgweldiff, globalwelfare - globalwelfare_compare)
 end
+
+df = DataFrame(:tmaxdiff => alltmaxdiff, :smaxdiff => allsmaxdiff, :gweldiff => allgweldiff)
+CSV.write("errors-PCFGISISMSAF.csv", df)

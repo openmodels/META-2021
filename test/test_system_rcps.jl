@@ -19,15 +19,13 @@ for ii in 1:length(rcps)
     model_tp = model = full_model(; rcp=rcps[ii], ssp=ssps[ii])
 
     global model = model_notp
-    preset_fill(rr) = preset_fill_notp(model, benchmark_notp, rr)
-    sccs_notp = calculate_scc_mc(model, preset_fill, nrow(benchmark_notp), 2020, 10., 1.5)
+    sccs_notp = calculate_scc_mc(model, (rr) -> preset_fill_notp(model, benchmark_notp, rr), nrow(benchmark_notp), 2020, 10., 1.5)
 
     # @test mean(sccs_notp) ≈ scc_notp[ii] atol=1e-1
     push!(mine_scc_notp, mean(sccs_notp))
 
     global model = model_tp
-    preset_fill(rr) = preset_fill_tp(model, benchmark_tp, rr)
-    sccs_tp = calculate_scc_mc(model, preset_fill, nrow(benchmark_tp), 2020, 10., 1.5)
+    sccs_tp = calculate_scc_mc(model, (rr) -> preset_fill_tp(model, benchmark_tp, rr), nrow(benchmark_tp), 2020, 10., 1.5)
 
     # @test mean(sccs_tp) ≈ scc_tp[ii] atol=1e-1
     push!(mine_scc_tp, mean(sccs_tp))
