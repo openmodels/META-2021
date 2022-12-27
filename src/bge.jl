@@ -18,7 +18,7 @@ function calculate_BGE(model::Model, emuc::Float64)
     # Apply BGE method (eq. 5 in Anthoff and Tol 2009 ERE)
     world_bge = (sum_world_disc_utility_counterfactual/sum_world_disc_utility)^(1/(1-emuc))-1 
     
-    #THIS IS PROBABLY CORRECT; BUT NEED TO FIGURE OUT HOW TO HAVE THE FUNCTION PRODUCE MORE THAN JUST ONE SCALAR. THAT SEEMS TO BE THE CURRENT PROBLEM
+    #THIS IS PROBABLY CORRECT; BUT NEED TO FIGURE OUT HOW TO HAVE THE FUNCTION PRODUCE MORE THAN JUST ONE SCALAR. THAT SEEMS TO BE THE CURRENT PROBLEM https://stackoverflow.com/questions/27095173/how-can-a-function-have-multiple-return-values-in-julia-vs-matlab
     #bge                                     = zeros(length(isos), 1)
     #for cc in 1:length(isos)
     #   bge[cc] = (sum_disc_utility_counterfactual[cc]/sum_disc_utility[cc])^(1/(1-emuc))-1
