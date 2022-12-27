@@ -47,7 +47,7 @@ calculate_bge(model, outpath="bges-CP-GMP-1.5.csv")
 results = DataFrame(country=String[], bge=Float64[], rcp=String[])
 
 for rcp in ["NP-Base", "CP-Base", "1.5-Base", "NP-GMP", "CP-GMP", "1.5-GMP", "NP-GMP-LowCH4", "CP-GMP-LowCH4", "1.5-GMP-LowCH4", "NP-GMP-HighCH4", "CP-GMP-HighCH4", "1.5-GMP-HighCH4"]
-    model = base_model(; rcp=rcp, tdamage="pointestimate", slrdamage="mode")
+    model = base_model(; rcp=rcp, tdamage="pointestimate", slrdamage="mode") #Needs standard config TPs plus phi=0.25
     run(model)
     subres = calculate_bge(model)
     subres[!, :rcp] .= rcp
