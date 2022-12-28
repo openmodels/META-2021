@@ -2,6 +2,7 @@ using Mimi
 using DataFrames, CSV
 
 include("../src/MimiMETA.jl")
+include("../src/lib/presets.jl")
 
 model = base_model(; rcp="CP-GMP", tdamage="pointestimate", slrdamage="mode")
 run(model)
@@ -42,17 +43,47 @@ function calculate_bge(model::Model, outpath::String="")
     results
 end
 
-calculate_bge(model, outpath="bges-CP-GMP-1.5.csv")
+#calculate_bge(model, "bges-CP-GMP-1.5.csv") # Not needed, but keeping this in case it was a placeholder for James for later
 
-results = DataFrame(country=String[], bge=Float64[], rcp=String[])
+global results = DataFrame(country=String[], bge=Float64[], rcp=String[])
 
-for rcp in ["NP-Base", "CP-Base", "1.5-Base", "NP-GMP", "CP-GMP", "1.5-GMP", "NP-GMP-LowCH4", "CP-GMP-LowCH4", "1.5-GMP-LowCH4", "NP-GMP-HighCH4", "CP-GMP-HighCH4", "1.5-GMP-HighCH4"]
-    model = base_model(; rcp=rcp, tdamage="pointestimate", slrdamage="mode") #Needs standard config TPs plus phi=0.25
-    run(model)
-    subres = calculate_bge(model)
-    subres[!, :rcp] .= rcp
+for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]#, ("1.5-", "SSP2")] # Loop over base scenarios and socioeconomics
+    for z in ("Base", "GMP", "GMP-LowCH4", "GMP-HighCH4") # Loop over CH4 variants
+        rcp=x*z # Concatenate correct scenario-variant name
+            
+        ##  Load model and select configuration
+        include("../src/MimiMETA.jl")
+        model = full_model(; 
+            rcp=rcp, 
+            ssp=y, 
+            co2="Expectation", 
+            ch4="default", 
+            warming="Best fit multi-model mean", 
+            tdamage="pointestimate", 
+            slrdamage="mode", 
+            saf="Distribution mean", 
+            interaction=true, 
+            pcf=false,#"Fit of Hope and Schaefer (2016)", 
+            omh=false,#"Whiteman et al. beta 20 years", 
+            amaz=false,#"Cai et al. central value", 
+            gis="Nordhaus central value", 
+            wais="Value", 
+            ism=false,#"Value", 
+            amoc=false,#"IPSL", 
+            nonmarketdamage=false) 
+        
+        # Set persistence parameter to 0.25
+        myupdate_param!(model, :Consumption, :damagepersist, 0.25)
 
-    results = [results; subres]
+        #Other robustness
+        #myupdate_param!(model, :BGE, :PRTP, 0.02) 
+        
+        run(model)
+        subres = calculate_bge(model)
+        subres[!, :rcp] .= rcp
+
+        global results = [results; subres]
+    end
 end
 
 CSV.write("bges.csv", results)

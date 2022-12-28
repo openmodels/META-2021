@@ -70,3 +70,6 @@ src/Results_single scenario.jl
 src/Results_loop_all TPs.jl
 src/Results.jl
 src/Results.jl
+src/Results_loop_temperature graph.jl
+src/SC-X_baseTPs.csv
+.gitignore
