@@ -67,7 +67,6 @@ src/LSE_1Dec2022_total_damages_NP-GMPSSP2.csv
 src/scch4_carbon pulse size tests.jl
 src/Results_loop.jl
 src/Results_single scenario.jl
-src/Results_loop_all TPs.jl
 src/Results.jl
 src/Results.jl
 src/Results_loop_temperature graph.jl
