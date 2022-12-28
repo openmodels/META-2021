@@ -85,7 +85,7 @@ function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     bge_comp[:pop] = utility[:pop];
     bge_comp[:utility] = utility[:utility];
     bge_comp[:baseline_consumption_percap_percountry] = cons[:baseline_consumption_percap_percountry];
-    
+
     model
 end
 
@@ -176,7 +176,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         connect_param!(model, :NonMarketDamages=>:conspc, :Consumption=>:conspc);
 
         connect_param!(model, :Utility=>:lossfactor, :NonMarketDamages=>:lossfactor);
-        connect_param!(model, :bge_comp=>:lossfactor, :NonMarketDamages=>:lossfactor);
+        connect_param!(model, :BGE=>:lossfactor, :NonMarketDamages=>:lossfactor);
     end
 
     if interaction != false
