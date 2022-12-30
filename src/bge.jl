@@ -4,8 +4,8 @@ using DataFrames, CSV
 include("../src/MimiMETA.jl")
 include("../src/lib/presets.jl")
 
-model = base_model(; rcp="CP-GMP", tdamage="pointestimate", slrdamage="mode")
-run(model)
+#model = base_model(; rcp="CP-GMP", tdamage="pointestimate", slrdamage="mode")
+#run(model)
 
 function calculate_bge(model::Model, outpath::String="")
     results = DataFrame(country=String[], bge=Float64[])
@@ -52,7 +52,7 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]#, ("1.5-", "SS
         rcp=x*z # Concatenate correct scenario-variant name
             
         ##  Load model and select configuration
-        include("../src/MimiMETA.jl")
+        #include("../src/MimiMETA.jl")
         model = full_model(; 
             rcp=rcp, 
             ssp=y, 
@@ -64,7 +64,7 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]#, ("1.5-", "SS
             saf="Distribution mean", 
             interaction=true, 
             pcf=false,#"Fit of Hope and Schaefer (2016)", 
-            omh=false,#"Whiteman et al. beta 20 years", 
+            omh="Whiteman et al. beta 20 years", 
             amaz=false,#"Cai et al. central value", 
             gis="Nordhaus central value", 
             wais="Value", 

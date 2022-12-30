@@ -40,7 +40,7 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]#, ("1.5-", "SS
         subres = []
         for yy in 2020:10:2100
             ## Post-model scripts for SC-X for pulses in 2020
-            append!(subres, calculate_scch4(model, yy, 0.001, 1.5))
+            append!(subres, calculate_scch4(model, yy, 0.36, 1.5))
             #sc_ch4_mc = calculate_scch4_mc(model, preset_fill, nrow(benchmark), 2020, 0.00001, 1.5) NEED TO ADD CODE TO INIT MC RUNS
 
             append!(subres, calculate_scc(model, yy, 10., 1.5))
