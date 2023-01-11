@@ -158,6 +158,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         if interaction != false
             ismmodel[:f_NINO] = interact[:f_NINO];
         end
+        connect_param!(model, :Consumption=>:extradamage, :ISMModel=>:extradamage);
     end
     if amoc != false
         amocmodel = addAMOC(model, amoc, after=:PatternScaling);

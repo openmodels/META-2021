@@ -6,16 +6,13 @@ include("../lib/saverate.jl")
     # Variables
     gdppc_region = Variable(index=[time, region], unit="2010 USD PPP")
     gdppc_ratio_region = Variable(index=[time, region])
-    gdppc_growth_region = Variable(index=[time, region])    
+    gdppc_growth_region = Variable(index=[time, region])
 
     gdppc_growth = Variable(index=[time, country])
     gdppc = Variable(index=[time, country], unit="2010 USD PPP")
     conspc_preadj = Variable(index=[time, country], unit="2010 USD PPP") # previous year's
     conspc = Variable(index=[time, country], unit="2010 USD PPP")
     baseline_consumption_percap_percountry = Variable(index = [time, country], unit = "2010 USD PPP") # Counterfactual consumption per cap per country from SSPs
-
-    test1 = Variable(index=[time, country])
-    test2 = Variable(index=[time, country])
 
     # Parameters
     ssp = Parameter{String}()
@@ -42,6 +39,7 @@ include("../lib/saverate.jl")
     # Damage configuration
     damagepersist = Parameter(default=0.5)
     min_conspc = Parameter(unit="2010 USD PPP", default=1)
+    extradamage = Parameter(index=[time, country])
 
     # Inputs from other components
     T_country = Parameter(index=[time, country], unit="degC")
@@ -118,13 +116,11 @@ include("../lib/saverate.jl")
         end
 
         for cc in dd.country
-            vv.test1[tt, cc] = (1+(vv.gdppc_growth[tt, cc]-pp.beta1[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])-pp.beta2[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])^2))
-            vv.test2[tt, cc] = (1-pp.SLR[tt]*pp.slrcoeff[cc])
-            vv.conspc[tt, cc] = vv.conspc_preadj[tt, cc]*(1+(vv.gdppc_growth[tt, cc]-pp.beta1[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])-pp.beta2[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])^2))*(1-pp.SLR[tt]*pp.slrcoeff[cc])
+            vv.conspc[tt, cc] = vv.conspc_preadj[tt, cc]*(1+(vv.gdppc_growth[tt, cc]-pp.beta1[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])-pp.beta2[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])^2))*(1-pp.SLR[tt]*pp.slrcoeff[cc])*(1 - pp.extradamage[tt, cc])
 
             # Compute baseline consumption per capita without damages
             vv.baseline_consumption_percap_percountry[tt,cc] = (1-pp.saverate[cc])*vv.gdppc[tt, cc]
-    
+
             if vv.conspc[tt, cc] <= pp.min_conspc && vv.conspc[TimestepIndex(1), cc] != 0
                 vv.conspc[tt, cc] = pp.min_conspc
             end
@@ -180,6 +176,7 @@ function addConsumption(model, tdamage, slrdamage, ssp)
     gdppc_2009[isos .== "DJI"] .= 2700
     cons[:gdppc_2009] = gdppc_2009
     cons[:T_country_1990] = [gettemp1990(iso) for iso in isos]
+    cons[:extradamage] = zeros(dim_count(model, :time), dim_count(model, :country))
 
     cons
 end

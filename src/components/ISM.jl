@@ -1,5 +1,6 @@
 @defcomp ISMModel begin
     monsoonsteps = Index()
+    country = Index()
 
     # Variables
 
@@ -14,6 +15,8 @@
     D_ISM = Variable(index=[time], unit="pctGDP") # damages as a function of whether the year is drought, flood or neither
 
     dailyrainfall = Variable(index=[time, monsoonsteps], unit="mm/day")
+
+    extradamage = Variable(index=[time, country])
 
     # Parameters
 
@@ -124,6 +127,8 @@
             vv.D_ISM[tt] = 0
         end
 
+        vv.extradamage[tt, :] .= 0
+        vv.extradamage[tt, convert(Vector{Bool}, dim_keys(model, :country) .== "IND")] .= vv.D_ISM[tt]
     end
 
 end
