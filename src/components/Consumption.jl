@@ -33,7 +33,8 @@ include("../lib/saverate.jl")
 
     T_country_1990 = Parameter(index=[country], unit="degC")
 
-    # slruniforms = Parameter(index=[country])
+    slrdamageconfig = Parameter{String}()
+    slruniforms = Parameter(index=[country]) # only used for MC mode
     slrcoeff = Parameter(index=[country], unit="1/m")
 
     # Damage configuration
@@ -46,12 +47,18 @@ include("../lib/saverate.jl")
     SLR = Parameter(index=[time], unit="m")
 
     function init(pp, vv, dd)
+        isos = dim_keys(model, :country)
+
         for cc in dd.country
             if pp.seeds[cc] != 0
-                betaboths = getbhmbetas(dim_keys(model, :country)[cc], "distribution", pp.seeds[cc])
+                betaboths = getbhmbetas(isos[cc], "distribution", pp.seeds[cc])
                 pp.beta1[cc] = betaboths[1]
                 pp.beta2[cc] = betaboths[2]
             end
+        end
+
+        if pp.slrdamageconfig == "distribution"
+            pp.slrcoeff = [getslrcoeff_distribution(isos[cc], slrdamage, pp.slruniforms[cc]) for cc in 1:length(isos)]
         end
     end
 
@@ -164,11 +171,16 @@ function addConsumption(model, tdamage, slrdamage, ssp)
 
     if slrdamage == "none"
         cons[:slrcoeff] = zeros(length(isos))
+        cons[:slruniforms] = zeros(length(isos))
     elseif slrdamage != "distribution"
         cons[:slrcoeff] = [getslrcoeff(iso, slrdamage) for iso in isos]
+        cons[:slruniforms] = zeros(length(isos))
     else
-        # cons[:slrcoeff] = [getslrcoeff_distribution(isos[cc], slrdamage, pp.slruniforms[cc]) for cc in 1:length(isos)]
+        cons[:slrcoeff] = zeros(length(isos))  # to be filled by init
+        cons[:slruniforms] = zeros(length(isos))  # to be filled by monte carlo
     end
+
+    cons[:slrdamageconfig] = slrdamage
 
     cons[:saverate] = [getsaverate(iso) for iso in isos]
     gdppc_2009 = [getgdppc(iso, 2009) for iso in isos]
