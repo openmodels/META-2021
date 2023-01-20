@@ -56,18 +56,24 @@ function prepare_montecarlo!(model::Model)
     connect_param!(model, :CO2Model, :rho3, :Shifter, :rho3)
 end
 
+function make_lognormal(riskmu, risksd)
+    mu = log(riskmu^2 / sqrt(risksd^2 + riskmu^2))
+    sd = sqrt(log(1 + (risksd /  riskmu)^2))
+    LogNormal(mu, sd)
+end
+
 function getsim(pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool)
     sim = @defsim begin
 
         # CO2Model
 
-        rv(a0_rv) = LogNormal(0.021089, 0.13636)
+        rv(a0_rv) = make_lognormal(0.021089, 0.13636)
         rv(a1) = Logistic(0.224, 0.0000339623)
         rv(a3) = Levy(0.276, 0.00000039629)
 
-        rv(rho1_rv) = LogNormal(0.0011748, 0.012058)
+        rv(rho1_rv) = make_lognormal(0.0011748, 0.012058)
         rv(rho2_rv) = Beta(1, 1.6911) # Translate to scaled Kumaraswamy in Shifter
-        rv(rho3_rv) = LogNormal(0.017462, 0.29837)
+        rv(rho3_rv) = make_lognormal(0.017462, 0.29837)
 
         Shifter.a0_rv = a0_rv
         Shifter.rho1_rv = rho1_rv
@@ -196,8 +202,8 @@ function getsim(pcf_calib::String, amazon_calib::String, gis_calib::String, wais
     # WAIS
 
     if wais_calib == "Distribution"
-        # WAISmodel.waisrate = LogNormal(3.3 / log(1000), 1.65 / log(1000))
-        add_RV!(sim, :waisrate, LogNormal(3.3 / log(1000), 1.65 / log(1000)))
+        # WAISmodel.waisrate = make_lognormal(3.3 / log(1000), 1.65 / log(1000))
+        add_RV!(sim, :waisrate, make_lognormal(3.3 / log(1000), 1.65 / log(1000)))
     end
 
     # SAF
