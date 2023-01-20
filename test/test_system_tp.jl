@@ -10,7 +10,6 @@ for rr in 1:nrow(benchmark)
     println(rr)
     global model = full_model(rcp="RCP4.5", ssp="SSP2") # XXX: Consumption currently refers to this...
     preset_fill_tp(model, benchmark, rr)
-    update_param!(model, :CH4Model, :decay_rate, 1 / 12.4)
 
     run(model)
 

@@ -5,7 +5,6 @@ include("../src/montecarlo.jl")
 include("../src/lib/presets.jl")
 
 model = full_model(rcp="RCP4.5", ssp="SSP2")
-update_param!(model, :CH4Model, :decay_rate, 1 / 12.4)
 prepare_montecarlo!(model)
 sim = getsim("Fit of Hope and Schaefer (2016)", "Cai et al. central value", "Nordhaus central value", "Distribution", "Distribution", false, false, false)
 
