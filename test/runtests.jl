@@ -20,4 +20,8 @@ using Test
     include("test_NonMarketDamages.jl")
     include("test_Utility.jl")
     include("test_system_notp.jl")
+    include("test_system_tp.jl")
+    include("test_system_PCFGISISMSAF.jl")
+    include("test_system_rcps.jl")
+    include("test_montecarlo_tp.jl")
 end
