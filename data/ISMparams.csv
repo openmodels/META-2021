@@ -1,0 +1,28 @@
+Parameter,Value
+D^{drought} (% of GDP),0.035
+D^{flood} (% of GDP),0.0084
+P^{dry} (mm/day),0
+P^{wet}_{0} (mm/day),9
+p^{init}_{0},0.75
+p_{m},0.82
+delta (days),16
+p'' (mm/day),0.42
+p_{0},0.2
+p',0.41
+m_{0} (mb),1008.649
+m',-0.29
+m^{NINO3.4}_{0} (mb),1009.983445
+O,1.5
+A_{s},0.16
+H^{SO2},0.65
+T_{pl},0.76
+Beta_{pl},0.29
+alpha^{pl}_{3} (m^2/g),8.5
+V,0.005479452
+Omega (m^2),4.20E+12
+alpha^{pl}_{1},0.02
+alpha^{pl}_{2},0.37
+SO2_{IND}/SO2_{ASIA},0.136570278
+P^{drought} (mm/day),2.8667
+P^{flood} (mm/day),7.6667
+T_AT_2010,0.854
