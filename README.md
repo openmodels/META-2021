@@ -124,7 +124,7 @@ The following directories are used for the Mimi model:
   - `co2`: CO2 model calibration; one of AR5-IR, AR5-PI, MESMO (lowest
     decay), ACC2 (highest decay),Expectation (default), and
     Distribution.
-  - `ch4`: CH4 model calibration; pne of default (default), low, or
+  - `ch4`: CH4 model calibration; one of default (default), low, or
     high.
   - `warming`: Forcing model calibration: one of Best fit multi-model
     mean (default), HadGEM2-ES (hottest model), or GISS-E2-R (coldest
