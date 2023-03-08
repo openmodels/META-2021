@@ -1,9 +1,9 @@
 # META 2021
 The Model for Economic Tipping point Analysis
 
-META 2021 is an advanced integrated assessment model (SC-IAM), designed as a model-based meta-analysis of the effects of tipping points on the social cost of carbon (SCC). The model simulates greenhouse gas emissions, temperature and sea-level rise, and market and non-market damages at the country-level, and the effects of eight climate tipping points that have been studied in the climate economics literature.
+META 2021 is an advanced integrated assessment model (SC-IAM), designed as a model-based meta-analysis of the effects of tipping points on the social cost of carbon (SCC). The model simulates greenhouse gas emissions, temperature and sea-level rise, and market and non-market damages at the country level, and the effects of eight climate tipping points that have been studied in the climate economics literature.
 
-META 2021 is introduced in; **Dietz, Rising, Stoerk, and Wagner (2021): "Economic impacts of tipping points in the climate system", PNAS.** [https://doi.org/10.1073/pnas.2103081118]
+META 2021 is introduced in; **Dietz, Rising, Stoerk, and Wagner (2021): "Economic impacts of tipping points in the climate system", PNAS, 118(34), e2103081118.** [https://doi.org/10.1073/pnas.2103081118]
 
 See that paper and its supplementary information for further
 details. Please cite the paper when using META in your research.
@@ -34,8 +34,8 @@ To open the model, first load @RISK, and within @RISK load `excel/META model Jul
 The model links to a number of supporting files. You should therefore also open the following files:
 
  - `BHM betas v3pd.xlsx`: Country-level damage function coefficients, derived from [Burke et al. (2015)](https://www.nature.com/articles/nature15725).
- - `National gdp per capita ppp.xlsx`: Projected GDP per capita from the Shared Socioeconomic Pathways (SSP).
- - `National population.xlsx`: Projected population totals from the Shared Socioeconomic Pathways (SSP).
+ - `National gdp per capita ppp.xlsx`: Projected GDP per capita from the Shared Socioeconomic Pathways (SSPs).
+ - `National population.xlsx`: Projected population totals from the Shared Socioeconomic Pathways (SSPs).
 
 The first tab, `Settings`, allows you to activate tipping points, choose emissions and socioeconomic scenarios, and choose other settings. It also contains a dashboard, which provides an overview of your settings, including key parameters and sets of parameters (see below).
 
@@ -52,8 +52,8 @@ All model files are in the `excel` folder, and consist of:
  - `API_NY.GNS.ICTR.ZS_DS2_en_excel_v2_41442.xls`: World Bank historical savings rates.
  - `API_SP.POP.TOTL_DS2_en_excel_v2_126122.xls`: World Bank historical population totals.
  - `BHM betas v3pd.xlsx`: Country-level damage function coefficients, derived from [Burke et al. (2015)](https://www.nature.com/articles/nature15725).
- - `National gdp per capita ppp.xlsx`: Projected GDP per capita from the Shared Socioeconomic Pathways (SSP).
- - `National population.xlsx`: Projected population totals from the Shared Socioeconomic Pathways (SSP).
+ - `National gdp per capita ppp.xlsx`: Projected GDP per capita from the Shared Socioeconomic Pathways (SSPs).
+ - `National population.xlsx`: Projected population totals from the Shared Socioeconomic Pathways (SSPs).
 
 The main model includes links to the other files in the `excel` folder.
 
@@ -99,7 +99,7 @@ in the Mimi model.
 The following directories are used for the Mimi model:
  - `data`: Input parameters and validation outputs (under
    `data/benchmark`).
- - `src`: The model code. The scripts directly in this directory
+ - `src`: The model code. The scripts directly contained in this directory
    support various types of analyses, with internal model code in
    subdirectories. Specifically, the model components are under
    `src/components` and additional functions are in `src/lib`.
@@ -120,9 +120,9 @@ The following directories are used for the Mimi model:
  with the following arguments:
  
   - `rcp`: Emissions scenario; one of RCP3-PD/2.6, RCP4.5 (default), RCP6, or RCP8.5.
-  - `ssp`: Socioeconomic scenario: one of SSP1, SSP2 (default), SSP3, SSP4, SSP5.
+  - `ssp`: Socioeconomic scenario; one of SSP1, SSP2 (default), SSP3, SSP4, SSP5.
   - `co2`: CO2 model calibration; one of AR5-IR, AR5-PI, MESMO (lowest
-    decay), ACC2 (highest decay),Expectation (default), and
+    decay), ACC2 (highest decay), Expectation (default), or
     Distribution.
   - `ch4`: CH4 model calibration; one of default (default), low, or
     high.
@@ -137,10 +137,10 @@ The following directories are used for the Mimi model:
     default) or true.
   - `saf`: Surface albedo feedback calibration; May be false (to not
     use) or Distribution mean (default)
-  - `pcf`: Permafrost carbon feedback calibratio; May be false (to not
+  - `pcf`: Permafrost carbon feedback calibration; May be false (to not
     use) or one of Fit of Hope and Schaefer (2016), Kessler central
-    value,Kessler 2.5%, Kessler 97.5%, Fit of Hope and Schaefer (2016)
-    (default), Fit of Yumashev et al. (2019).
+    value, Kessler 2.5%, Kessler 97.5%, Fit of Hope and Schaefer (2016)
+    (default), or Fit of Yumashev et al. (2019).
   - `omh`: Ocean methane hydrates calibration; May be false (to not
     use) or one of Whiteman et al. beta 20 years (default), Whiteman
     et al. uniform 10 years, "Whiteman et al. triangular, mode 10%, 10
@@ -149,7 +149,7 @@ The following directories are used for the Mimi model:
     year, beta", "Ceronsky et al. (2011), 0.2GtCH4 per year, beta",
     Whiteman et al. beta 20 years, Whiteman et al. beta 30 years,
     Whiteman et al. uniform 20 years, or "Whiteman et al. triangular,
-    mode 10%, 20 years"
+    mode 10%, 20 years".
   - `amaz`: Amazon dieback calibration; May be false (to not use) or
     one of Cai et al. central value (default), Cai et al. long, or Cai
     et al. short.
@@ -190,7 +190,7 @@ which are defined in `src/montecarlo.jl`.
 
 `getsim` takes the following arguments (all are required, and given in
 order):
- - `trials`: The number of Monte Carlo simulations
+ - `trials`: The number of Monte Carlo simulations.
  - `pcf_calib`: May be "Kessler probabilistic" to draw stochastic
    parameters for the PCF model, or one of the options described in
    the deterministic use case.
@@ -215,7 +215,7 @@ order):
    
  The `runsim` function takes the following parameters, all of which
  must be provided:
-  - `model`: A full Mimi model
+  - `model`: A full Mimi model.
   - `draws`: The result of the `getsim` function.
   - `ism_used`: Set to true if the ISM component is included;
     otherwise false.
@@ -278,6 +278,7 @@ A basic usage is:
 ```
 include("../src/MimiMETA.jl")
 include("../src/lib/presets.jl")
+include("../src/scc.jl")
 benchmark = CSV.read("../data/benchmark/ExcelMETA-alltp.csv", DataFrame)
 model = full_model()
 preset_fill(rr) = preset_fill_tp(model, benchmark, rr)
