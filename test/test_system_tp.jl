@@ -10,13 +10,12 @@ for rr in 1:nrow(benchmark)
     println(rr)
     global model = full_model(rcp="RCP4.5", ssp="SSP2") # XXX: Consumption currently refers to this...
     preset_fill_tp(model, benchmark, rr)
-    update_param!(model, :CH4Model, :decay_rate, 1 / 12.4)
 
     run(model)
 
     ## Test the model
 
-    T_AT = model[:TemperatureModel, :T_AT][11:10:191]
+    T_AT = model[:temperature, :T][(2020-1750+1):10:(2200-1750+1)]
     T_AT_compare = collect(benchmark[rr, 2:20])
 
     @test T_AT ≈ T_AT_compare atol=1e-4

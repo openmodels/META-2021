@@ -1,13 +1,11 @@
-using Distributions
+using Distributions, CSVFiles
+using MimiFAIRv2
 
 include("../src/basemodel.jl")
 include("../src/components/RCP.jl")
-include("../src/components/CO2Model.jl")
-include("../src/components/CH4Model.jl")
-include("../src/components/Forcing.jl")
+include("../src/components/CO2Converter.jl")
+include("../src/components/CH4Converter.jl")
 include("../src/components/SAF.jl")
-include("../src/components/TemperatureModel.jl")
-include("../src/components/PostTemperature.jl")
 include("../src/components/PCF.jl")
 include("../src/components/OMH.jl")
 include("../src/components/AmazonDieback.jl")
@@ -25,17 +23,17 @@ include("../src/components/TotalDamages.jl")
 include("../src/components/BGE.jl")
 #include("../src/components/DEBUG.jl")
 
-do_May2022 = false
+function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none")
+    model = MimiFAIRv2.get_model(end_year=2200)
 
-function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="none", slrdamage="none")
-    model = test_model();
+    # Get backup data
+    emissions_data = DataFrame(load(joinpath(dirname(pathof(MimiFAIRv2)), "..", "data", "rcmip_ssp245_emissions_1750_to_2500.csv"), skiplines_begin=6))
 
-    rcpmodel = addRCP(model, rcp);
-    co2model = addCO2Model(model, co2);
-    ch4model = addCH4Model(model, ch4);
-    forcing = addForcing(model, warming);
-    temperaturemodel = addTemperatureModel(model, warming);
-    posttemp = addPostTemperature(model, co2);
+    set_special_model_dimensions!(model)
+
+    rcpmodel = addRCP(model, rcp, before=:co2_cycle);
+    co2converter = addCO2Converter(model, after=:RCP);
+    ch4converter = addCH4Converter(model, after=:RCP);
     slr = addSLR(model);
     pattscale = addPatternScaling(model);
     cons = addConsumption(model, tdamage, slrdamage, ssp);
@@ -44,30 +42,21 @@ function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     bge_comp = addBGE(model)
     #debug = addDEBUG(model)
 
-    # Setup CO2 model
-    co2model[:co2_rcp] = rcpmodel[:co2_rcp];
-    co2model[:co2_alpha] = posttemp[:alpha];
+    # Setup CO2 converter
+    co2converter[:co2_rcp] = rcpmodel[:co2_rcp];
 
-    # Setup CH4 model
-    ch4model[:ch4_rcp] = rcpmodel[:ch4_rcp];
-    ch4model[:ch4_conc_rcp] = rcpmodel[:ch4_conc_rcp];
-    ch4model[:n2o_conc_rcp] = rcpmodel[:n2o_conc_rcp];
+    # Setup CH4 converter
+    ch4converter[:ch4_rcp] = rcpmodel[:ch4_rcp];
 
-    # Setup forcing
-    forcing[:st_ppm] = co2model[:st_ppm];
-    forcing[:F_CH4] = ch4model[:F_CH4];
-    forcing[:F_EX] = rcpmodel[:F_EX];
-
-    # Setup temperature model
-    temperaturemodel[:F] = forcing[:F];
-    posttemp[:T_AT] = temperaturemodel[:T_AT];
-    posttemp[:co2_cum] = co2model[:co2_cum];
+    # Feed converters into FAIR
+    connect_param!(model, :co2_cycle => :E_co2, :CO2Converter => :E_co2, emissions_data.carbon_dioxide[emissions_data[!, 1] .<= 2200])
+    connect_param!(model, :ch4_cycle => :E_ch4, :CH4Converter => :E_ch4, emissions_data.methane[emissions_data[!, 1] .<= 2200])
 
     # Setup SLR model
-    slr[:T_AT] = temperaturemodel[:T_AT];
+    connect_param!(model, :SLRModel => :T_AT, :temperature => :T)
 
     # Setup pattern scaling
-    pattscale[:T_AT] = temperaturemodel[:T_AT];
+    connect_param!(model, :PatternScaling => :T_AT, :temperature => :T)
 
     # Setup Consumption
     cons[:T_country] = pattscale[:T_country];
@@ -90,68 +79,68 @@ function base_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
 end
 
 function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
-    model = base_model(rcp=rcp, ssp=ssp, co2=co2, ch4=ch4, warming=warming, tdamage=tdamage, slrdamage=slrdamage);
+    model = base_model(rcp=rcp, ssp=ssp, tdamage=tdamage, slrdamage=slrdamage);
 
-    if saf != false
-        safmodel = addSAFModel(model, saf, before=:TemperatureModel);
+    # if saf != false
+    #     safmodel = addSAFModel(model, saf, before=:TemperatureModel);
 
-        connect_param!(model, :SAFModel=>:F, :Forcing=>:F);
-        connect_param!(model, :TemperatureModel=>:T_AT_adjustment, :SAFModel=>:T_AT_adjustment);
-    end
+    #     connect_param!(model, :SAFModel=>:F, :Forcing=>:F);
+    #     connect_param!(model, :TemperatureModel=>:T_AT_adjustment, :SAFModel=>:T_AT_adjustment);
+    # end
     if interaction != false
-        interact = addInteractions(model, after=:PostTemperature);
+        interact = addInteractions(model, after=:temperature);
     end
     if pcf != false
-        pcfmodel = addPCFModel(model, pcf, after=:TemperatureModel);
+        pcfmodel = addPCFModel(model, pcf, after=:temperature);
 
-        connect_param!(model, :CO2Model=>:co2_pcf, :PCFModel=>:CO2_PF);
-        connect_param!(model, :CH4Model=>:ch4_pcf, :PCFModel=>:CH4_PF);
+        connect_param!(model, :CO2Converter=>:co2_pcf, :PCFModel=>:CO2_PF);
+        connect_param!(model, :CH4Converter=>:ch4_pcf, :PCFModel=>:CH4_PF);
 
-        connect_param!(model, :PCFModel=>:T_AT, :TemperatureModel=>:T_AT);
+        connect_param!(model, :PCFModel=>:T_AT, :temperature => :T);
     end
     if omh != false
-        omhmodel = addOMH(model, omh, after=:TemperatureModel);
+        omhmodel = addOMH(model, omh, after=:temperature);
 
-        connect_param!(model, :CH4Model=>:ch4_omh, :OMH=>:CH4_OMH);
+        connect_param!(model, :CH4Converter=>:ch4_omh, :OMH=>:CH4_OMH);
 
         omhmodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
-        connect_param!(model, :OMH=>:T_AT, :TemperatureModel=>:T_AT);
+        connect_param!(model, :OMH=>:T_AT, :temperature => :T);
     end
     if amaz != false
-        amazmodel = addAmazonDieback(model, amaz, after=ifelse(interaction, :Interactions, :TemperatureModel));
+        amazmodel = addAmazonDieback(model, amaz, after=ifelse(interaction, :Interactions, :temperature));
 
-        connect_param!(model, :CO2Model=>:co2_amazon, :AmazonDieback=>:CO2_AMAZ);
+        connect_param!(model, :CO2Converter=>:co2_amazon, :AmazonDieback=>:CO2_AMAZ);
 
-        connect_param!(model, :AmazonDieback=>:T_AT, :TemperatureModel=>:T_AT);
+        connect_param!(model, :AmazonDieback=>:T_AT, :temperature => :T);
         amazmodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
         if interaction != false
             amazmodel[:probmult] = interact[:f_AMAZ];
         end
     end
     if gis != false
-        gismodel = addGISModel(model, gis, after=ifelse(interaction, :Interactions, :TemperatureModel));
+        gismodel = addGISModel(model, gis, after=ifelse(interaction, :Interactions, :temperature));
 
-        connect_param!(model, :GISModel=>:T_AT, :TemperatureModel=>:T_AT);
+        connect_param!(model, :GISModel=>:T_AT, :temperature => :T);
         if interaction != false
             gismodel[:f_GIS] = interact[:f_GIS];
         end
         connect_param!(model, :SLRModel=>:SLR_GIS, :GISModel=>:SLR_GIS);
     end
     if wais != false
-        waismodel = addWAISmodel(model, wais, after=ifelse(interaction, :Interactions, :TemperatureModel));
+        waismodel = addWAISmodel(model, wais, after=ifelse(interaction, :Interactions, :temperature));
 
         waismodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
-        connect_param!(model, :WAISmodel=>:T_AT, :TemperatureModel=>:T_AT);
+        connect_param!(model, :WAISmodel=>:T_AT, :temperature => :T);
         if interaction != false
             waismodel[:f_WAIS] = interact[:f_WAIS];
         end
         connect_param!(model, :SLRModel=>:SLR_WAIS, :WAISmodel=>:SLR_WAIS);
     end
     if ism != false
-        ismmodel = addISMModel(model, ism, after=ifelse(interaction, :Interactions, :TemperatureModel));
+        ismmodel = addISMModel(model, ism, after=ifelse(interaction, :Interactions, :temperature));
 
-        connect_param!(model, :ISMModel=>:T_AT, :TemperatureModel=>:T_AT);
-        connect_param!(model, :ISMModel=>:st_ppm, :CO2Model=>:st_ppm);
+        connect_param!(model, :ISMModel=>:T_AT, :temperature => :T);
+        connect_param!(model, :ISMModel=>:st_ppm, :co2_cycle=>:co2);
         ismmodel[:uniforms] = reshape(rand(Uniform(0, 1), dim_count(model, :time) * dim_count(model, :monsoonsteps)),
                                       dim_count(model, :time), dim_count(model, :monsoonsteps));
         connect_param!(model, :ISMModel=>:SO_2, :RCP=>:SO_2);
@@ -163,7 +152,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     if amoc != false
         amocmodel = addAMOC(model, amoc, after=:PatternScaling);
 
-        connect_param!(model, :AMOC=>:T_AT, :TemperatureModel=>:T_AT);
+        connect_param!(model, :AMOC=>:T_AT, :temperature => :T);
         connect_param!(model, :AMOC=>:scale_country, :PatternScaling=>:T_country);
         amocmodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
         if interaction != false
@@ -173,7 +162,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     if nonmarketdamage != false
         nonmarket = addNonMarketDamages(model, after=:Consumption);
 
-        connect_param!(model, :NonMarketDamages=>:T_AT, :TemperatureModel=>:T_AT);
+        connect_param!(model, :NonMarketDamages=>:T_AT, :temperature => :T);
         connect_param!(model, :NonMarketDamages=>:conspc, :Consumption=>:conspc);
 
         connect_param!(model, :Utility=>:lossfactor, :NonMarketDamages=>:lossfactor);
@@ -189,11 +178,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
             interact[:VGIS] = gismodel[:VGIS];
         end
         if wais != false
-            if do_May2022
-                interact[:I_WAIS] = waismodel[:p_WAIS];
-            else
-                interact[:I_WAIS] = waismodel[:I_WAIS];
-            end
+            interact[:I_WAIS] = waismodel[:I_WAIS];
         end
         if amaz != false
             interact[:I_AMAZ] = amazmodel[:I_AMAZ];

@@ -41,7 +41,7 @@ function addOMH(model, calibration; before=nothing, after=nothing)
         throw(ArgumentError("Unknown OMH calibration"))
     end
 
-    omh = add_comp!(model, OMH, before=before, after=after)
+    omh = add_comp!(model, OMH, first=2010, before=before, after=after)
     omh[:b_OMH] = params[params.Calibration .== calibration, "b_OMH"][1]
     omh[:max_CH4_OMH] = params[params.Calibration .== calibration, "CH4_OMH max (MtCH4)"][1]
     omh[:Delta_OMH] = params[params.Calibration .== calibration, "Delta_OMH"][1]

@@ -60,7 +60,7 @@ function addAMOC(model, calibration; before=nothing, after=nothing)
 
     params = CSV.read("../data/AMOCparams.csv", DataFrame)
 
-    amoc = add_comp!(model, AMOC, before=before, after=after)
+    amoc = add_comp!(model, AMOC, first=2010, before=before, after=after)
     amoc[:b_AMOC] = b_AMOC_calibs[calibration]
     amoc[:max_deltaT_country_AMOC] = params[!, calibration]
 

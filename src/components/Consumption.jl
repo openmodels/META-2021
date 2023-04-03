@@ -143,7 +143,7 @@ function addConsumption(model, tdamage, slrdamage, ssp)
         throw(ArgumentError("Unknown Consumption slrdamage"))
     end
 
-    cons = add_comp!(model, Consumption)
+    cons = add_comp!(model, Consumption, first=2010)
 
     cons[:ssp] = ssp
 

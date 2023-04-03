@@ -43,7 +43,7 @@ function addAmazonDieback(model, calibration; before=nothing, after=nothing)
         throw(ArgumentError("Unknown AMAZ calibration"))
     end
 
-    amazon = add_comp!(model, AmazonDieback, before=before, after=after)
+    amazon = add_comp!(model, AmazonDieback, first=2010, before=before, after=after)
     amazon[:b_AMAZ] = params[params.Calibration .== calibration, "b_AMAZ"][1]
     amazon[:max_CO2_AMAZ] = params[params.Calibration .== calibration, "CO2_AMAZ max (GtCO2)"][1]
     amazon[:Delta_AMAZ] = params[params.Calibration .== calibration, "Delta_AMAZ"][1]

@@ -59,7 +59,7 @@ function addGISModel(model, giscalib; before=nothing, after=nothing)
         throw(ArgumentError("Unknown GIS model calibration"))
     end
 
-    gismodel = add_comp!(model, GISModel, before=before, after=after)
+    gismodel = add_comp!(model, GISModel, first=2010, before=before, after=after)
 
     #gismodel[:meltmult] = params[params.Parameter .== "meltmult", giscalib][1]
     #gismodel[:volzero] = params[params.Parameter .== "volzero", giscalib][1]

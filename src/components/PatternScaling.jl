@@ -31,7 +31,7 @@ end
 function addPatternScaling(model)
     params = CSV.read("../data/pattern-scaling.csv", DataFrame)
 
-    pattscale = add_comp!(model, PatternScaling)
+    pattscale = add_comp!(model, PatternScaling, first=2010)
 
     pattscale[:ps_alpha] = params.alpha
     pattscale[:ps_beta] = params.beta

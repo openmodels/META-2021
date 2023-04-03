@@ -28,7 +28,7 @@
 end
 
 function addSLR(model)
-    slr = add_comp!(model, SLRModel)
+    slr = add_comp!(model, SLRModel, first=2010)
 
     slr[:SLR_GIS] = zeros(dim_count(model, :time))
     slr[:SLR_WAIS] = zeros(dim_count(model, :time))

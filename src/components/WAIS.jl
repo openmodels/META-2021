@@ -55,7 +55,7 @@ function addWAISmodel(model, default; before=nothing, after=nothing)
     #    error("Distribution WAIS model not implemented")
     #end
 
-    waismodel = add_comp!(model, WAISmodel, before=before, after=after)
+    waismodel = add_comp!(model, WAISmodel, first=2010, before=before, after=after)
     waismodel[:f_WAIS] = ones(dim_count(model, :time))
     waismodel
 end
