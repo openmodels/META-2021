@@ -3,7 +3,7 @@
     E_ch4 = Variable(index=[time])   # Annual methane emissions (TgCH₄ yr⁻¹)
 
     # Parameters #ALL READ IN FROM RCP SCENARIOS AND OTHER TP MODULES
-    ch4_2009 = Parameter(unit="MtCH4", default=(310.1868098 + 334.21168)/2)
+    ch4_2009 = Parameter(unit="MtCH4", default=364.2003634)
     ch4_rcp = Parameter(index=[time], unit="MtCH4") # Named based on James's variable from RCP.jl
     ch4_pcf = Parameter(index=[time], unit="MtCH4")
     ch4_omh = Parameter(index=[time], unit="MtCH4")

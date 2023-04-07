@@ -6,6 +6,7 @@ include("../src/components/RCP.jl")
 include("../src/components/CO2Converter.jl")
 include("../src/components/CH4Converter.jl")
 include("../src/components/SAF.jl")
+include("../src/components/temperature_withadj.jl")
 include("../src/components/PCF.jl")
 include("../src/components/OMH.jl")
 include("../src/components/AmazonDieback.jl")
@@ -47,6 +48,7 @@ function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none
 
     # Setup CH4 converter
     ch4converter[:ch4_rcp] = rcpmodel[:ch4_rcp];
+    ch4converter[:ch4_2009] = emissions_data.methane[emissions_data[!, 1] .== 2009][1]
 
     # Feed converters into FAIR
     connect_param!(model, :co2_cycle => :E_co2, :CO2Converter => :E_co2, emissions_data.carbon_dioxide[emissions_data[!, 1] .<= 2200])
@@ -81,12 +83,14 @@ end
 function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
     model = base_model(rcp=rcp, ssp=ssp, tdamage=tdamage, slrdamage=slrdamage);
 
-    # if saf != false
-    #     safmodel = addSAFModel(model, saf, before=:TemperatureModel);
+    if saf != false
+        safmodel = addSAFModel(model, saf, before=:temperature);
 
-    #     connect_param!(model, :SAFModel=>:F, :Forcing=>:F);
-    #     connect_param!(model, :TemperatureModel=>:T_AT_adjustment, :SAFModel=>:T_AT_adjustment);
-    # end
+        replace!(model, :temperature => temperature_withadj)
+
+        connect_param!(model, :SAFModel=>:F, :radiative_forcing => :total_RF);
+        connect_param!(model, :temperature=>:T1_adjustment, :SAFModel=>:T_AT_adjustment, zeros(2200 - 1750 + 1), ignoreunits=true);
+    end
     if interaction != false
         interact = addInteractions(model, after=:temperature);
     end
