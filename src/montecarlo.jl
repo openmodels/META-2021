@@ -25,7 +25,7 @@ function sim_base(model::Model, trials::Int64, persist_dist::Bool, emuc_dist::Bo
                                                     "large_constrained_parameter_files"),
                                   delete_downloaded_data=false,
                                   other_mc_set=(inst, ii) -> setsim_base(inst, draws, ii),
-                                  other_mc_get=(inst) -> getsim_base(inst, save_rvs=save_rvs))
+                                  other_mc_get=(inst) -> getsim_base(inst, draws, save_rvs=save_rvs))
     sim()
 end
 
@@ -55,15 +55,13 @@ function setsim_base(inst::ModelInstance, draws::DataFrame, ii::Int64)
 
     # Damages
 
-    println(keys(inst.md.model_params))
-
     update_param!(inst, :Consumption_seeds, rand(DiscreteUniform(1, typemax(Int64)), dim_count(model, :country)))
     update_param!(inst, :Consumption_slruniforms, rand(Uniform(0, 1), dim_count(model, :country)))
 end
 
-function getsim_base(inst::ModelInstance, save_rvs::Bool=true)
+function getsim_base(inst::ModelInstance, draws::DataFrame; save_rvs::Bool=true)
     mcres = Dict{Symbol, Any}()
-    mcres[:TemperatureModel_T_AT] = copy(inst[:TemperatureModel, :T_AT])
+    mcres[:temperature_T] = copy(inst[:temperature, :T])
     mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
     mcres[:Utility_world_disc_utility] = inst[:Utility, :world_disc_utility]
 

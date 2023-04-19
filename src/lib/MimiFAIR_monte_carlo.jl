@@ -31,7 +31,7 @@
 #----------------------------------------------------------------------------------------------------------------------
 
 # Load packages.
-using CSVFiles, DataFrames, Mimi, MimiFAIRv2, StatsBase, Downloads
+using CSVFiles, DataFrames, Mimi, MimiFAIRv2, StatsBase, Downloads, ProgressMeter
 
 function create_fair_monte_carlo(fair_model::Model, n_samples::Int;
                                  start_year::Int=1750,
@@ -274,6 +274,8 @@ function create_fair_monte_carlo(fair_model::Model, n_samples::Int;
         # Create a model instance to speed things up.
         fair_instance = Mimi.build(fair_model)
 
+        progress = Progress(n_samples, 1)
+
         otherresults = []
         for i = 1:n_samples
 
@@ -427,6 +429,7 @@ function create_fair_monte_carlo(fair_model::Model, n_samples::Int;
 
             othermc = other_mc_get(fair_instance)
             push!(otherresults, othermc)
+            next!(progress)
         end
 
         # Return temperature and radiative forcing
