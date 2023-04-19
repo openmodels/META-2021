@@ -33,12 +33,9 @@
                 v.Tj[t,j] = v.Tj[t-1,j] * p.decay_factor[j] + p.F[t] * p.q[j] * (1.0 - p.decay_factor[j])
             end
 
-            # Add adjustment to fastest box
-            v.Tj[t,1] = v.Tj[t,1] + p.T1_adjustment[t]
-            # Don't need to recalculate, since no interaction between boxes
-
             #Calculate global mean surface temperature anomaly.
-            v.T[t] = sum([v.Tj[t-1,:] v.Tj[t,:]]) / 2
+            # Add adjustment at end; don't need to include in boxes since no interactions
+            v.T[t] = sum([v.Tj[t-1,:] v.Tj[t,:]]) / 2 + p.T1_adjustment[t]
         end
     end
 end

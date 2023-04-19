@@ -49,8 +49,7 @@ for do_test in ["notp", "full", "some"]
     elseif do_test == "notp"
         ## Run a test with no TPs
         global model = base_model(rcp="RCP4.5")
-        draws = getsim_base(500, false, false, false)
-        results = runsim_base(model, draws)
+        results = sim_base(model, 500, false, false, false)
     end
 
     run(model) # run once for simdataframe

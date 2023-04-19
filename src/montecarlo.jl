@@ -4,40 +4,11 @@ using CSV
 using DataFrames
 using LinearAlgebra
 using ProgressMeter
+using MimiFAIRv2
 include("../src/lib/presets.jl")
+include("../src/lib/MimiFAIR_monte_carlo.jl")
 
-import Mimi.add_RV!, Mimi.add_save!, Mimi.ReshapedDistribution, Mimi.lhs, Mimi.RandomVariable
-
-# Prepare correlations for CO2 model
-## Note: Correlations with rho2 are applied to Beta, not Kumaraswamy
-function load_corrmat(filepath::String, skips::Vector{String}=String[])
-    corrs = CSV.read(filepath, DataFrame)
-    corrmatrix = Matrix(1.0I, nrow(corrs), nrow(corrs))
-
-    for ii in 2:nrow(corrs)
-        if corrs[ii, 1] in skips
-            continue
-        end
-        for jj in 2:ii
-            if names(corrs)[jj] in skips
-                continue
-            end
-            corrmatrix[ii, jj-1] = corrmatrix[jj-1, ii] = corrs[ii, jj]
-        end
-    end
-
-    if skips != []
-        iis = []
-        for ii in 1:nrow(corrs)
-            if corrs[ii, 1] ∉ skips
-                push!(iis, ii)
-            end
-        end
-        corrmatrix = corrmatrix[iis, iis]
-    end
-
-    corrmatrix
-end
+import Mimi.ModelInstance
 
 function make_lognormal(riskmu, risksd)
     mu = log(riskmu^2 / sqrt(risksd^2 + riskmu^2))
@@ -45,63 +16,22 @@ function make_lognormal(riskmu, risksd)
     LogNormal(mu, sd)
 end
 
-# abstract type SimulationDefAbstract end
+# Master function for base model (uses helpers below)
+function sim_base(model::Model, trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool; save_rvs::Bool=true)
+    draws = presim_base(trials, persist_dist, emuc_dist, prtp_dist)
 
-# mutable struct FunctionalSimulationDef <: SimulationDefAbstract
-#     mcupdate::Function
-# end
+    sim = create_fair_monte_carlo(model, trials; end_year=2200,
+                                  data_dir=joinpath(dirname(pathof(MimiFAIRv2)), "..", "data",
+                                                    "large_constrained_parameter_files"),
+                                  delete_downloaded_data=false,
+                                  other_mc_set=(inst, ii) -> setsim_base(inst, draws, ii),
+                                  other_mc_get=(inst) -> getsim_base(inst, save_rvs=save_rvs))
+    sim()
+end
 
 
-function getsim_base(trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool)
+function presim_base(trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool)
     draws = DataFrame(mc=1:trials)
-    # CO2Model
-
-    corrmatrix = load_corrmat("../data/arhocorrs.csv", ["a2"])
-    rvlist = Vector{RandomVariable}([RandomVariable(:a0_rv, make_lognormal(0.021089, 0.13636)),
-                                     RandomVariable(:a1, Logistic(0.224, 0.0000339623)),
-                                     RandomVariable(:a3, Levy(0.276, 0.00000039629)),
-                                     RandomVariable(:rho1_rv, make_lognormal(0.0011748, 0.012058)),
-                                     RandomVariable(:rho2_rv, Beta(1, 1.6911)), # Translate to scaled Kumaraswamy
-                                     RandomVariable(:rho3_rv, make_lognormal(0.017462, 0.29837))])
-    df = lhs(rvlist, trials; corrmatrix=corrmatrix)
-
-    draws.CO2Model_a0 = df.a0_rv .+ 0.213777
-    draws.CO2Model_a1 = df.a1
-    draws.CO2Model_a3 = df.a3
-
-    draws.CO2Model_rho1 = df.rho1_rv .+ 0.0024261
-    draws.CO2Model_rho2 = (0.048002 - 0.01674) * df.rho2_rv.^(1 / 1.013) .+ 0.01674
-    draws.CO2Model_rho3 = df.rho3_rv .+ 0.231322
-
-    # PostTemperature
-
-    draws.PostTemperature_r_0 = rand(Normal(32.4, 0.13/1.65*32.4), trials) # PostTemperature.r_0
-    draws.PostTemperature_r_C = rand(Normal(0.019, 0.13/1.65*0.019), trials) # PostTemperature.r_C
-    draws.PostTemperature_r_T = rand(Normal(4.165, 0.13/1.65*4.165), trials) # PostTemperature.r_T
-
-    # Temperature
-
-    corrmatrix = load_corrmat("../data/tempcorrs.csv")
-    rvlist = Vector{RandomVariable}([RandomVariable(:xi_1, Pareto(5.907, 0.11628)),
-                                     RandomVariable(:F_2xCO2,  Normal(3.45938, 0.43674)),
-                                     RandomVariable(:fair_ECS,  Normal(3.25312, 0.80031)),
-                                     RandomVariable(:fair_gamma,  TriangularDist(0.5, 1.23723, 0.5)),
-                                     RandomVariable(:fair_C_0,  Pareto(1.7062, 53))])
-    df = lhs(rvlist, trials; corrmatrix=corrmatrix)
-
-    draws.TemperatureModel_xi_1 = df.xi_1 # TemperatureModel.xi_1
-    draws.TemperatureModel_F_2xCO2 = df.F_2xCO2 # TemperatureModel.F_2xCO2
-    draws.TemperatureModel_fair_ECS = df.fair_ECS # TemperatureModel.fair_ECS
-    draws.TemperatureModel_fair_gamma = df.fair_gamma # TemperatureModel.fair_gamma
-    draws.TemperatureModel_fair_C_0 = df.fair_C_0 # TemperatureModel.fair_C_0
-
-    # Forcing
-
-    draws.Forcing_F_2xCO2 = df.F_2xCO2 # Forcing.F_2xCO2
-
-    # CH4
-
-    draws.CH4Model_ch4_alpha = rand(TriangularDist(0.0319967, 0.0400033, 0.036), trials) # CH4Model.ch4_alpha
 
     # Utility
 
@@ -118,45 +48,36 @@ function getsim_base(trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_di
     draws
 end
 
-function runsim_base(model::Model, draws::DataFrame; save_rvs::Bool=true)
-    inst = Mimi.build(model)
-
-    progress = Progress(nrow(draws), 1)
-
-    results = Dict{Symbol, Any}[]
-    for ii in 1:nrow(draws)
-        for jj in 2:ncol(draws)
-            update_param!(inst, Symbol(names(draws)[jj]), draws[ii, jj])
-        end
-
-        # Damages
-
-        update_param!(inst, :Consumption_seeds, rand(DiscreteUniform(1, typemax(Int64)), dim_count(model, :country)))
-        update_param!(inst, :Consumption_slruniforms, rand(Uniform(0, 1), dim_count(model, :country)))
-
-        run(inst)
-
-        mcres = Dict{Symbol, Any}()
-        mcres[:TemperatureModel_T_AT] = copy(inst[:TemperatureModel, :T_AT])
-        mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
-        mcres[:Utility_world_disc_utility] = inst[:Utility, :world_disc_utility]
-
-        if save_rvs
-            for jj in 2:ncol(draws)
-                mcres[Symbol(names(draws)[jj])] = draws[ii, jj]
-            end
-        end
-
-        push!(results, mcres)
-
-        next!(progress)
+function setsim_base(inst::ModelInstance, draws::DataFrame, ii::Int64)
+    for jj in 2:ncol(draws)
+        update_param!(inst, Symbol(names(draws)[jj]), draws[ii, jj])
     end
 
-    results
+    # Damages
+
+    println(keys(inst.md.model_params))
+
+    update_param!(inst, :Consumption_seeds, rand(DiscreteUniform(1, typemax(Int64)), dim_count(model, :country)))
+    update_param!(inst, :Consumption_slruniforms, rand(Uniform(0, 1), dim_count(model, :country)))
 end
 
-function getsim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool)
-    draws = getsim_base(trials, persist_dist, emuc_dist, prtp_dist)
+function getsim_base(inst::ModelInstance, save_rvs::Bool=true)
+    mcres = Dict{Symbol, Any}()
+    mcres[:TemperatureModel_T_AT] = copy(inst[:TemperatureModel, :T_AT])
+    mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
+    mcres[:Utility_world_disc_utility] = inst[:Utility, :world_disc_utility]
+
+    if save_rvs
+        for jj in 2:ncol(draws)
+            mcres[Symbol(names(draws)[jj])] = draws[ii, jj]
+        end
+    end
+
+    mcres
+end
+
+function presim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool)
+    draws = presim_base(trials, persist_dist, emuc_dist, prtp_dist)
 
     # Interactions
 
@@ -182,6 +103,11 @@ function getsim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_cali
     draws.Interactions_gis2nino = rand(dists["gis"]["nino"], trials)
     draws.Interactions_wais2nino = rand(dists["wais"]["nino"], trials)
     draws.Interactions_amaz2nino = rand(dists["amaz"]["nino"], trials)
+
+    # AIS
+
+    draws.AIS_ω = rand(Normal(-0.05, 0.004), trials)
+    draws.AIS_λ = rand(Uniform(7, 16), trials)
 
     # Permafrost
 
@@ -226,6 +152,14 @@ function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, 
         set_param!(model, :WAISmodel, :waisrate, :WAISmodel_waisrate, 0.0033) # set up global connection
     end
 
+    # AIS
+    aisgcms = CSV.read("../data/Basal_melt_models.csv", DataFrame)
+    aisresponse_EAIS = CSV.read("../data/Response functions - EAIS.csv", DataFrame)
+    aisresponse_Ross = CSV.read("../data/Response functions - Ross.csv", DataFrame)
+    aisresponse_Amundsen = CSV.read("../data/Response functions - Amundsen.csv", DataFrame)
+    aisresponse_Weddell = CSV.read("../data/Response functions - Weddell.csv", DataFrame)
+    aisresponse_Peninsula = CSV.read("../data/Response functions - Peninsula.csv", DataFrame)
+
     inst = Mimi.build(model)
 
     progress = Progress(nrow(draws), 1)
@@ -237,6 +171,26 @@ function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, 
                 update_param!(inst, Symbol(names(draws)[jj]), draws[ii, jj])
             end
         end
+
+        # AIS
+
+        gcmchoice = rand(DiscreteUniform(1, 19), 1)
+        update_param!(inst, :AIS_β_EAIS, aisgcms.EAIS_beta[gcmchoice])
+        update_param!(inst, :AIS_δ_EAIS, aisgcms.EAIS_delta[gcmchoice])
+        update_param!(inst, :AIS_β_EAIS, aisgcms.Ross_beta[gcmchoice])
+        update_param!(inst, :AIS_δ_EAIS, aisgcms.Ross_delta[gcmchoice])
+        update_param!(inst, :AIS_β_EAIS, aisgcms.Amundsen_beta[gcmchoice])
+        update_param!(inst, :AIS_δ_EAIS, aisgcms.Amundsen_delta[gcmchoice])
+        update_param!(inst, :AIS_β_EAIS, aisgcms.Weddell_beta[gcmchoice])
+        update_param!(inst, :AIS_δ_EAIS, aisgcms.Weddell_delta[gcmchoice])
+        update_param!(inst, :AIS_β_EAIS, aisgcms.Peninsula_beta[gcmchoice])
+        update_param!(inst, :AIS_δ_EAIS, aisgcms.Peninsula_delta[gcmchoice])
+        icechoice = rand(DiscreteUniform(1, 17), 1)
+        update_param!(inst, :AIS_R_functions_EAIS, aisresponse_EAIS[!, icechoice])
+        update_param!(inst, :AIS_R_functions_Ross, aisresponse_Ross[!, icechoice])
+        update_param!(inst, :AIS_R_functions_Amundsen, aisresponse_Amundsen[!, icechoice])
+        update_param!(inst, :AIS_R_functions_Weddell, aisresponse_Weddell[!, icechoice])
+        update_param!(inst, :AIS_R_functions_Peninsula, aisresponse_Peninsula[!, icechoice])
 
         # SAF
 
