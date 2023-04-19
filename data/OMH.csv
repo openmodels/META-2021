@@ -1,12 +1,13 @@
 ﻿Calibration,b_OMH,CH4_OMH max (MtCH4),Delta_OMH
-Whiteman et al. beta 20 years,0.118,50000,20
-Whiteman et al. uniform 10 years,1.457060957,50000,10
-"Whiteman et al. triangular, mode 10%, 10 years",0.067950786,50000,10
-Whiteman et al. beta 10 years,0.093300732,50000,10
-"Ceronsky et al. (2011), 1.784GtCH4 per year, beta",0.244,267600,150
-"Ceronsky et al. (2011), 7.8GtCH4 per year, beta",0.163,1170000,150
-"Ceronsky et al. (2011), 0.2GtCH4 per year, beta",0.365,30000,150
-Whiteman et al. beta 20 years,0.118,50000,20
-Whiteman et al. beta 30 years,0.178,50000,30
-Whiteman et al. uniform 20 years,1.290094095,50000,20
-"Whiteman et al. triangular, mode 10%, 20 years",0.976783721,50000,20
+"Ceronsky et al. (2011), 1.784GtCH4 per year, beta",0.0125462691181624,267600,150
+"Ceronsky et al. (2011), 7.8GtCH4 per year, beta",0.00838158249383212,1170000,150
+"Ceronsky et al. (2011), 0.2GtCH4 per year, beta",0.018782355,30000,150
+Whiteman et al. uniform 10 years,0.421994427999864,50000,10
+"Whiteman et al. triangular, mode 10%, 10 years",0.0196799278864841,50000,10
+Whiteman et al. beta 10 years,0.0270217857621833,50000,10
+Whiteman et al. beta 20 years,0.0591519454213677,50000,20
+Whiteman et al. uniform 20 years,0.647990759103816,50000,20
+"Whiteman et al. triangular, mode 10%, 20 years",0.490620529463564,50000,20
+Whiteman et al. beta 30 years,0.084463717,50000,30
+Whiteman et al. uniform 30 years,0.800866349044608,50000,30
+"Whiteman et al. triangular, mode 10%, 30 years",0.810930066352735,50000,30
