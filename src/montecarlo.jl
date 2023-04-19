@@ -10,6 +10,13 @@ include("../src/lib/MimiFAIR_monte_carlo.jl")
 
 import Mimi.ModelInstance
 
+aisgcms = CSV.read("../data/Basal_melt_models.csv", DataFrame)
+aisresponse_EAIS = CSV.read("../data/Response functions - EAIS.csv", DataFrame)
+aisresponse_Ross = CSV.read("../data/Response functions - Ross.csv", DataFrame)
+aisresponse_Amundsen = CSV.read("../data/Response functions - Amundsen.csv", DataFrame)
+aisresponse_Weddell = CSV.read("../data/Response functions - Weddell.csv", DataFrame)
+aisresponse_Peninsula = CSV.read("../data/Response functions - Peninsula.csv", DataFrame)
+
 function make_lognormal(riskmu, risksd)
     mu = log(riskmu^2 / sqrt(risksd^2 + riskmu^2))
     sd = sqrt(log(1 + (risksd /  riskmu)^2))
@@ -50,7 +57,9 @@ end
 
 function setsim_base(inst::ModelInstance, draws::DataFrame, ii::Int64)
     for jj in 2:ncol(draws)
-        update_param!(inst, Symbol(names(draws)[jj]), draws[ii, jj])
+        if has_parameter(model.md, Symbol(names(draws)[jj]))
+            update_param!(inst, Symbol(names(draws)[jj]), draws[ii, jj])
+        end
     end
 
     # Damages
@@ -67,14 +76,33 @@ function getsim_base(inst::ModelInstance, draws::DataFrame; save_rvs::Bool=true)
 
     if save_rvs
         for jj in 2:ncol(draws)
-            mcres[Symbol(names(draws)[jj])] = draws[ii, jj]
+            mcres[Symbol(names(draws)[jj])] = draws[!, jj]
         end
     end
 
     mcres
 end
 
-function presim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool)
+function sim_full(model::Model, trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, ais_dist::Bool, ism_used::Bool, omh_used::Bool, amoc_used::Bool, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool; save_rvs::Bool=true)
+    if wais_calib == "Distribution"
+        try
+            set_param!(model, :WAISmodel, :waisrate, :WAISmodel_waisrate, 0.0033) # set up global connection
+        catch
+        end
+    end
+
+    draws = presim_full(trials, pcf_calib, amazon_calib, gis_calib, wais_calib, saf_calib, ais_dist, persist_dist, emuc_dist, prtp_dist)
+
+    sim = create_fair_monte_carlo(model, trials; end_year=2200,
+                                  data_dir=joinpath(dirname(pathof(MimiFAIRv2)), "..", "data",
+                                                    "large_constrained_parameter_files"),
+                                  delete_downloaded_data=false,
+                                  other_mc_set=(inst, ii) -> setsim_full(inst, draws, ii, ism_used, omh_used, amoc_used, amazon_calib, wais_calib, ais_dist),
+                                  other_mc_get=(inst) -> getsim_full(inst, draws, save_rvs=save_rvs))
+    sim()
+end
+
+function presim_full(trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, ais_dist::Bool, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool)
     draws = presim_base(trials, persist_dist, emuc_dist, prtp_dist)
 
     # Interactions
@@ -104,8 +132,10 @@ function presim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_cali
 
     # AIS
 
-    draws.AIS_ω = rand(Normal(-0.05, 0.004), trials)
-    draws.AIS_λ = rand(Uniform(7, 16), trials)
+    if ais_dist
+        draws.AIS_ω = rand(Normal(-0.05, 0.004), trials)
+        draws.AIS_λ = rand(Uniform(7, 16), trials)
+    end
 
     # Permafrost
 
@@ -145,33 +175,11 @@ function presim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_cali
     draws
 end
 
-function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, amoc_used::Bool, amazon_calib::String, wais_calib::String; save_rvs::Bool=true)
-    if wais_calib == "Distribution"
-        set_param!(model, :WAISmodel, :waisrate, :WAISmodel_waisrate, 0.0033) # set up global connection
-    end
+function setsim_full(inst::ModelInstance, draws::DataFrame, ii::Int64, ism_used::Bool, omh_used::Bool, amoc_used::Bool, amazon_calib::String, wais_calib::String, ais_dist::Bool)
+    setsim_base(inst, draws, ii)
 
     # AIS
-    aisgcms = CSV.read("../data/Basal_melt_models.csv", DataFrame)
-    aisresponse_EAIS = CSV.read("../data/Response functions - EAIS.csv", DataFrame)
-    aisresponse_Ross = CSV.read("../data/Response functions - Ross.csv", DataFrame)
-    aisresponse_Amundsen = CSV.read("../data/Response functions - Amundsen.csv", DataFrame)
-    aisresponse_Weddell = CSV.read("../data/Response functions - Weddell.csv", DataFrame)
-    aisresponse_Peninsula = CSV.read("../data/Response functions - Peninsula.csv", DataFrame)
-
-    inst = Mimi.build(model)
-
-    progress = Progress(nrow(draws), 1)
-
-    results = Dict{Symbol, Any}[]
-    for ii in 1:nrow(draws)
-        for jj in 2:ncol(draws)
-            if has_parameter(model.md, Symbol(names(draws)[jj]))
-                update_param!(inst, Symbol(names(draws)[jj]), draws[ii, jj])
-            end
-        end
-
-        # AIS
-
+    if ais_dist
         gcmchoice = rand(DiscreteUniform(1, 19), 1)
         update_param!(inst, :AIS_β_EAIS, aisgcms.EAIS_beta[gcmchoice])
         update_param!(inst, :AIS_δ_EAIS, aisgcms.EAIS_delta[gcmchoice])
@@ -189,65 +197,47 @@ function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, 
         update_param!(inst, :AIS_R_functions_Amundsen, aisresponse_Amundsen[!, icechoice])
         update_param!(inst, :AIS_R_functions_Weddell, aisresponse_Weddell[!, icechoice])
         update_param!(inst, :AIS_R_functions_Peninsula, aisresponse_Peninsula[!, icechoice])
-
-        # SAF
-
-        update_param!(inst, :SAFModel_ECS, draws.TemperatureModel_fair_ECS[ii]) # SAFModel.ECS
-
-        # Damages
-
-        update_param!(inst, :Consumption_seeds, rand(DiscreteUniform(1, typemax(Int64)), dim_count(model, :country)))
-        update_param!(inst, :Consumption_slruniforms, rand(Uniform(0, 1), dim_count(model, :country)))
-
-        # ISM
-
-        if ism_used
-            update_param!(inst, :ISMModel_uniforms, rand(Uniform(0, 1), (dim_count(model, :time), dim_count(model, :monsoonsteps))))
-        end
-
-        # OMH
-
-        if omh_used
-            update_param!(inst, :OMH_uniforms, rand(Uniform(0, 1), dim_count(model, :time)))
-        end
-
-        # AMOC
-
-        if amoc_used
-            update_param!(inst, :AMOC_uniforms, rand(Uniform(0, 1), dim_count(model, :time)))
-        end
-
-        # Amazon
-
-        if amazon_calib != "none"
-            update_param!(inst, :AmazonDieback_uniforms, rand(Uniform(0, 1), dim_count(model, :time)))
-        end
-
-        # WAIS
-
-        if wais_calib == "Distribution"
-            update_param!(inst, :WAISmodel_uniforms, rand(Uniform(0, 1), dim_count(model, :time)))
-        end
-
-        run(inst)
-
-        mcres = Dict{Symbol, Any}()
-        mcres[:TemperatureModel_T_AT] = copy(inst[:TemperatureModel, :T_AT])
-        mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
-        mcres[:Utility_world_disc_utility] = inst[:Utility, :world_disc_utility]
-
-        if save_rvs
-            for jj in 2:ncol(draws)
-                mcres[Symbol(names(draws)[jj])] = draws[ii, jj]
-            end
-        end
-
-        push!(results, mcres)
-
-        next!(progress)
     end
 
-    results
+    # SAF
+
+    # Assume default F2x to get ECS
+    FAIR_ECS = (sum(inst[:temperature, :q]))*3.759
+    update_param!(inst, :SAFModel_ECS, FAIR_ECS) # SAFModel.ECS
+
+    # ISM
+
+    if ism_used
+        update_param!(inst, :ISMModel_uniforms, rand(Uniform(0, 1), (dim_count(inst, :time), dim_count(inst, :monsoonsteps))))
+    end
+
+    # OMH
+
+    if omh_used
+        update_param!(inst, :OMH_uniforms, rand(Uniform(0, 1), dim_count(inst, :time)))
+    end
+
+    # AMOC
+
+    if amoc_used
+        update_param!(inst, :AMOC_uniforms, rand(Uniform(0, 1), dim_count(inst, :time)))
+    end
+
+    # Amazon
+
+    if amazon_calib != "none"
+        update_param!(inst, :AmazonDieback_uniforms, rand(Uniform(0, 1), dim_count(inst, :time)))
+    end
+
+    # WAIS
+
+    if wais_calib == "Distribution"
+        update_param!(inst, :WAISmodel_uniforms, rand(Uniform(0, 1), dim_count(inst, :time)))
+    end
+end
+
+function getsim_full(inst::ModelInstance, draws::DataFrame; save_rvs::Bool=true)
+    getsim_base(inst, draws, save_rvs=save_rvs)
 end
 
 function simdataframe(model::Model, results::Vector{Dict{Symbol, Any}}, comp::Symbol, name::Symbol)
