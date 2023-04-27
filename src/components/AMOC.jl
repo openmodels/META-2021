@@ -21,15 +21,15 @@
     scale_country = Parameter(index=[time, country], unit="degC")
 
     function run_timestep(pp, vv, dd, tt)
-        vv.p_AMOC[tt] = min((1-exp(-pp.b_AMOC*pp.T_AT[tt]))*pp.f_AMOC[tt], 1)
-
         if is_first(tt)
+            vv.p_AMOC[tt] = min((1-exp(-pp.b_AMOC*pp.T_AT[tt]))*pp.f_AMOC[tt], 1)
             vv.I_AMOC[tt] = pp.uniforms[tt] < vv.p_AMOC[tt]
 
             for cc in dd.country
                 vv.deltaT_country_AMOC[tt, cc] = vv.I_AMOC[tt] ? pp.max_deltaT_country_AMOC[cc] / pp.Delta_AMOC : 0
             end
         else
+            vv.p_AMOC[tt] = min(((1-exp(-pp.b_AMOC*pp.T_AT[tt]))-(1-exp(-pp.b_AMOC*pp.T_AT[tt-1])))*pp.f_AMOC[tt], 1)
             vv.I_AMOC[tt] = vv.I_AMOC[tt-1] || (pp.uniforms[tt] < vv.p_AMOC[tt])
 
             for cc in dd.country
