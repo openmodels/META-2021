@@ -4,6 +4,10 @@ bhmbetas = CSV.read("../data/BHMbetas.csv", DataFrame)
 amocparams = CSV.read("../data/AMOCparams.csv", DataFrame)
 
 function getbhmbetas(iso, option, seed=nothing)
+    if iso ∉ bhmbetas.iso
+        return 0.0, 0.0
+    end
+
     if option == "pointestimate"
         beta1 = bhmbetas.beta1[bhmbetas.iso .== iso][1]
         beta2 = bhmbetas.beta2[bhmbetas.iso .== iso][1]
@@ -29,12 +33,27 @@ function getbhmbetas(iso, option, seed=nothing)
 end
 
 function gettemp1990(iso)
+    if iso ∉ amocparams."Country code"
+        return mean(amocparams."1990 temp")
+    end
     return amocparams[amocparams."Country code" .== iso, "1990 temp"][1]
 end
 
 slrcoeffs = CSV.read("../data/SLRcoeffs.csv", DataFrame)
 
 function getslrcoeff(iso, option::String)
+    if iso ∉ slrcoeffs.ISO
+        if option == "mode"
+            return mean(slrcoeffs.mode)
+        elseif option == "low"
+            return mean(slrcoeffs.low)
+        elseif option == "high"
+            return mean(slrcoeffs.hig)
+        else
+            throw(ArgumentError("Distribution implemented in getslrcoeff_distribution"))
+        end
+    end
+
     if option == "mode"
         return slrcoeffs.mode[slrcoeffs.ISO .== iso][1]
     elseif option == "low"
