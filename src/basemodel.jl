@@ -1,6 +1,6 @@
 using Mimi
 using DataFrames, CSV
-countries = CSV.read("../data/pattern-scaling.csv", DataFrame).Country
+countries = CSV.read("../data/pattern-scaling_new.csv", DataFrame).Country
 include("lib/gdppc.jl")
 
 function test_model()
