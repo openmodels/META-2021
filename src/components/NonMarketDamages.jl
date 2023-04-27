@@ -23,5 +23,5 @@
 end
 
 function addNonMarketDamages(model; before=nothing, after=nothing)
-    add_comp!(model, NonMarketDamages, before=before, after=after)
+    add_comp!(model, NonMarketDamages, first=2010, before=before, after=after)
 end

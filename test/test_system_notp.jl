@@ -15,7 +15,7 @@ for rr in 1:nrow(benchmark)
 
     ## Test the model
 
-    T_AT = model[:TemperatureModel, :T_AT][11:10:191]
+    T_AT = model[:temperature, :T][(2020-1750+1):10:(2200-1750+1)]
     T_AT_compare = collect(benchmark[rr, 2:20])
 
     @test T_AT ≈ T_AT_compare atol=1e-4

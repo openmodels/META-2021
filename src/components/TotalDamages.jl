@@ -8,14 +8,14 @@ using Mimi
 
         # Other parameters
         population = Parameter(index = [time, country], unit = "inhabitants")
-        
+
         # Undiscounted costs to calculate
-        total_damages_percap_peryear    = Variable(index = [time, country], unit = "2010 USD PPP")  # Undiscounted total damages per capita per year   
+        total_damages_percap_peryear    = Variable(index = [time, country], unit = "2010 USD PPP")  # Undiscounted total damages per capita per year
         total_damages_peryear           = Variable(index = [time, country], unit = "2010 USD PPP")  # Undiscounted total damages per year per country
         total_damages_cumulative        = Variable(index = [time, country], unit = "2010 USD PPP") # Country-level undiscounted total damages through 2200
-        total_damages_global_peryear    = Variable(index = [time], unit = "2010 USD PPP")  # Undiscounted total damages per year 
+        total_damages_global_peryear    = Variable(index = [time], unit = "2010 USD PPP")  # Undiscounted total damages per year
         total_damages_global_cumulative = Variable(index = [time], unit = "2010 USD PPP") # Undiscounted total damages through 2200
-        
+
         function run_timestep(pp, vv, dd, tt)
                 #Define market damages per cap per year
                 for cc in dd.country
@@ -50,8 +50,8 @@ end
 function addTotalDamages(model)
 
         params = CSV.read("../data/utilityparams.csv", DataFrame)
-    
-        damages = add_comp!(model, TotalDamages)
-    
+
+        damages = add_comp!(model, TotalDamages, first=2010)
+
         damages
 end

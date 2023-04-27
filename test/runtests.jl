@@ -2,10 +2,7 @@ using Test
 
 @testset "MimiMETA-all" begin
     include("test_RCP.jl")
-    include("test_CO2Model.jl")
-    include("test_CH4Model.jl")
     include("test_SAF.jl")
-    include("test_TemperatureModel.jl")
     include("test_PCF.jl")
     include("test_OMH.jl")
     include("test_AmazonDieback.jl")

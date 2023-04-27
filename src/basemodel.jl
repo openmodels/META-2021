@@ -7,9 +7,14 @@ function test_model()
     m = Model()
 
     set_dimension!(m, :time, collect(2010:2200))
-    set_dimension!(m, :country, countries)
-    set_dimension!(m, :region, unique(gdps_ssp.REGION_SHORT))
-    set_dimension!(m, :monsoonsteps, 35)
+    set_special_model_dimensions!(m)
 
     return m
 end
+
+function set_special_model_dimensions!(m::Model)
+    set_dimension!(m, :country, countries)
+    set_dimension!(m, :region, unique(gdps_ssp.REGION_SHORT))
+    set_dimension!(m, :monsoonsteps, 35)
+end
+

@@ -99,7 +99,7 @@ function addUtility(model, ssp)
 
     params = CSV.read("../data/utilityparams.csv", DataFrame)
 
-    utility = add_comp!(model, Utility)
+    utility = add_comp!(model, Utility, first=2010)
 
     utility[:EMUC] = params.Value[params.Parameter .== "EMUC"][1]
     utility[:PRTP] = params.Value[params.Parameter .== "PRTP"][1]

@@ -61,7 +61,7 @@ include("../lib/interacts.jl")
 end
 
 function addInteractions(model; before=nothing, after=nothing)
-    interact = add_comp!(model, Interactions, before=before, after=after)
+    interact = add_comp!(model, Interactions, first=2010, before=before, after=after)
 
     allinteractrates((symbol, ratemu, ratese) -> interact[symbol] = ratemu)
     interact[:I_AMOC] = zeros(dim_count(model, :time))

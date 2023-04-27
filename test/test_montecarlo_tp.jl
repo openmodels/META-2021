@@ -17,43 +17,22 @@ for do_test in ["notp", "full", "some"]
     if do_test == "full"
         ## Run a test with all TPs
         global model = full_model(rcp="RCP4.5", ssp="SSP2")
-        update_param!(model, :CH4Model, :decay_rate, 1 / 12.4)
-        draws = getsim(500, "Fit of Hope and Schaefer (2016)", # PCF
-                       "Cai et al. central value", # AMAZ
-                       "Nordhaus central value", # GIS
-                       "Distribution", # WAIS
-                       "Distribution", # SAF
-                       false, # persit
-                       false, # emuc
-                       false) # prtp
-        results = runsim(model, draws, true, # ism_used
-                         true, # omh_used
-                         true, # amoc_used
-                         "Cai et al. central value", # AMAZ
-                         "Distribution") # WAIS
-    elseif do_test == "some" # PCFGISISMSAF
-        ## Run a test with some TPs
-        global model = full_model(rcp="RCP4.5", ssp="SSP2"; interaction=false, omh=false, amaz=false, wais=false, amoc=false)
-        update_param!(model, :CH4Model, :decay_rate, 1 / 12.4)
-        draws = getsim(500, "Fit of Hope and Schaefer (2016)", # PCF
-                       "none", # AMAZ
-                       "Nordhaus central value", # GIS
-                       "none", # WAIS
-                       "Distribution", # SAF
-                       false, # persit
-                       false, # emuc
-                       false) # prtp
-        results = runsim(model, draws, true, # ism_used
-                         false, # omh_used
-                         false, # amoc_used
-                         "none", # AMAZ
-                         "none") # WAIS
+        results = sim_full(model, 500, "Fit of Hope and Schaefer (2016)", # PCF
+                           "Cai et al. central value", # AMAZ
+                           "Nordhaus central value", # GIS
+                           "Distribution", # WAIS
+                           "Distribution", # SAF
+                           false, # ais_used
+                           true, # ism_used
+                           true, # omh_used
+                           true, # amoc_used
+                           false, # persit
+                           false, # emuc
+                           false) # prtp
     elseif do_test == "notp"
         ## Run a test with no TPs
         global model = base_model(rcp="RCP4.5")
-        update_param!(model, :CH4Model, :decay_rate, 1 / 12.4)
-        draws = getsim_base(500, false, false, false)
-        results = runsim_base(model, draws)
+        results = sim_base(model, 500, false, false, false)
     end
 
     run(model) # run once for simdataframe

@@ -141,7 +141,7 @@ function addISMModel(model, ismcalib; before=nothing, after=nothing)
         throw(ArgumentError("Unknown ISM model calibration"))
     end
 
-    ismmodel = add_comp!(model, ISMModel, before=before, after=after)
+    ismmodel = add_comp!(model, ISMModel, first=2010, before=before, after=after)
     ismmodel[:f_NINO] = ones(dim_count(model, :time))
     ismmodel
 

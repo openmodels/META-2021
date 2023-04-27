@@ -9,7 +9,6 @@ benchmark = CSV.read("../data/benchmark/ExcelMETA-PCFGISISMSAF.csv", DataFrame)
 for rr in 1:nrow(benchmark)
     println(rr)
     global model = full_model(rcp="RCP4.5", ssp="SSP2"; interaction=false, omh=false, amaz=false, wais=false, amoc=false) # XXX: Consumption currently refers to this...
-    update_param!(model, :CH4Model, :decay_rate, 1 / 12.4)
 
     preset_fill_notp(model, benchmark, rr)
 
