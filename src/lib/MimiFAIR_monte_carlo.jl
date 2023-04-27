@@ -32,8 +32,46 @@
 
 # Load packages.
 using CSVFiles, DataFrames, Mimi, MimiFAIRv2, StatsBase, Downloads, ProgressMeter
+import Mimi.build, Mimi.update_param!, Mimi.ModelInstance, Mimi.run, Mimi.dim_count
 
-function create_fair_monte_carlo(fair_model::Model, n_samples::Int;
+struct MarginalInstance
+    base::ModelInstance
+    modified::ModelInstance
+    delta::Float64
+
+    function MarginalInstance(base::ModelInstance, modified::ModelInstance, delta::Float64)
+        return new(base, modified, delta)
+    end
+end
+
+function build(mm::MarginalModel)
+    MarginalInstance(build(mm.base), build(mm.modified), mm.delta)
+end
+
+function update_param!(mi::MarginalInstance, comp::Symbol, param::Symbol, value)
+    update_param!(mi.base, comp, param, value)
+    update_param!(mi.modified, comp, param, value)
+end
+
+function update_param!(mi::MarginalInstance, param::Symbol, value)
+    update_param!(mi.base, param, value)
+    update_param!(mi.modified, param, value)
+end
+
+function run(mi::MarginalInstance)
+    run(mi.base)
+    run(mi.modified)
+end
+
+function Base.getindex(mi::MarginalInstance, comp_path::Symbol, name::Symbol)
+    return (mi.modified[comp_path, name] .- mi.base[comp_path, name]) ./ mi.delta
+end
+
+function dim_count(mi::MarginalInstance, dim::Symbol)
+    dim_count(mi.base, dim)
+end
+
+function create_fair_monte_carlo(fair_model::Union{Model, MarginalModel}, n_samples::Int;
                                  start_year::Int=1750,
                                  end_year::Int=2300,
                                  data_dir::String = joinpath(@__DIR__, "..", "data", "large_constrained_parameter_files"),

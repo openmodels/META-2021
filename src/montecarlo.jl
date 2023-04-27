@@ -24,15 +24,15 @@ function make_lognormal(riskmu, risksd)
 end
 
 # Master function for base model (uses helpers below)
-function sim_base(model::Model, trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool; save_rvs::Bool=true)
+function sim_base(model::Union{Model, MarginalModel}, trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool; save_rvs::Bool=true, setsim::Function=setsim_base, getsim::Function=getsim_base)
     draws = presim_base(trials, persist_dist, emuc_dist, prtp_dist)
 
     sim = create_fair_monte_carlo(model, trials; end_year=2200,
                                   data_dir=joinpath(dirname(pathof(MimiFAIRv2)), "..", "data",
                                                     "large_constrained_parameter_files"),
                                   delete_downloaded_data=false,
-                                  other_mc_set=(inst, ii) -> setsim_base(inst, draws, ii),
-                                  other_mc_get=(inst) -> getsim_base(inst, draws, save_rvs=save_rvs))
+                                  other_mc_set=(inst, ii) -> setsim(inst, draws, ii),
+                                  other_mc_get=(inst) -> getsim(inst, draws, save_rvs=save_rvs))
     sim()
 end
 
@@ -55,7 +55,7 @@ function presim_base(trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_di
     draws
 end
 
-function setsim_base(inst::ModelInstance, draws::DataFrame, ii::Int64)
+function setsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFrame, ii::Int64)
     for jj in 2:ncol(draws)
         if has_parameter(model.md, Symbol(names(draws)[jj]))
             update_param!(inst, Symbol(names(draws)[jj]), draws[ii, jj])
@@ -68,7 +68,7 @@ function setsim_base(inst::ModelInstance, draws::DataFrame, ii::Int64)
     update_param!(inst, :Consumption_slruniforms, rand(Uniform(0, 1), dim_count(model, :country)))
 end
 
-function getsim_base(inst::ModelInstance, draws::DataFrame; save_rvs::Bool=true)
+function getsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFrame; save_rvs::Bool=true)
     mcres = Dict{Symbol, Any}()
     mcres[:temperature_T] = copy(inst[:temperature, :T])
     mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
@@ -83,7 +83,7 @@ function getsim_base(inst::ModelInstance, draws::DataFrame; save_rvs::Bool=true)
     mcres
 end
 
-function sim_full(model::Model, trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, ais_dist::Bool, ism_used::Bool, omh_used::Bool, amoc_used::Bool, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool; save_rvs::Bool=true)
+function sim_full(model::Union{Model, MarginalModel}, trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, ais_dist::Bool, ism_used::Bool, omh_used::Bool, amoc_used::Bool, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool; save_rvs::Bool=true, setsim::Function=setsim_full, getsim::Function=getsim_full)
     if wais_calib == "Distribution"
         try
             set_param!(model, :WAISmodel, :waisrate, :WAISmodel_waisrate, 0.0033) # set up global connection
@@ -97,8 +97,8 @@ function sim_full(model::Model, trials::Int64, pcf_calib::String, amazon_calib::
                                   data_dir=joinpath(dirname(pathof(MimiFAIRv2)), "..", "data",
                                                     "large_constrained_parameter_files"),
                                   delete_downloaded_data=false,
-                                  other_mc_set=(inst, ii) -> setsim_full(inst, draws, ii, ism_used, omh_used, amoc_used, amazon_calib, wais_calib, ais_dist),
-                                  other_mc_get=(inst) -> getsim_full(inst, draws, save_rvs=save_rvs))
+                                  other_mc_set=(inst, ii) -> setsim(inst, draws, ii, ism_used, omh_used, amoc_used, amazon_calib, wais_calib, ais_dist),
+                                  other_mc_get=(inst) -> getsim(inst, draws, save_rvs=save_rvs))
     sim()
 end
 
@@ -175,7 +175,7 @@ function presim_full(trials::Int64, pcf_calib::String, amazon_calib::String, gis
     draws
 end
 
-function setsim_full(inst::ModelInstance, draws::DataFrame, ii::Int64, ism_used::Bool, omh_used::Bool, amoc_used::Bool, amazon_calib::String, wais_calib::String, ais_dist::Bool)
+function setsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFrame, ii::Int64, ism_used::Bool, omh_used::Bool, amoc_used::Bool, amazon_calib::String, wais_calib::String, ais_dist::Bool)
     setsim_base(inst, draws, ii)
 
     # AIS
@@ -236,11 +236,11 @@ function setsim_full(inst::ModelInstance, draws::DataFrame, ii::Int64, ism_used:
     end
 end
 
-function getsim_full(inst::ModelInstance, draws::DataFrame; save_rvs::Bool=true)
+function getsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFrame; save_rvs::Bool=true)
     getsim_base(inst, draws, save_rvs=save_rvs)
 end
 
-function simdataframe(model::Model, results::Vector{Dict{Symbol, Any}}, comp::Symbol, name::Symbol)
+function simdataframe(model::Union{Model, MarginalModel}, results::Vector{Dict{Symbol, Any}}, comp::Symbol, name::Symbol)
     key = Symbol("$(comp)_$(name)")
     if results[1][key] isa Number
         df = DataFrame(trialnum=1:length(results))
