@@ -1,3 +1,5 @@
+import Random
+
 bhmbetas = CSV.read("../data/BHMbetas.csv", DataFrame)
 amocparams = CSV.read("../data/AMOCparams.csv", DataFrame)
 

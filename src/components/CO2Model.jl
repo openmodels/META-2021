@@ -52,10 +52,10 @@
         else
             vv.co2_total[tt] = pp.co2_rcp[tt-1] / 1000 + pp.co2_pcf[tt-1] + pp.co2_amazon[tt-1] + pp.co2_extra[tt]
 
-            vv.s0[tt] = pp.a0 * vv.co2_total[tt] + (1 - pp.rho0/pp.co2_alpha[tt-1]) * vv.s0[tt-1]
-            vv.s1[tt] = pp.a1 * vv.co2_total[tt] + (1 - pp.rho1/pp.co2_alpha[tt-1]) * vv.s1[tt-1]
-            vv.s2[tt] = vv.a2 * vv.co2_total[tt] + (1 - pp.rho2/pp.co2_alpha[tt-1]) * vv.s2[tt-1]
-            vv.s3[tt] = pp.a3 * vv.co2_total[tt] + (1 - pp.rho3/pp.co2_alpha[tt-1]) * vv.s3[tt-1]
+            vv.s0[tt] = pp.a0 * vv.co2_total[tt] + (1 - min(pp.rho0, 1)/pp.co2_alpha[tt-1]) * vv.s0[tt-1]
+            vv.s1[tt] = pp.a1 * vv.co2_total[tt] + (1 - min(pp.rho1, 1)/pp.co2_alpha[tt-1]) * vv.s1[tt-1]
+            vv.s2[tt] = vv.a2 * vv.co2_total[tt] + (1 - min(pp.rho2, 1)/pp.co2_alpha[tt-1]) * vv.s2[tt-1]
+            vv.s3[tt] = pp.a3 * vv.co2_total[tt] + (1 - min(pp.rho3, 1)/pp.co2_alpha[tt-1]) * vv.s3[tt-1]
 
             vv.co2_cum_ppm[tt] = vv.co2_total[tt] + vv.co2_cum_ppm[tt-1]
         end
