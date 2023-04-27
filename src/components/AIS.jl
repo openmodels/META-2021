@@ -142,8 +142,8 @@
 
 end
 
-function addAISmodel(model, default)
+function addAISmodel(model; before=nothing, after=nothing)
 
-    add_comp!(model, AISmodel)
+    add_comp!(model, AISmodel, first=2010, before=before, after=after)
 
 end

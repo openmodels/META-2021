@@ -12,6 +12,7 @@ include("../src/components/OMH.jl")
 include("../src/components/AmazonDieback.jl")
 include("../src/components/GIS.jl")
 include("../src/components/WAIS.jl")
+include("../src/components/AIS.jl")
 include("../src/components/SLR.jl")
 include("../src/components/ISM.jl")
 include("../src/components/PatternScaling.jl")
@@ -80,7 +81,7 @@ function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none
     model
 end
 
-function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", wais="Value", ism="Value", amoc="IPSL", nonmarketdamage=false)
+function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", ais="AIS", ism="Value", amoc="IPSL", nonmarketdamage=false)
     model = base_model(rcp=rcp, ssp=ssp, tdamage=tdamage, slrdamage=slrdamage);
 
     if saf != false
@@ -130,15 +131,19 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         end
         connect_param!(model, :SLRModel=>:SLR_GIS, :GISModel=>:SLR_GIS);
     end
-    if wais != false
-        waismodel = addWAISmodel(model, wais, after=ifelse(interaction, :Interactions, :temperature));
+    if ais == "AIS"
+        aismodel = addAISmodel(model, after=ifelse(interaction, :Interactions, :temperature))
+        connect_param!(model, :AISmodel=>:T_AT, :temperature => :T);
+        connect_param!(model, :SLRModel=>:SLR_AIS, :AISmodel=>:SLR_AIS);
+    elseif ais == "WAIS"
+        waismodel = addWAISmodel(model, after=ifelse(interaction, :Interactions, :temperature));
 
         waismodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
         connect_param!(model, :WAISmodel=>:T_AT, :temperature => :T);
         if interaction != false
             waismodel[:f_WAIS] = interact[:f_WAIS];
         end
-        connect_param!(model, :SLRModel=>:SLR_WAIS, :WAISmodel=>:SLR_WAIS);
+        connect_param!(model, :SLRModel=>:SLR_AIS, :WAISmodel=>:SLR_WAIS);
     end
     if ism != false
         ismmodel = addISMModel(model, ism, after=ifelse(interaction, :Interactions, :temperature));
@@ -181,7 +186,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         if gis != false
             interact[:VGIS] = gismodel[:VGIS];
         end
-        if wais != false
+        if ais == "WAIS"
             interact[:I_WAIS] = waismodel[:I_WAIS];
         end
         if amaz != false
