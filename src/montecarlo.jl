@@ -63,8 +63,10 @@ function setsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
     end
 
     # Damages
+    beta1, beta2 = getbhmbetas("distribution")
+    update_param!(inst, :Consumption_beta1, beta1)
+    update_param!(inst, :Consumption_beta2, beta2)
 
-    update_param!(inst, :Consumption_seeds, rand(DiscreteUniform(1, typemax(Int64)), dim_count(model, :country)))
     update_param!(inst, :Consumption_slruniforms, rand(Uniform(0, 1), dim_count(model, :country)))
 end
 
