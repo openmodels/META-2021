@@ -7,9 +7,11 @@ function getbhmbetas(tdamage::String)
     elseif tdamage == "low"
         beta2 = -0.0004871 + 1.96 * 0.0001183216 # beta2 + 1.96 SE_2
         beta1 = -2 * beta2 * 13.05512 # keep same peak
+        return beta1, beta2
     elseif tdamage == "high"
         beta2 = -0.0004871 - 1.96 * 0.0001183216 # beta2 + 1.96 SE_2
         beta1 = -2 * beta2 * 13.05512 # keep same peak
+        return beta1, beta2
     else # distribution
         mvn = Distributions.MvNormal([0.0127183, -0.0004871], [1.43e-5 -3.76e-7; -3.76e-7 1.4e-8])
         rand(mvn)

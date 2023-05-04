@@ -5,6 +5,7 @@ include("../src/basemodel.jl")
 include("../src/components/RCP.jl")
 include("../src/components/CO2Converter.jl")
 include("../src/components/CH4Converter.jl")
+include("../src/components/TemperatureConverter.jl")
 include("../src/components/SAF.jl")
 include("../src/components/temperature_withadj.jl")
 include("../src/components/PCF.jl")
@@ -35,6 +36,7 @@ function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none
     rcpmodel = addRCP(model, rcp, before=:co2_cycle);
     co2converter = addCO2Converter(model, after=:RCP);
     ch4converter = addCH4Converter(model, after=:RCP);
+    tempconverter = addTemperatureConverter(model, after=:temperature);
     slr = addSLR(model);
     pattscale = addPatternScaling(model);
     cons = addConsumption(model, tdamage, slrdamage, ssp);
@@ -50,15 +52,18 @@ function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none
     ch4converter[:ch4_rcp] = rcpmodel[:ch4_rcp];
     ch4converter[:ch4_2009] = emissions_data.methane[emissions_data[!, 1] .== 2009][1]
 
+    # Setup temperature converter
+    connect_param!(model, :TemperatureConverter => :T, :temperature => :T)
+
     # Feed converters into FAIR
     connect_param!(model, :co2_cycle => :E_co2, :CO2Converter => :E_co2, emissions_data.carbon_dioxide[emissions_data[!, 1] .<= 2200])
     connect_param!(model, :ch4_cycle => :E_ch4, :CH4Converter => :E_ch4, emissions_data.methane[emissions_data[!, 1] .<= 2200])
 
     # Setup SLR model
-    connect_param!(model, :SLRModel => :T_AT, :temperature => :T)
+    connect_param!(model, :SLRModel => :T_AT, :TemperatureConverter => :T_AT)
 
     # Setup pattern scaling
-    connect_param!(model, :PatternScaling => :T_AT, :temperature => :T)
+    connect_param!(model, :PatternScaling => :T_AT, :TemperatureConverter => :T_AT)
 
     # Setup Consumption
     cons[:T_country] = pattscale[:T_country];
@@ -100,7 +105,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         connect_param!(model, :CO2Converter=>:co2_pcf, :PCFModel=>:CO2_PF);
         connect_param!(model, :CH4Converter=>:ch4_pcf, :PCFModel=>:CH4_PF);
 
-        connect_param!(model, :PCFModel=>:T_AT, :temperature => :T);
+        connect_param!(model, :PCFModel=>:T_AT, :TemperatureConverter => :T_AT);
     end
     if omh != false
         omhmodel = addOMH(model, omh, after=:temperature);
@@ -108,14 +113,14 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         connect_param!(model, :CH4Converter=>:ch4_omh, :OMH=>:CH4_OMH);
 
         omhmodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
-        connect_param!(model, :OMH=>:T_AT, :temperature => :T);
+        connect_param!(model, :OMH=>:T_AT, :TemperatureConverter => :T_AT);
     end
     if amaz != false
         amazmodel = addAmazonDieback(model, amaz, after=ifelse(interaction, :Interactions, :temperature));
 
         connect_param!(model, :CO2Converter=>:co2_amazon, :AmazonDieback=>:CO2_AMAZ);
 
-        connect_param!(model, :AmazonDieback=>:T_AT, :temperature => :T);
+        connect_param!(model, :AmazonDieback=>:T_AT, :TemperatureConverter => :T_AT);
         amazmodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
         if interaction != false
             amazmodel[:probmult] = interact[:f_AMAZ];
@@ -124,7 +129,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     if gis != false
         gismodel = addGISModel(model, gis, after=ifelse(interaction, :Interactions, :temperature));
 
-        connect_param!(model, :GISModel=>:T_AT, :temperature => :T);
+        connect_param!(model, :GISModel=>:T_AT, :TemperatureConverter => :T_AT);
         if interaction != false
             gismodel[:f_GIS] = interact[:f_GIS];
         end
@@ -134,7 +139,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         waismodel = addWAISmodel(model, wais, after=ifelse(interaction, :Interactions, :temperature));
 
         waismodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
-        connect_param!(model, :WAISmodel=>:T_AT, :temperature => :T);
+        connect_param!(model, :WAISmodel=>:T_AT, :TemperatureConverter => :T_AT);
         if interaction != false
             waismodel[:f_WAIS] = interact[:f_WAIS];
         end
@@ -143,7 +148,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     if ism != false
         ismmodel = addISMModel(model, ism, after=ifelse(interaction, :Interactions, :temperature));
 
-        connect_param!(model, :ISMModel=>:T_AT, :temperature => :T);
+        connect_param!(model, :ISMModel=>:T_AT, :TemperatureConverter => :T_AT);
         connect_param!(model, :ISMModel=>:st_ppm, :co2_cycle=>:co2);
         ismmodel[:uniforms] = reshape(rand(Uniform(0, 1), dim_count(model, :time) * dim_count(model, :monsoonsteps)),
                                       dim_count(model, :time), dim_count(model, :monsoonsteps));
@@ -156,7 +161,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     if amoc != false
         amocmodel = addAMOC(model, amoc, after=:PatternScaling);
 
-        connect_param!(model, :AMOC=>:T_AT, :temperature => :T);
+        connect_param!(model, :AMOC=>:T_AT, :TemperatureConverter => :T_AT);
         connect_param!(model, :AMOC=>:scale_country, :PatternScaling=>:T_country);
         amocmodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
         if interaction != false
@@ -166,7 +171,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     if nonmarketdamage != false
         nonmarket = addNonMarketDamages(model, after=:Consumption);
 
-        connect_param!(model, :NonMarketDamages=>:T_AT, :temperature => :T);
+        connect_param!(model, :NonMarketDamages=>:T_AT, :TemperatureConverter => :T_AT);
         connect_param!(model, :NonMarketDamages=>:conspc, :Consumption=>:conspc);
 
         connect_param!(model, :Utility=>:lossfactor, :NonMarketDamages=>:lossfactor);
