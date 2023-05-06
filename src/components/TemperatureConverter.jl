@@ -7,15 +7,15 @@
     T = Parameter(index=[time]) # raw from MimiFAIR
 
     function run_timestep(pp, vv, dd, tt)
-        if gettime(tt) == 2005
+        if gettime(tt) == 2010
             # Fill in all values
-            vv.biascorrection = 0.69 - mean([pp.T[tt-dt] for dt in 0:19]) # relative to 1850-1900
+            vv.biascorrection = 0.854 - pp.T[tt]
             ss = 1
             while TimestepIndex(ss) <= tt
                 vv.T_AT[TimestepIndex(ss)] = pp.T[TimestepIndex(ss)] + vv.biascorrection
                 ss += 1
             end
-        elseif gettime(tt) > 2005
+        elseif gettime(tt) > 2010
             vv.T_AT[tt] = pp.T[tt] + vv.biascorrection
         end
     end
