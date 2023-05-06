@@ -44,7 +44,6 @@ end
 
 if false
     model = base_model(; rcp="RCP4.5", tdamage="pointestimate", slrdamage="mode")
-    update_param!(model, :Consumption, :damagepersist, 1.)
     calculate_scc(model, 2020, 10., 1.5)
     sccs = calculate_scc_base_mc(model, 100, false, false, false, 2020, 10., 1.5)
     [mean(sccs[:other]), std(sccs[:other]), median(sccs[:other])]
