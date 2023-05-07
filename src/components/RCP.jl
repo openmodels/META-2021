@@ -2,7 +2,7 @@
     # Variables
     co2_rcp = Variable(index=[time], unit="GtCO2")
     ch4_conc_rcp = Variable(index=[time], unit="ppb")
-    ch4_rcp = Variable(index=[time], unit="MtCH4")
+    ch4_rcp = Variable(index=[time], unit="GtCH4")
     n2o_conc_rcp = Variable(index=[time], unit="ppb")
     F_EX = Variable(index=[time], unit="W/m^2")
     SO_2 = Variable(index=[time], unit="Mt")
@@ -41,8 +41,9 @@
             end
             vv.co2_rcp[TimestepIndex(gettime(tt) - 2009)] = rcps[gettime(tt) - 2009, colnames .== "CO2 (Mt CO2/yr)"][1]
             vv.ch4_rcp[TimestepIndex(gettime(tt) - 2009)] = rcps[gettime(tt) - 2009, colnames .== "CH4 (Mt CH4/yr)"][1]
+            vv.ch4_rcp[TimestepIndex(gettime(tt) - 2009)] = vv.ch4_rcp[TimestepIndex(gettime(tt) - 2009)]/1000 #Convert scenario inputs to GtCH4 to conform to FAIRv2 units
             vv.ch4_conc_rcp[TimestepIndex(gettime(tt) - 2009)] = rcps[gettime(tt) - 2009, colnames .== "Concentration|CH4 (ppm)"][1]
-	    vv.n2o_conc_rcp[TimestepIndex(gettime(tt) - 2009)] = rcps[gettime(tt) - 2009, colnames .== "Concentration|N2O (ppm)"][1]
+	        vv.n2o_conc_rcp[TimestepIndex(gettime(tt) - 2009)] = rcps[gettime(tt) - 2009, colnames .== "Concentration|N2O (ppm)"][1]
             vv.F_EX[TimestepIndex(gettime(tt) - 2009)] = rcps[gettime(tt) - 2009, colnames .== "Forcing|other agents (W/m2)"][1]
             vv.SO_2[TimestepIndex(gettime(tt) - 2009)] = rcps[gettime(tt) - 2009, colnames .== "Emissions|Sulfur global (kt SO2/yr)"][1]
             if pp.scenario ∈ scenarios_rma[2:end]

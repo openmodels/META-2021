@@ -1,13 +1,13 @@
 @defcomp CH4Converter begin
     # Variables
-    E_ch4 = Variable(index=[time])   # Annual methane emissions (TgCH₄ yr⁻¹)
+    E_ch4 = Variable(index=[time])   # Annual methane emissions (GtCH₄ yr⁻¹)
 
     # Parameters #ALL READ IN FROM RCP SCENARIOS AND OTHER TP MODULES
-    ch4_2009 = Parameter(unit="MtCH4", default=364.2003634)
-    ch4_rcp = Parameter(index=[time], unit="MtCH4") # Named based on James's variable from RCP.jl
-    ch4_pcf = Parameter(index=[time], unit="MtCH4")
-    ch4_omh = Parameter(index=[time], unit="MtCH4")
-    ch4_extra = Parameter(index=[time], unit="MtCH4")
+    ch4_2009 = Parameter(unit="GtCH4", default=0.3642003634)
+    ch4_rcp = Parameter(index=[time], unit="GtCH4") # Named based on James's variable from RCP.jl
+    ch4_pcf = Parameter(index=[time], unit="GtCH4")
+    ch4_omh = Parameter(index=[time], unit="GtCH4")
+    ch4_extra = Parameter(index=[time], unit="GtCH4")
 
     function run_timestep(pp, vv, dd, tt)
         if is_first(tt)
