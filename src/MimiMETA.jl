@@ -98,10 +98,10 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         connect_param!(model, :temperature=>:T1_adjustment, :SAFModel=>:T_AT_adjustment, zeros(2200 - 1750 + 1), ignoreunits=true);
     end
     if interaction != false
-        interact = addInteractions(model, after=:temperature);
+        interact = addInteractions(model, after=:TemperatureConverter);
     end
     if pcf != false
-        pcfmodel = addPCFModel(model, pcf, after=:temperature);
+        pcfmodel = addPCFModel(model, pcf, after=:TemperatureConverter);
 
         connect_param!(model, :CO2Converter=>:co2_pcf, :PCFModel=>:CO2_PF);
         connect_param!(model, :CH4Converter=>:ch4_pcf, :PCFModel=>:CH4_PF);
@@ -109,7 +109,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         connect_param!(model, :PCFModel=>:T_AT, :TemperatureConverter => :T_AT);
     end
     if omh != false
-        omhmodel = addOMH(model, omh, after=:temperature);
+        omhmodel = addOMH(model, omh, after=:TemperatureConverter);
 
         connect_param!(model, :CH4Converter=>:ch4_omh, :OMH=>:CH4_OMH);
 
@@ -117,7 +117,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         connect_param!(model, :OMH=>:T_AT, :TemperatureConverter => :T_AT);
     end
     if amaz != false
-        amazmodel = addAmazonDieback(model, amaz, after=ifelse(interaction, :Interactions, :temperature));
+        amazmodel = addAmazonDieback(model, amaz, after=ifelse(interaction, :Interactions, :TemperatureConverter));
 
         connect_param!(model, :CO2Converter=>:co2_amazon, :AmazonDieback=>:CO2_AMAZ);
 
@@ -128,7 +128,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         end
     end
     if gis != false
-        gismodel = addGISModel(model, gis, after=ifelse(interaction, :Interactions, :temperature));
+        gismodel = addGISModel(model, gis, after=ifelse(interaction, :Interactions, :TemperatureConverter));
 
         connect_param!(model, :GISModel=>:T_AT, :TemperatureConverter => :T_AT);
         if interaction != false
@@ -137,13 +137,12 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         connect_param!(model, :SLRModel=>:SLR_GIS, :GISModel=>:SLR_GIS);
     end
     if ais == "AIS"
-        aismodel = addAISmodel(model, after=ifelse(interaction, :Interactions, :temperature))
+        aismodel = addAISmodel(model, after=ifelse(interaction, :Interactions, :TemperatureConverter))
         connect_param!(model, :AISmodel=>:T_AT, :TemperatureConverter => :T_AT);
         connect_param!(model, :AISmodel=>:T_AT_tminus100, :TemperatureConverter => :T_AT_tminus100);
         connect_param!(model, :SLRModel=>:SLR_AIS, :AISmodel=>:SLR_AIS);
     elseif ais == "WAIS"
-        waismodel = addWAISmodel(model, after=ifelse(interaction, :Interactions, :temperature));
-
+        waismodel = addWAISmodel(model, after=ifelse(interaction, :Interactions, :TemperatureConverter));
         waismodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
         connect_param!(model, :WAISmodel=>:T_AT, :TemperatureConverter => :T_AT);
         if interaction != false
@@ -152,7 +151,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         connect_param!(model, :SLRModel=>:SLR_AIS, :WAISmodel=>:SLR_WAIS);
     end
     if ism != false
-        ismmodel = addISMModel(model, ism, after=ifelse(interaction, :Interactions, :temperature));
+        ismmodel = addISMModel(model, ism, after=ifelse(interaction, :Interactions, :TemperatureConverter));
 
         connect_param!(model, :ISMModel=>:T_AT, :TemperatureConverter => :T_AT);
         connect_param!(model, :ISMModel=>:st_ppm, :co2_cycle=>:co2);
