@@ -194,11 +194,11 @@ function setsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
         update_param!(inst, :AIS_β_Peninsula, aisgcms.Peninsula_beta[gcmchoice])
         update_param!(inst, :AIS_δ_Peninsula, aisgcms.Peninsula_delta[gcmchoice])
         icechoice = rand(DiscreteUniform(1, 17), 1)
-        update_param!(inst, :AIS_R_functions_EAIS, aisresponse_EAIS[!, icechoice])
-        update_param!(inst, :AIS_R_functions_Ross, aisresponse_Ross[!, icechoice])
-        update_param!(inst, :AIS_R_functions_Amundsen, aisresponse_Amundsen[!, icechoice])
-        update_param!(inst, :AIS_R_functions_Weddell, aisresponse_Weddell[!, icechoice])
-        update_param!(inst, :AIS_R_functions_Peninsula, aisresponse_Peninsula[!, icechoice])
+        update_param!(inst, :AIS_R_functions_EAIS, aisresponse_EAIS[!, icechoice + 1])
+        update_param!(inst, :AIS_R_functions_Ross, aisresponse_Ross[!, icechoice + 1])
+        update_param!(inst, :AIS_R_functions_Amundsen, aisresponse_Amundsen[!, icechoice + 1])
+        update_param!(inst, :AIS_R_functions_Weddell, aisresponse_Weddell[!, icechoice + 1])
+        update_param!(inst, :AIS_R_functions_Peninsula, aisresponse_Peninsula[!, icechoice + 1])
     end
 
     # SAF
