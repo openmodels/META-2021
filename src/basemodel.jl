@@ -3,10 +3,10 @@ using DataFrames, CSV
 countries = CSV.read("../data/pattern-scaling_new.csv", DataFrame).Country
 include("lib/gdppc.jl")
 
-function test_model()
+function test_model(; startyear::Int64=2010)
     m = Model()
 
-    set_dimension!(m, :time, collect(2010:2200))
+    set_dimension!(m, :time, collect(startyear:2200))
     set_special_model_dimensions!(m)
 
     return m

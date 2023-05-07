@@ -138,7 +138,8 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
     end
     if ais == "AIS"
         aismodel = addAISmodel(model, after=ifelse(interaction, :Interactions, :temperature))
-        connect_param!(model, :AISmodel=>:T_AT, :temperature => :T);
+        connect_param!(model, :AISmodel=>:T_AT, :TemperatureConverter => :T_AT);
+        connect_param!(model, :AISmodel=>:T_AT_tminus100, :TemperatureConverter => :T_AT_tminus100);
         connect_param!(model, :SLRModel=>:SLR_AIS, :AISmodel=>:SLR_AIS);
     elseif ais == "WAIS"
         waismodel = addWAISmodel(model, after=ifelse(interaction, :Interactions, :temperature));
