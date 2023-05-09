@@ -2,7 +2,7 @@
     # Variables
     p_OMH = Variable(index=[time])
     I_OMH = Variable{Bool}(index=[time])
-    CH4_OMH = Variable(index=[time], unit="GtCH4") # Inputs in MtCH4, but ultimately converted to GtCH4 use in FAIRv2
+    CH4_OMH = Variable(index=[time], unit="MtCH4")
     cum_CH4_OMH = Variable(index=[time], unit="MtCH4")
 
     # Parameters
@@ -32,8 +32,6 @@
                 pp.max_CH4_OMH / pp.Delta_OMH : 0
             vv.cum_CH4_OMH[tt] = vv.cum_CH4_OMH[tt-1] + vv.CH4_OMH[tt]
         end
-        # Convert to GtCH4 for FAIR input
-        vv.CH4_OMH[tt] = vv.CH4_OMH[tt]/1000
     end
 end
 

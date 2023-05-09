@@ -7,7 +7,7 @@
     CCum_PF = Variable(index=[time], unit="GtC") # cumulative CO2 emissions from thawed permafrost (GtC)
     DifferencedCO2 = Variable(index=[time], unit="GtC") # difference in cumulative permafrost CO2 emissions (GtC)
     CO2_PF = Variable(index=[time], unit="GtCO2") # permafrost CO2 emissions (GtCO2)
-    CH4_PF = Variable(index=[time], unit="GtCH4") # permafrost CH4 emissions (GtCH4)
+    CH4_PF = Variable(index=[time], unit="MtCH4") # permafrost CH4 emissions (MtCH4)
 
     # Parameters
 
@@ -40,7 +40,6 @@
             vv.DifferencedCO2[tt] = vv.CCum_PF[tt] - vv.CCum_PF[tt-1]
             vv.CO2_PF[tt] = vv.DifferencedCO2[tt] * (1 - pp.propCH4) * 44/12
             vv.CH4_PF[tt] = vv.DifferencedCO2[tt] * pp.propCH4 * 16 / 12 * 1000
-            vv.CH4_PF[tt] = vv.CH4_PF[tt] / 1000 #Convert to GtCH4 to conform to FAIRv2 units
 
         end
 
