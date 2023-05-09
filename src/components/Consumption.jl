@@ -27,11 +27,8 @@ include("../lib/saverate.jl")
     saverate = Parameter(index=[country])
 
     # Based on damage specification
-    seeds = Parameter{Int64}(index=[country])
-    beta1 = Parameter(index=[country], unit="1/degC")
-    beta2 = Parameter(index=[country], unit="1/degC^2")
-
-    T_country_1990 = Parameter(index=[country], unit="degC")
+    beta1 = Parameter(unit="1/degC")
+    beta2 = Parameter(unit="1/degC^2")
 
     slrdamageconfig = Parameter{String}()
     slruniforms = Parameter(index=[country]) # only used for MC mode
@@ -48,14 +45,6 @@ include("../lib/saverate.jl")
 
     function init(pp, vv, dd)
         isos = dim_keys(model, :country)
-
-        for cc in dd.country
-            if pp.seeds[cc] != 0
-                betaboths = getbhmbetas(isos[cc], "distribution", pp.seeds[cc])
-                pp.beta1[cc] = betaboths[1]
-                pp.beta2[cc] = betaboths[2]
-            end
-        end
 
         if pp.slrdamageconfig == "distribution"
             pp.slrcoeff = [getslrcoeff_distribution(isos[cc], slrdamage, pp.slruniforms[cc]) for cc in 1:length(isos)]
@@ -123,7 +112,7 @@ include("../lib/saverate.jl")
         end
 
         for cc in dd.country
-            vv.conspc[tt, cc] = vv.conspc_preadj[tt, cc]*(1+(vv.gdppc_growth[tt, cc]-pp.beta1[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])-pp.beta2[cc]*(pp.T_country[tt, cc]-pp.T_country_1990[cc])^2))*(1-pp.SLR[tt]*pp.slrcoeff[cc])*(1 - pp.extradamage[tt, cc])
+            vv.conspc[tt, cc] = vv.conspc_preadj[tt, cc]*(1+(vv.gdppc_growth[tt, cc]+pp.beta1*(pp.T_country[tt, cc]-pp.T_country[TimestepIndex(1), cc])+pp.beta2*(pp.T_country[tt, cc]^2-pp.T_country[TimestepIndex(1), cc]^2)))*(1-pp.SLR[tt]*pp.slrcoeff[cc])*(1 - pp.extradamage[tt, cc])
 
             # Compute baseline consumption per capita without damages
             vv.baseline_consumption_percap_percountry[tt,cc] = (1-pp.saverate[cc])*vv.gdppc[tt, cc]
@@ -156,17 +145,9 @@ function addConsumption(model, tdamage, slrdamage, ssp)
     isos = dim_keys(model, :country)
 
     if tdamage == "none"
-        cons[:seeds] = [0 for iso in isos]
-        cons[:beta1] = zeros(length(isos))
-        cons[:beta2] = zeros(length(isos))
-    elseif tdamage != "distribution"
-        betaboths = [getbhmbetas(iso, tdamage) for iso in isos]
-        cons[:seeds] = [0 for iso in isos]
-        cons[:beta1] = [betaboth[1] for betaboth in betaboths]
-        cons[:beta2] = [betaboth[2] for betaboth in betaboths]
+        cons[:beta1] = cons[:beta2] = 0.
     else
-        cons[:beta1] = zeros(length(isos))
-        cons[:beta2] = zeros(length(isos))
+        cons[:beta1], cons[:beta2] = getbhmbetas(tdamage)
     end
 
     if slrdamage == "none"
@@ -187,7 +168,6 @@ function addConsumption(model, tdamage, slrdamage, ssp)
     gdppc_2009[ismissing.(gdppc_2009)] .= 0
     gdppc_2009[isos .== "DJI"] .= 2700
     cons[:gdppc_2009] = gdppc_2009
-    cons[:T_country_1990] = [gettemp1990(iso) for iso in isos]
     cons[:extradamage] = zeros(dim_count(model, :time), dim_count(model, :country))
 
     cons

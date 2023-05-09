@@ -42,10 +42,12 @@ function calculate_scc_base_mc(model::Model, trials::Int64, persist_dist::Bool, 
              getsim=(inst, draws; save_rvs) -> calculate_scc_marginal(inst, pulse_year, emuc))
 end
 
-# model = base_model(; rcp="CP-Base", tdamage="pointestimate", slrdamage="mode")
-# calculate_scc(model, 2020, 10., 1.5)
-# sccs = calculate_scc_base_mc(model, 100, false, false, false, 2020, 10., 1.5)
-# [mean(sccs[:other]), std(sccs[:other]), median(sccs[:other])]
+if false
+    model = base_model(; rcp="RCP4.5", tdamage="pointestimate", slrdamage="mode")
+    calculate_scc(model, 2020, 10., 1.5)
+    sccs = calculate_scc_base_mc(model, 100, false, false, false, 2020, 10., 1.5)
+    [mean(sccs[:other]), std(sccs[:other]), median(sccs[:other])]
+end
 
 function calculate_scc_full_mc(model::Model, trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, ais_dist::Bool, ism_used::Bool, omh_used::Bool, amoc_used::Bool, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
     mm = calculate_scc_setup(model, pulse_year, pulse_size)

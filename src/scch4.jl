@@ -14,13 +14,8 @@ function calculate_scch4_setup(model::Model, pulse_year::Int64, pulse_size::Floa
     pulse_index = findfirst(dim_keys(model, :time) .== pulse_year)
     run(mm)
 
-    mm.modified[:CH4Converter, :ch4_extra][pulse_index] = pulse_size
-
-    mm
-end
-
-function calculate_scch4_marginal(mm::Union{MarginalModel, MarginalInstance}, pulse_year::Int64, emuc::Float64)
-    pulse_index = findfirst(dim_keys(model, :time) .== pulse_year)
+    mm.modified[:CH4Model, :ch4_extra][pulse_index] = pulse_size
+    run(mm)
 
     globalwelfare_marginal = sum(mm[:Utility, :world_disc_utility][pulse_index:dim_count(model, :time)])
 
