@@ -84,3 +84,42 @@ function preset_fill_tp(model::Model, benchmark::DataFrame, rr::Int64)
     draws = reshape(collect(benchmark[rr, raindrawstart:raindrawend]), (dim_count(model, :monsoonsteps), dim_count(model, :time)))'
     myupdate_param!(model, :ISMModel, :uniforms, draws)
 end
+
+excel2mimi_mapping = Dict{String, Tuple{Symbol, Symbol}}("Nonlinear SAF / Distribution" => (:SAFModel, :saf_delta),
+                                                         "Warming half-life / Distribution" => (:SAFModel, :FRT),
+                                                         "xi_1" => (:TemperatureModel, :xi_1),
+                                                         "F_2XCO2" => (:TemperatureModel, :F_2xCO2),
+                                                         "T_2xCO2" => (:TemperatureModel, :fair_ECS),
+                                                         "gamma" => (:TemperatureModel, :fair_gamma),
+                                                         "C0" => (:TemperatureModel, :fair_C_0),
+                                                         "Dataset 1" => (:CH4Model, :ch4_alpha))
+
+function excel2mimi(model::Model, name::String; getdataframe::Function=getdataframe, tempcomp::Symbol=:TemperatureConverter)
+    info = split(name, " / ")
+    if name ∈ ["a_0", "a_1", "a_3", "rho_1", "rho_2", "rho_3"]
+        df = getdataframe(model, :CO2Model, Symbol(replace(name, "_" => "")))
+    elseif name ∈ ["r_{0) / Distribution", "r_{C} / Distribution", "r_{T} / Distribution"]
+        df = getdataframe(model, :PostTemperature, Symbol(replace(info[1], "{" => "", "}" => "", ")" => "")))
+    elseif name ∈ keys(excel2mimi_mapping)
+        df = getdataframe(model, excel2mimi_mapping[name][1], excel2mimi_mapping[name][2])
+    elseif info[2] == "Atmospheric temperature"
+        df = getdataframe(model, tempcomp, :T_AT)
+    elseif info[2] == "SLR total (m)"
+        df = getdataframe(model, :SLRModel, :SLR)
+    elseif info[2] == "World aggregate consumption per capita"
+        df = getdataframe(model, :Utility, :equiv_conspc)
+    elseif info[1] == "waisrate"
+        df = getdataframe(model, :WAISmodel, :waisrate)
+        df.waisrate *= 1000
+    else
+        return nothing
+    end
+
+    if length(info) == 2 && info[2] != "Distribution"
+        vals = convert(Vector{Float64}, df[df.time .== parse(Int64, info[1]), 2])
+    else
+        vals = convert(Vector{Float64}, df[!, 2])
+    end
+
+    return vals
+end

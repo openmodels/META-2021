@@ -35,7 +35,7 @@
         else
 
             vv.C_thawedPF[tt] = -pp.C_PF * (vv.PF_extent[tt] - vv.PF_extent[tt-1])
-            DecompPF = [vv.C_thawedPF[tt-dt] * (1 - pp.propPassive) * (1 - exp(-dt / pp.tau)) for dt in 0:tt.t-1]
+            DecompPF = [vv.C_thawedPF[tt-dt] * (1 - pp.propPassive) * (1 - exp(-dt / pp.tau)) for dt in 0:(gettime(tt) - 2009)-1]
             vv.CCum_PF[tt] = sum(DecompPF)
             vv.DifferencedCO2[tt] = vv.CCum_PF[tt] - vv.CCum_PF[tt-1]
             vv.CO2_PF[tt] = vv.DifferencedCO2[tt] * (1 - pp.propCH4) * 44/12
