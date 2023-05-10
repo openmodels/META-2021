@@ -6,10 +6,10 @@ function calculate_scch4(model::Model, pulse_year::Int64, pulse_size::Float64, e
     pulse_index = findfirst(dim_keys(model, :time) .== pulse_year)
     run(mm)
 
-    mm.modified[:CH4Converter, :ch4_extra][pulse_index] = pulse_size
+    mm.modified[:CH4Model, :ch4_extra][pulse_index] = pulse_size
     run(mm)
 
-    globalwelfare_marginal = sum(mm[:Utility, :world_disc_utility][pulse_index:dim_count(model, :time)])
+    globalwelfare_marginal = sum(mm[:Utility, :world_disc_utility][pulse_index:191])
 
     global_conspc = sum(mm.base[:Consumption, :conspc][pulse_index, :] .* mm.base[:Utility, :pop][pulse_index, :]) / mm.base[:Utility, :world_population][pulse_index]
     -(globalwelfare_marginal / (global_conspc^-emuc)) / 1e6
