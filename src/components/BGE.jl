@@ -62,12 +62,12 @@
         end
 
         # Discount utility
-        vv.world_disc_utility_counterfactual[tt] = vv.world_utility_counterfactual[tt] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020)
-        vv.world_disc_utility[tt] = vv.world_utility[tt] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020)
+        vv.world_disc_utility_counterfactual[tt] = vv.world_utility_counterfactual[tt] * (1 + pp.PRTP) ^ - (gettime(tt) - 2020)
+        vv.world_disc_utility[tt] = vv.world_utility[tt] * (1 + pp.PRTP) ^ - (gettime(tt) - 2020)
 
         for cc in dd.country
-            vv.disc_utility_counterfactual[tt, cc] = vv.utility_counterfactual[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020)
-            vv.disc_utility[tt, cc] = pp.utility[tt, cc] * (1 + pp.PRTP) ^ - (dim_keys(model, :time)[tt.t] - 2020)
+            vv.disc_utility_counterfactual[tt, cc] = vv.utility_counterfactual[tt, cc] * (1 + pp.PRTP) ^ - (gettime(tt) - 2020)
+            vv.disc_utility[tt, cc] = pp.utility[tt, cc] * (1 + pp.PRTP) ^ - (gettime(tt) - 2020)
         end
 
                 #= Marginal welfare change method
