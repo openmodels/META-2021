@@ -135,8 +135,8 @@ function presim_full(trials::Int64, pcf_calib::String, amazon_calib::String, gis
     # AIS
 
     if ais_dist
-        draws.AIS_ω = rand(Normal(-0.05, 0.004), trials)
-        draws.AIS_λ = rand(Uniform(7, 16), trials)
+        draws.AISmodel_ω = rand(Normal(-0.05, 0.004), trials)
+        draws.AISmodel_λ = rand(Uniform(7, 16), trials)
     end
 
     # Permafrost
@@ -182,23 +182,23 @@ function setsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
 
     # AIS
     if ais_dist
-        gcmchoice = rand(DiscreteUniform(1, 19), 1)
-        update_param!(inst, :AIS_β_EAIS, aisgcms.EAIS_beta[gcmchoice])
-        update_param!(inst, :AIS_δ_EAIS, aisgcms.EAIS_delta[gcmchoice])
-        update_param!(inst, :AIS_β_Ross, aisgcms.Ross_beta[gcmchoice])
-        update_param!(inst, :AIS_δ_Ross, aisgcms.Ross_delta[gcmchoice])
-        update_param!(inst, :AIS_β_Amundsen, aisgcms.Amundsen_beta[gcmchoice])
-        update_param!(inst, :AIS_δ_Amundsen, aisgcms.Amundsen_delta[gcmchoice])
-        update_param!(inst, :AIS_β_Weddell, aisgcms.Weddell_beta[gcmchoice])
-        update_param!(inst, :AIS_δ_Weddell, aisgcms.Weddell_delta[gcmchoice])
-        update_param!(inst, :AIS_β_Peninsula, aisgcms.Peninsula_beta[gcmchoice])
-        update_param!(inst, :AIS_δ_Peninsula, aisgcms.Peninsula_delta[gcmchoice])
-        icechoice = rand(DiscreteUniform(1, 17), 1)
-        update_param!(inst, :AIS_R_functions_EAIS, aisresponse_EAIS[!, icechoice + 1])
-        update_param!(inst, :AIS_R_functions_Ross, aisresponse_Ross[!, icechoice + 1])
-        update_param!(inst, :AIS_R_functions_Amundsen, aisresponse_Amundsen[!, icechoice + 1])
-        update_param!(inst, :AIS_R_functions_Weddell, aisresponse_Weddell[!, icechoice + 1])
-        update_param!(inst, :AIS_R_functions_Peninsula, aisresponse_Peninsula[!, icechoice + 1])
+        gcmchoice = rand(DiscreteUniform(1, 19), 1)[1]
+        update_param!(inst, :AISmodel_β_EAIS, aisgcms.EAIS_beta[gcmchoice])
+        update_param!(inst, :AISmodel_δ_EAIS, aisgcms.EAIS_delta[gcmchoice])
+        update_param!(inst, :AISmodel_β_Ross, aisgcms.Ross_beta[gcmchoice])
+        update_param!(inst, :AISmodel_δ_Ross, aisgcms.Ross_delta[gcmchoice])
+        update_param!(inst, :AISmodel_β_Amundsen, aisgcms.Amundsen_beta[gcmchoice])
+        update_param!(inst, :AISmodel_δ_Amundsen, aisgcms.Amundsen_delta[gcmchoice])
+        update_param!(inst, :AISmodel_β_Weddell, aisgcms.Weddell_beta[gcmchoice])
+        update_param!(inst, :AISmodel_δ_Weddell, aisgcms.Weddell_delta[gcmchoice])
+        update_param!(inst, :AISmodel_β_Peninsula, aisgcms.Peninsula_beta[gcmchoice])
+        update_param!(inst, :AISmodel_δ_Peninsula, aisgcms.Peninsula_delta[gcmchoice])
+        icechoice = rand(DiscreteUniform(1, 17), 1)[1]
+        update_param!(inst, :AISmodel_R_functions_EAIS, aisresponse_EAIS[!, icechoice + 1])
+        update_param!(inst, :AISmodel_R_functions_Ross, aisresponse_Ross[!, icechoice + 1])
+        update_param!(inst, :AISmodel_R_functions_Amundsen, aisresponse_Amundsen[!, icechoice + 1])
+        update_param!(inst, :AISmodel_R_functions_Weddell, aisresponse_Weddell[!, icechoice + 1])
+        update_param!(inst, :AISmodel_R_functions_Peninsula, aisresponse_Peninsula[!, icechoice + 1])
     end
 
     # SAF

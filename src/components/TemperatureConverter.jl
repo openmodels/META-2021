@@ -16,12 +16,14 @@
                 vv.T_AT[TimestepIndex(ss)] = pp.T[TimestepIndex(ss)] + vv.biascorrection
                 ss += 1
             end
-            vv.T_AT_tminus100[tt] = pp.T_AT[tt - 100]
+            vv.T_AT_tminus100[tt + 100] = vv.T_AT[tt]
         elseif gettime(tt) > 2010
             vv.T_AT[tt] = pp.T[tt] + vv.biascorrection
-            vv.T_AT_tminus100[tt] = pp.T_AT[tt - 100]
+            if gettime(tt) + 100 < maximum(dim_keys(model, :time))
+                vv.T_AT_tminus100[tt + 100] = vv.T_AT[tt]
+            end
         else
-            vv.T_AT_tminus100[tt] = 0
+            vv.T_AT_tminus100[tt + 100] = 0
         end
     end
 end

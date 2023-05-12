@@ -140,6 +140,9 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         aismodel = addAISmodel(model, after=ifelse(interaction, :Interactions, :TemperatureConverter))
         connect_param!(model, :AISmodel=>:T_AT, :TemperatureConverter => :T_AT);
         connect_param!(model, :AISmodel=>:T_AT_tminus100, :TemperatureConverter => :T_AT_tminus100);
+        if interaction != false
+            aismodel[:f_AIS] = interact[:f_AIS];
+        end
         connect_param!(model, :SLRModel=>:SLR_AIS, :AISmodel=>:SLR_AIS);
     elseif ais == "WAIS"
         waismodel = addWAISmodel(model, after=ifelse(interaction, :Interactions, :TemperatureConverter));
@@ -191,7 +194,12 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
         if gis != false
             interact[:VGIS] = gismodel[:VGIS];
         end
-        if ais == "WAIS"
+        if ais == "AIS"
+            interact[:totalSLR_Ross] = aismodel[:totalSLR_Ross];
+            interact[:totalSLR_Amundsen] = aismodel[:totalSLR_Amundsen];
+            interact[:totalSLR_Weddell] = aismodel[:totalSLR_Weddell];
+            interact[:totalSLR_Peninsula] = aismodel[:totalSLR_Peninsula];
+        elseif ais == "WAIS"
             interact[:I_WAIS] = waismodel[:I_WAIS];
         end
         if amaz != false
