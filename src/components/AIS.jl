@@ -119,7 +119,7 @@
             vv.marginalSLR_Ross[tt] = pp.R_functions_Ross[tt] * vv.ΔM_Ross[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Ross[tt] = vv.totalSLR_Ross[tt-1] + vv.marginalSLR_Ross[tt]
 
-            vv.ΔT₀_Amundsen[tt] = (gettime(tt) - pp.δ_Amundsen < 2010 ? pp.β_Amundsen * pp.T_AT_tminus100[tt + (100 - pp.δ_Amundsen))] : pp.β_Amundsen * pp.T_AT[tt - pp.δ_Amundsen])
+            vv.ΔT₀_Amundsen[tt] = (gettime(tt) - pp.δ_Amundsen < 2010 ? pp.β_Amundsen * pp.T_AT_tminus100[tt + (100 - pp.δ_Amundsen)] : pp.β_Amundsen * pp.T_AT[tt - pp.δ_Amundsen])
             vv.ΔM_Amundsen[tt] = pp.λ * vv.ΔT₀_Amundsen[tt]
             vv.marginalSLR_Amundsen[tt] = pp.R_functions_Amundsen[tt] * vv.ΔM_Amundsen[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Amundsen[tt] = vv.totalSLR_Amundsen[tt-1] + vv.marginalSLR_Amundsen[tt]
