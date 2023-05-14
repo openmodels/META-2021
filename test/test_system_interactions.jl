@@ -20,7 +20,7 @@ for aiscalib in ["WAIS", "AIS"]
                            false, # persit
                            false, # emuc
                            false;
-                           getsim=(inst, draws; save_rvs) -> inst[:SLRModel, :SLR][end - 100]) # prtp
+                           getsim=(inst, draws; save_rvs) -> inst[:SLRModel, :SLR][end]) # prtp
         push!(allres, [aiscalib, useinteract, mean(results[:other]), std(results[:other]) / sqrt(length(results[:other]))])
     end
 end
