@@ -1,6 +1,7 @@
 @defcomp TemperatureConverter begin
     # Variables
     T_AT = Variable(index=[time]) # after bias-correction
+    T_AT_tminus100 = Variable(index=[time]) # T_AT 100 years before
     biascorrection = Variable()
 
     # Parameters
@@ -15,8 +16,14 @@
                 vv.T_AT[TimestepIndex(ss)] = pp.T[TimestepIndex(ss)] + vv.biascorrection
                 ss += 1
             end
+            vv.T_AT_tminus100[tt + 100] = vv.T_AT[tt]
         elseif gettime(tt) > 2010
             vv.T_AT[tt] = pp.T[tt] + vv.biascorrection
+            if gettime(tt) + 100 < maximum(dim_keys(model, :time))
+                vv.T_AT_tminus100[tt + 100] = vv.T_AT[tt]
+            end
+        else
+            vv.T_AT_tminus100[tt + 100] = 0
         end
     end
 end

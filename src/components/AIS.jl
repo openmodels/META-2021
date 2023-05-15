@@ -38,6 +38,7 @@
     # Parameters
 
     T_AT = Parameter(index=[time], unit="degC") # GMST increase (degC), series starting in 2010
+    T_AT_tminus100 = Parameter(index=[time], unit="degC") # GMST increase (degC), series starting in 1910
     β_EAIS = Parameter(unit="degC/degC") # scaling coefficient
     δ_EAIS = Parameter{Int64}(unit="years") # time delay (years)
     β_Ross = Parameter(unit="degC/degC")
@@ -53,6 +54,7 @@
     R_functions_Amundsen = Parameter(index=[time])
     R_functions_Weddell = Parameter(index=[time])
     R_functions_Peninsula = Parameter(index=[time])
+    f_AIS = Parameter(index=[time]) # AIS probability factor representing interactions with other tipping points # NEW
 
     # Surface Mass Balance module
 
@@ -70,34 +72,33 @@
     λ = Parameter(default=11.5) # basal melt sensitivity parameter (ma^{-1} K^{-1})
 
     function run_timestep(pp, vv, dd, tt)
-
         if is_first(tt)
 
             vv.totalAdjustedΔSMB[tt] = 0
 
-            gettime(tt) - pp.δ_EAIS < 2010 ? vv.ΔT₀_EAIS[tt] = pp.β_EAIS * pp.T_AT[tt - pp.δ_EAIS] : vv.ΔT₀_EAIS[tt] = pp.β_EAIS * pp.T_AT[tt - pp.δ_EAIS]
+            vv.ΔT₀_EAIS[tt] = (gettime(tt) - pp.δ_EAIS < 2010 ? pp.β_EAIS * pp.T_AT_tminus100[tt + (100 - pp.δ_EAIS)] : pp.β_EAIS * pp.T_AT[tt - pp.δ_EAIS])
             vv.ΔM_EAIS[tt] = pp.λ * vv.ΔT₀_EAIS[tt]
             vv.marginalSLR_EAIS[tt] = pp.R_functions_EAIS[tt] * vv.ΔM_EAIS[tt]
             vv.totalSLR_EAIS[tt] = vv.marginalSLR_EAIS[tt]
 
-            gettime(tt) - pp.δ_Ross < 2010 ? vv.ΔT₀_Ross[tt] = pp.β_Ross * pp.T_AT[tt - pp.δ_Ross] : vv.ΔT₀_Ross[tt] = pp.β_Ross * pp.T_AT[tt - pp.δ_Ross]
+            vv.ΔT₀_Ross[tt] = (gettime(tt) - pp.δ_Ross < 2010 ? pp.β_Ross * pp.T_AT_tminus100[tt + (100 - pp.δ_Ross)] : pp.β_Ross * pp.T_AT[tt - pp.δ_Ross])
             vv.ΔM_Ross[tt] = pp.λ * vv.ΔT₀_Ross[tt]
-            vv.marginalSLR_Ross[tt] = pp.R_functions_Ross[tt] * vv.ΔM_Ross[tt]
+            vv.marginalSLR_Ross[tt] = pp.R_functions_Ross[tt] * vv.ΔM_Ross[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Ross[tt] = vv.marginalSLR_Ross[tt]
 
-            gettime(tt) - pp.δ_Amundsen < 2010 ? vv.ΔT₀_Amundsen[tt] = pp.β_Amundsen * pp.T_AT[tt - pp.δ_Amundsen] : vv.ΔT₀_Amundsen[tt] = pp.β_Amundsen * pp.T_AT[tt - pp.δ_Amundsen]
+            vv.ΔT₀_Amundsen[tt] = (gettime(tt) - pp.δ_Amundsen < 2010 ? pp.β_Amundsen * pp.T_AT_tminus100[tt + (100 - pp.δ_Amundsen)] : pp.β_Amundsen * pp.T_AT[tt - pp.δ_Amundsen])
             vv.ΔM_Amundsen[tt] = pp.λ * vv.ΔT₀_Amundsen[tt]
-            vv.marginalSLR_Amundsen[tt] = pp.R_functions_Amundsen[tt] * vv.ΔM_Amundsen[tt]
+            vv.marginalSLR_Amundsen[tt] = pp.R_functions_Amundsen[tt] * vv.ΔM_Amundsen[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Amundsen[tt] = vv.marginalSLR_Amundsen[tt]
 
-            gettime(tt) - pp.δ_Weddell < 2010 ? vv.ΔT₀_Weddell[tt] = pp.β_Weddell * pp.T_AT[tt - pp.δ_Weddell] : vv.ΔT₀_Weddell[tt] = pp.β_Weddell * pp.T_AT[tt - pp.δ_Weddell]
+            vv.ΔT₀_Weddell[tt] = (gettime(tt) - pp.δ_Weddell < 2010 ? pp.β_Weddell * pp.T_AT_tminus100[tt + (100 - pp.δ_Weddell)] : pp.β_Weddell * pp.T_AT[tt - pp.δ_Weddell])
             vv.ΔM_Weddell[tt] = pp.λ * vv.ΔT₀_Weddell[tt]
-            vv.marginalSLR_Weddell[tt] = pp.R_functions_Weddell[tt] * vv.ΔM_Weddell[tt]
+            vv.marginalSLR_Weddell[tt] = pp.R_functions_Weddell[tt] * vv.ΔM_Weddell[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Weddell[tt] = vv.marginalSLR_Weddell[tt]
 
-            gettime(tt) - pp.δ_Peninsula < 2010 ? vv.ΔT₀_Peninsula[tt] = pp.β_Peninsula * pp.T_AT[tt - pp.δ_Peninsula] : vv.ΔT₀_Peninsula[tt] = pp.β_Peninsula * pp.T_AT[tt - pp.δ_Peninsula]
+            vv.ΔT₀_Peninsula[tt] = (gettime(tt) - pp.δ_Peninsula < 2010 ? pp.β_Peninsula * pp.T_AT_tminus100[tt + (100 - pp.δ_Peninsula)] : pp.β_Peninsula * pp.T_AT[tt - pp.δ_Peninsula])
             vv.ΔM_Peninsula[tt] = pp.λ * vv.ΔT₀_Peninsula[tt]
-            vv.marginalSLR_Peninsula[tt] = pp.R_functions_Peninsula[tt] * vv.ΔM_Peninsula[tt]
+            vv.marginalSLR_Peninsula[tt] = pp.R_functions_Peninsula[tt] * vv.ΔM_Peninsula[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Peninsula[tt] = vv.marginalSLR_Peninsula[tt]
 
         else
@@ -108,29 +109,29 @@
             vv.AdjustedΔSMB[tt] = vv.ΔSMB[tt] + vv.Adjustment[tt]
             vv.totalAdjustedΔSMB[tt] = vv.totalAdjustedΔSMB[tt-1] + vv.AdjustedΔSMB[tt]
 
-            gettime(tt) - pp.δ_EAIS < 2010 ? vv.ΔT₀_EAIS[tt] = pp.β_EAIS * pp.T_AT[tt - pp.δ_EAIS] : vv.ΔT₀_EAIS[tt] = pp.β_EAIS * pp.T_AT[tt - pp.δ_EAIS]
+            vv.ΔT₀_EAIS[tt] = (gettime(tt) - pp.δ_EAIS < 2010 ? pp.β_EAIS * pp.T_AT_tminus100[tt + (100 - pp.δ_EAIS)] : pp.β_EAIS * pp.T_AT[tt - pp.δ_EAIS])
             vv.ΔM_EAIS[tt] = pp.λ * vv.ΔT₀_EAIS[tt]
             vv.marginalSLR_EAIS[tt] = pp.R_functions_EAIS[tt] * vv.ΔM_EAIS[tt]
             vv.totalSLR_EAIS[tt] = vv.totalSLR_EAIS[tt-1] + vv.marginalSLR_EAIS[tt]
 
-            gettime(tt) - pp.δ_Ross < 2010 ? vv.ΔT₀_Ross[tt] = pp.β_Ross * pp.T_AT[tt - pp.δ_Ross] : vv.ΔT₀_Ross[tt] = pp.β_Ross * pp.T_AT[tt - pp.δ_Ross]
+            vv.ΔT₀_Ross[tt] = (gettime(tt) - pp.δ_Ross < 2010 ? pp.β_Ross * pp.T_AT_tminus100[tt + (100 - pp.δ_Ross)] : pp.β_Ross * pp.T_AT[tt - pp.δ_Ross])
             vv.ΔM_Ross[tt] = pp.λ * vv.ΔT₀_Ross[tt]
-            vv.marginalSLR_Ross[tt] = pp.R_functions_Ross[tt] * vv.ΔM_Ross[tt]
+            vv.marginalSLR_Ross[tt] = pp.R_functions_Ross[tt] * vv.ΔM_Ross[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Ross[tt] = vv.totalSLR_Ross[tt-1] + vv.marginalSLR_Ross[tt]
 
-            gettime(tt) - pp.δ_Amundsen < 2010 ? vv.ΔT₀_Amundsen[tt] = pp.β_Amundsen * pp.T_AT[tt - pp.δ_Amundsen] : vv.ΔT₀_Amundsen[tt] = pp.β_Amundsen * pp.T_AT[tt - pp.δ_Amundsen]
+            vv.ΔT₀_Amundsen[tt] = (gettime(tt) - pp.δ_Amundsen < 2010 ? pp.β_Amundsen * pp.T_AT_tminus100[tt + (100 - pp.δ_Amundsen)] : pp.β_Amundsen * pp.T_AT[tt - pp.δ_Amundsen])
             vv.ΔM_Amundsen[tt] = pp.λ * vv.ΔT₀_Amundsen[tt]
-            vv.marginalSLR_Amundsen[tt] = pp.R_functions_Amundsen[tt] * vv.ΔM_Amundsen[tt]
+            vv.marginalSLR_Amundsen[tt] = pp.R_functions_Amundsen[tt] * vv.ΔM_Amundsen[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Amundsen[tt] = vv.totalSLR_Amundsen[tt-1] + vv.marginalSLR_Amundsen[tt]
 
-            gettime(tt) - pp.δ_Weddell < 2010 ? vv.ΔT₀_Weddell[tt] = pp.β_Weddell * pp.T_AT[tt - pp.δ_Weddell] : vv.ΔT₀_Weddell[tt] = pp.β_Weddell * pp.T_AT[tt - pp.δ_Weddell]
+            vv.ΔT₀_Weddell[tt] = (gettime(tt) - pp.δ_Weddell < 2010 ? pp.β_Weddell * pp.T_AT_tminus100[tt + (100 - pp.δ_Weddell)] : pp.β_Weddell * pp.T_AT[tt - pp.δ_Weddell])
             vv.ΔM_Weddell[tt] = pp.λ * vv.ΔT₀_Weddell[tt]
-            vv.marginalSLR_Weddell[tt] = pp.R_functions_Weddell[tt] * vv.ΔM_Weddell[tt]
+            vv.marginalSLR_Weddell[tt] = pp.R_functions_Weddell[tt] * vv.ΔM_Weddell[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Weddell[tt] = vv.totalSLR_Weddell[tt-1] + vv.marginalSLR_Weddell[tt]
 
-            gettime(tt) - pp.δ_Peninsula < 2010 ? vv.ΔT₀_Peninsula[tt] = pp.β_Peninsula * pp.T_AT[tt - pp.δ_Peninsula] : vv.ΔT₀_Peninsula[tt] = pp.β_Peninsula * pp.T_AT[tt - pp.δ_Peninsula]
+            vv.ΔT₀_Peninsula[tt] = (gettime(tt) - pp.δ_Peninsula < 2010 ? pp.β_Peninsula * pp.T_AT_tminus100[tt + (100 - pp.δ_Peninsula)] : pp.β_Peninsula * pp.T_AT[tt - pp.δ_Peninsula])
             vv.ΔM_Peninsula[tt] = pp.λ * vv.ΔT₀_Peninsula[tt]
-            vv.marginalSLR_Peninsula[tt] = pp.R_functions_Peninsula[tt] * vv.ΔM_Peninsula[tt]
+            vv.marginalSLR_Peninsula[tt] = pp.R_functions_Peninsula[tt] * vv.ΔM_Peninsula[tt] * pp.f_AIS[tt] # NEW -- added interaction probability factor
             vv.totalSLR_Peninsula[tt] = vv.totalSLR_Peninsula[tt-1] + vv.marginalSLR_Peninsula[tt]
 
         end
@@ -141,8 +142,31 @@
 
 end
 
-function addAISmodel(model, default)
+function addAISmodel(model; before=nothing, after=nothing)
+    aisgcms = CSV.read("../data/Basal_melt_models.csv", DataFrame)
+    aisresponse_EAIS = CSV.read("../data/Response functions - EAIS.csv", DataFrame)
+    aisresponse_Ross = CSV.read("../data/Response functions - Ross.csv", DataFrame)
+    aisresponse_Amundsen = CSV.read("../data/Response functions - Amundsen.csv", DataFrame)
+    aisresponse_Weddell = CSV.read("../data/Response functions - Weddell.csv", DataFrame)
+    aisresponse_Peninsula = CSV.read("../data/Response functions - Peninsula.csv", DataFrame)
 
-    add_comp!(model, AISmodel)
+    ais = add_comp!(model, AISmodel, first=2010, before=before, after=after)
 
+    ais[:β_EAIS] = aisgcms.EAIS_beta[16]
+    ais[:δ_EAIS] = aisgcms.EAIS_delta[16]
+    ais[:β_Ross] = aisgcms.Ross_beta[14]
+    ais[:δ_Ross] = aisgcms.Ross_delta[7]
+    ais[:β_Amundsen] = aisgcms.Amundsen_beta[15]
+    ais[:δ_Amundsen] = aisgcms.Amundsen_delta[5]
+    ais[:β_Weddell] = aisgcms.Weddell_beta[17]
+    ais[:δ_Weddell] = aisgcms.Weddell_delta[17]
+    ais[:β_Peninsula] = aisgcms.Peninsula_beta[17]
+    ais[:δ_Peninsula] = aisgcms.Peninsula_delta[17]
+    ais[:R_functions_EAIS] = [zeros(sum(dim_keys(model, :time) .< 2010)); aisresponse_EAIS[!, 2 + 1]]
+    ais[:R_functions_Ross] = [zeros(sum(dim_keys(model, :time) .< 2010)); aisresponse_Ross[!, 14 + 1]]
+    ais[:R_functions_Amundsen] = [zeros(sum(dim_keys(model, :time) .< 2010)); aisresponse_Amundsen[!, 7 + 1]]
+    ais[:R_functions_Weddell] = [zeros(sum(dim_keys(model, :time) .< 2010)); aisresponse_Weddell[!, 8 + 1]]
+    ais[:R_functions_Peninsula] = [zeros(sum(dim_keys(model, :time) .< 2010)); aisresponse_Peninsula[!, 11 + 1]]
+    ais[:f_AIS] = ones(dim_count(model, :time)) # NEW -- load interaction probability factor
+    ais
 end
