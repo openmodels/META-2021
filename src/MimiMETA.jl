@@ -184,6 +184,7 @@ function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default
 
         connect_param!(model, :Utility=>:lossfactor, :NonMarketDamages=>:lossfactor);
         connect_param!(model, :BGE=>:lossfactor, :NonMarketDamages=>:lossfactor);
+        connect_param!(model, :TotalDamages=>:lossfactor, :NonMarketDamages=>:lossfactor);
     end
 
     if interaction != false

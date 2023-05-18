@@ -71,11 +71,24 @@ function setsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
 end
 
 function getsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFrame; save_rvs::Bool=true)
+    ##Set up results capture
     mcres = Dict{Symbol, Any}()
+
+    ##Geophysical results
     mcres[:temperature_T] = copy(inst[:temperature, :T])
     mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
-    mcres[:Utility_world_disc_utility] = inst[:Utility, :world_disc_utility]
+    mcres[:T_country] = copy(inst[:PatternScaling, :T_country])
+    mcres[:I_AMOC] = copy(inst[:AMOC, :I_AMOC])
+    mcres[:I_OMH] = copy(inst[:OMH, :I_OMH])
+    mcres[:I_AMAZ] = copy(inst[:AmazonDieback, :I_AMAZ])
+  
+    ##Economic results
+    mcres[:total_damages_global_peryear_percent] = inst[:TotalDamages, :total_damages_global_peryear_percent] #Population-weighted global change in consumption due to climate damages (in % of counterfactual consumption per capita)
+    mcres[:total_damages_equiv_conspc_equity] = inst[:TotalDamages, :total_damages_equiv_conspc_equity] #Equity-weighted global equivalent change in consumption due to climate damages (in % of counterfactual consumption per capita)
+    mcres[:vv.total_damages_percap_peryear_percent] = inst[:TotalDamages, vv.total_damages_percap_peryear_percent[tt, :]] #Annual % loss in per capita consumption due to climate damages. All years, can later pick 2030 and 2050 snapshots.
+    #BGE, SC-CO2 and SC-CH4 grabbed from post-compile scripts.
 
+    ##Store number of MC iteration
     if save_rvs
         for jj in 2:ncol(draws)
             mcres[Symbol(names(draws)[jj])] = draws[!, jj]

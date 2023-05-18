@@ -100,7 +100,7 @@ end
 #                              true, # ism_used
 #                              true, # omh_used
 #                              true, # amoc_used
-#                              false, # persit
+#                              false, # persist
 #                              false, # emuc
 #                              false, # prtp
 #                              2020, 10., 1.5)

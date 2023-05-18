@@ -43,10 +43,10 @@ function calculate_scch4_base_mc(model::Model, trials::Int64, persist_dist::Bool
 end
 
 
-model = base_model(; rcp="RCP4.5", tdamage="pointestimate", slrdamage="mode")
-calculate_scch4(model, 2020, .36, 1.5) #0.36 corresponds to 10 Gt CO2eq. in GWP100
-scch4s = calculate_scch4_base_mc(model, 10, false, false, false, 2020, 0.36, 1.5)
-[mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
+#model = base_model(; rcp="RCP4.5", tdamage="pointestimate", slrdamage="mode")
+#calculate_scch4(model, 2020, .36, 1.5) #0.36 corresponds to 10 Gt CO2eq. in GWP100
+#scch4s = calculate_scch4_base_mc(model, 10000, false, false, false, 2020, 0.36, 1.5)
+#[mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
 
 
 function calculate_scch4_full_mc(model::Model, trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, ais_dist::Bool, ism_used::Bool, omh_used::Bool, amoc_used::Bool, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
@@ -64,20 +64,20 @@ function calculate_scch4_full_mc(model::Model, trials::Int64, pcf_calib::String,
              getsim=(inst, draws; save_rvs) -> calculate_scch4_marginal(inst, pulse_year, emuc))
 end
 
-#model = full_model(rcp="RCP4.5", ssp="SSP2")
-#calculate_scch4(model, 2020, 0.36, 1.5)
-# scch4s = calculate_scch4_full_mc(model, 100,
-#                              "Fit of Hope and Schaefer (2016)", # PCF
-#                              "Cai et al. central value", # AMAZ
-#                              "Nordhaus central value", # GIS
-#                              "Distribution", # WAIS
-#                              "Distribution", # SAF
-#                              false, # ais_used
-#                              true, # ism_used
-#                              true, # omh_used
-#                              true, # amoc_used
-#                              false, # persit
-#                              false, # emuc
-#                              false, # prtp
-#                              2020, 0.36, 1.5)
-# [mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
+model = full_model(rcp="RCP4.5", ssp="SSP2")
+calculate_scch4(model, 2020, 0.36, 1.5)
+scch4s = calculate_scch4_full_mc(model, 100,
+                              "Fit of Hope and Schaefer (2016)", # PCF
+                              "Cai et al. central value", # AMAZ
+                              "Nordhaus central value", # GIS
+                              "Distribution", # WAIS
+                              "Distribution", # SAF
+                              false, # ais_used
+                              true, # ism_used
+                              false, # omh_used
+                              true, # amoc_used
+                              false, # persist
+                              false, # emuc
+                              false, # prtp
+                              2020, 0.36, 1.5)
+[mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
