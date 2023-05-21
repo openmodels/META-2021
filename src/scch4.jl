@@ -2,11 +2,15 @@ using Mimi
 include("../src/MimiMETA.jl")
 include("../src/montecarlo.jl")
 
+## Non-Monte Carlo SCC calculation
+
 function calculate_scch4(model::Model, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
     mm = calculate_scch4_setup(model, pulse_year, pulse_size)
     run(mm)
     calculate_scch4_marginal(mm, pulse_year, emuc)
 end
+
+## Helper functions
 
 function calculate_scch4_setup(model::Model, pulse_year::Int64, pulse_size::Float64)
     mm = create_marginal_model(model, pulse_size)
@@ -28,6 +32,8 @@ function calculate_scch4_marginal(mm::Union{MarginalModel, MarginalInstance}, pu
     -(globalwelfare_marginal / (global_conspc^-emuc)) / 1e6 #CH4 in Mt rather than Gt
 end
 
+## Monte Carlo SCC calculations
+
 function calculate_scch4_base_mc(model::Model, trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
     mm = calculate_scch4_setup(model, pulse_year, pulse_size)
 
@@ -42,12 +48,12 @@ function calculate_scch4_base_mc(model::Model, trials::Int64, persist_dist::Bool
              getsim=(inst, draws; save_rvs) -> calculate_scch4_marginal(inst, pulse_year, emuc))
 end
 
-
-#model = base_model(; rcp="RCP4.5", tdamage="pointestimate", slrdamage="mode")
-#calculate_scch4(model, 2020, .36, 1.5) #0.36 corresponds to 10 Gt CO2eq. in GWP100
-#scch4s = calculate_scch4_base_mc(model, 10000, false, false, false, 2020, 0.36, 1.5)
-#[mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
-
+if false
+    model = base_model(; rcp="RCP4.5", tdamage="pointestimate", slrdamage="mode")
+    calculate_scch4(model, 2020, .36, 1.5) #0.36 corresponds to 10 Gt CO2eq. in GWP100
+    scch4s = calculate_scch4_base_mc(model, 10000, false, false, false, 2020, 0.36, 1.5)
+    [mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
+end
 
 function calculate_scch4_full_mc(model::Model, trials::Int64, pcf_calib::String, amazon_calib::String, gis_calib::String, wais_calib::String, saf_calib::String, ais_dist::Bool, ism_used::Bool, omh_used::Bool, amoc_used::Bool, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
     mm = calculate_scch4_setup(model, pulse_year, pulse_size)
@@ -64,6 +70,7 @@ function calculate_scch4_full_mc(model::Model, trials::Int64, pcf_calib::String,
              getsim=(inst, draws; save_rvs) -> calculate_scch4_marginal(inst, pulse_year, emuc))
 end
 
+#=
 model = full_model(rcp="RCP4.5", ssp="SSP2")
 calculate_scch4(model, 2020, 0.36, 1.5)
 scch4s = calculate_scch4_full_mc(model, 100,
@@ -81,3 +88,4 @@ scch4s = calculate_scch4_full_mc(model, 100,
                               false, # prtp
                               2020, 0.36, 1.5)
 [mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
+=#
