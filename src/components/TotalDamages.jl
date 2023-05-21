@@ -64,8 +64,6 @@ using Mimi
                 end
                 vv.total_damages_equiv_conspc_equity[tt] = (vv.global_conspc_counterfactual[tt]-((vv.utility_equivalent_change_global[tt]*vv.lossfactor_global[tt]*(1 - pp.EMUC)) ^ (1 / (1 - pp.EMUC))))/vv.global_conspc_counterfactual[tt]
                 
-                #=
-
                 if is_first(tt)
                         vv.total_damages_global_cumulative[tt] = vv.total_damages_global_peryear[tt]
                         for cc in dd.country
@@ -77,7 +75,7 @@ using Mimi
                                 vv.total_damages_cumulative[tt, cc] = vv.total_damages_cumulative[tt-1, cc] + vv.total_damages_peryear[tt,cc] # Need to sum country-level total damages for country-level results
                         end
                 end
-                =#
+                
         end
 
 end
