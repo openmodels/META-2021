@@ -78,9 +78,15 @@ function getsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
     mcres[:temperature_T] = copy(inst[:temperature, :T])
     mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
     mcres[:T_country] = copy(inst[:PatternScaling, :T_country])
-    mcres[:I_AMOC] = copy(inst[:AMOC, :I_AMOC])
-    mcres[:I_OMH] = copy(inst[:OMH, :I_OMH])
-    mcres[:I_AMAZ] = copy(inst[:AmazonDieback, :I_AMAZ])
+    if amoc_used
+        mcres[:I_AMOC] = copy(inst[:AMOC, :I_AMOC])
+    end
+    if omh_used
+        mcres[:I_OMH] = copy(inst[:OMH, :I_OMH])
+    end
+    if amazon_calib != "none"
+        mcres[:I_AMAZ] = copy(inst[:AmazonDieback, :I_AMAZ])
+    end
   
     ##Economic results
     mcres[:total_damages_global_peryear_percent] = inst[:TotalDamages, :total_damages_global_peryear_percent] #Population-weighted global change in consumption due to climate damages (in % of counterfactual consumption per capita)
