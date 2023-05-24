@@ -1,37 +1,39 @@
 using Mimi
 @defcomp TotalDamages begin
 
-        # Per capita costs to aggregate
+        # Per capita values for aggregation
         postdamage_consumption_percap_percountry  = Parameter(index = [time, country], unit = "2010 USD PPP") # Consumption per cap per country post SLR post temp damages
         baseline_consumption_percap_percountry    = Parameter(index = [time, country], unit = "2010 USD PPP") # Counterfactual consumption per cap per country from SSPs
         market_damages_percap_peryear             = Variable(index = [time, country], unit = "2010 USD PPP") # Market damages per capita per year
         market_damages_percap_peryear_percent     = Variable(index = [time, country], unit = "Per cent") # % of consumption per cap lost due to market damages from climate change
+        global_conspc_counterfactual              = Variable(index = [time], unit = "2010 USD PPP") #Global consumption per capita before climate damages
+        total_damages_equiv_conspc_equity         = Variable(index = [time]) # Per period consumption-equivalent for equity-weighted climate damages
 
         # Other parameters and variables
-        population = Parameter(index = [time, country], unit = "inhabitants")
-        population_global = Variable(index = [time], unit = "inhabitants")
-        EMUC = Parameter() # elasticity of marginal utility of consumption
-        lossfactor = Parameter(index=[time, country]) # non-market loss factor for MERGE add-on
-        lossfactor_global = Variable(index = [time]) # Global loss-factor, from population-weighted country loss-factors
+        population                                = Parameter(index = [time, country], unit = "inhabitants")
+        population_global                         = Variable(index = [time], unit = "inhabitants")
+        EMUC                                      = Parameter() # elasticity of marginal utility of consumption
+        lossfactor                                = Parameter(index=[time, country]) # non-market loss factor for MERGE add-on
+        lossfactor_global                         = Variable(index = [time]) # Global loss-factor, from population-weighted country loss-factors
 
         # Undiscounted items to calculate
-        total_damages_percap_peryear    = Variable(index = [time, country], unit = "2010 USD PPP")  # Undiscounted total damages per capita per year per country
-        total_damages_percap_peryear_percent = Variable(index = [time, country])  # Undiscounted total damages per capita per year per country in % of baseline consumption
-        total_damages_peryear           = Variable(index = [time, country], unit = "2010 USD PPP")  # Undiscounted total damages per year per country
-        total_damages_cumulative        = Variable(index = [time, country], unit = "2010 USD PPP") # Country-level undiscounted total damages through 2200
-        total_damages_global_peryear    = Variable(index = [time], unit = "2010 USD PPP")  # Undiscounted total damages per year
-        total_damages_global_peryear_percent =Variable(index = [time]) # Undiscounted total damages per year in % of baseline consumption
-        total_damages_global_cumulative = Variable(index = [time], unit = "2010 USD PPP") # Undiscounted total damages through 2200
-        utility_equivalent_change       = Variable(index = [time, country]) # Welfare-equivalent change from climate damages for change in consumption per capita due to climate damages per country 
-        utility_equivalent_change_global= Variable(index = [time]) # Welfare-equivalent change from climate damages population-weighted (accounts for equity weighting through utility function)
-        total_damages_equiv_conspc_equity=Variable(index = [time]) # Per period consumption-equivalent for equity-weighted climate damages
-        global_conspc_counterfactual     = Variable(index = [time], unit = "2010 USD PPP") #Global consumption per capita before climate damages
+        total_damages_percap_peryear              = Variable(index = [time, country], unit = "2010 USD PPP")  # Undiscounted total damages per capita per year per country
+        total_damages_percap_peryear_percent      = Variable(index = [time, country])  # Undiscounted total damages per capita per year per country in % of baseline consumption
+        total_damages_peryear                     = Variable(index = [time, country], unit = "2010 USD PPP")  # Undiscounted total damages per year per country
+        total_damages_cumulative                  = Variable(index = [time, country], unit = "2010 USD PPP") # Country-level undiscounted total damages through 2200
+        total_damages_global_peryear              = Variable(index = [time], unit = "2010 USD PPP")  # Undiscounted total damages per year
+        total_damages_global_peryear_percent      = Variable(index = [time]) # Undiscounted total damages per year in % of baseline consumption
+        total_damages_global_cumulative           = Variable(index = [time], unit = "2010 USD PPP") # Undiscounted total damages through 2200
+        utility_equivalent_change                 = Variable(index = [time, country]) # Welfare-equivalent change from climate damages for change in consumption per capita due to climate damages per country 
+        utility_equivalent_change_global          = Variable(index = [time]) # Welfare-equivalent change from climate damages population-weighted (accounts for equity weighting through utility function)
+        total_damages_equiv_conspc_equity         = Variable(index = [time]) # Per period consumption-equivalent for equity-weighted climate damages
+        
 
         function run_timestep(pp, vv, dd, tt)
                 #Define market damages per cap per year
                 for cc in dd.country
                         vv.market_damages_percap_peryear[tt,cc] = pp.baseline_consumption_percap_percountry[tt,cc] - pp.postdamage_consumption_percap_percountry[tt,cc]
-                        vv.market_damages_percap_peryear_percent[tt,cc] = vv.market_damages_percap_peryear[tt,cc]/pp.baseline_consumption_percap_percountry[tt,cc]
+                        vv.market_damages_percap_peryear_percent[tt,cc] = vv.market_damages_percap_peryear[tt,cc]/pp.baseline_consumption_percap_percountry[tt,cc]*100
                         #Utility equivalent change per country per person
                         vv.utility_equivalent_change[tt, cc] = ((1 / (1 - pp.EMUC)*(max(pp.baseline_consumption_percap_percountry[tt, cc],1)*pp.lossfactor[tt, cc])^(1 - pp.EMUC))) - ((1 / (1 - pp.EMUC)*(max(pp.postdamage_consumption_percap_percountry[tt,cc],1)*pp.lossfactor[tt, cc])^(1 - pp.EMUC)))
                 end

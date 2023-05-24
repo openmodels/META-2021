@@ -70,7 +70,7 @@
             vv.disc_utility[tt, cc] = pp.utility[tt, cc] * (1 + pp.PRTP) ^ - (gettime(tt) - 2020)
         end
 
-                #= Marginal welfare change method
+        #= Marginal welfare change method
         vv.world_damages_marginalmethod[tt] = (world_disc_utility_counterfactual[tt] - world_disc_utility[tt])#(1/marginal utility of cosumption in 2010^-EMUC) WHERE TO FIND CONSUMPTION IN 2010? AND CAN I USE CONSUMPTION PER CAP?
         vv.damages_marginalmethod[tt, cc] = (disc_utility_counterfactual[tt, cc] - disc_utility[tt, cc])#(1/marginal utility of cosumption in 2010^-EMUC) WHERE TO FIND CONSUMPTION IN 2010? AND CAN I USE CONSUMPTION PER CAP?
         =#
