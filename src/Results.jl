@@ -1,6 +1,8 @@
 # Load model and select configuration
 include("../src/MimiMETA.jl")
-model = full_model(; rcp="CP-Base")
+include("../src/montecarlo.jl")
+model = full_model(; rcp="1.5-Base")
+
 
 #Update persistence parameter phi (hard-coded default: 0.5)
 #myupdate_param!(model, :Consumption, :damagepersist, 0.25)

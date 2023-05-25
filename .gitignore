@@ -72,3 +72,6 @@ src/Results.jl
 src/Results_loop_temperature graph.jl
 src/SC-X_baseTPs.csv
 .gitignore
+src/Results.jl
+src/bge_oldresults.jl
+.gitignore
