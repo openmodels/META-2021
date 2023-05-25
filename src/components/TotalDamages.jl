@@ -52,6 +52,14 @@ using Mimi
                         vv.total_damages_peryear[tt, cc] = vv.total_damages_percap_peryear[tt, cc] * pp.population[tt, cc]
                         vv.total_damages_global_peryear[tt] += vv.total_damages_peryear[tt, cc]
                         vv.population_global[tt] += pp.population[tt, cc]
+                        #Sanitize for missing countries
+                        if isnan(vv.total_damages_percap_peryear_percent[tt, cc])
+                                vv.total_damages_percap_peryear_percent[tt, cc] = 0
+                        end
+                        if isnan(pp.population[tt, cc])
+                                pp.population[tt, cc] = 0
+                        end
+
                         #The variable below computes population-weighted percentage-change per year
                         vv.total_damages_global_peryear_percent[tt] += vv.total_damages_percap_peryear_percent[tt, cc]*(pp.population[tt, cc]/vv.population_global[tt])
                         vv.utility_equivalent_change_global[tt] += vv.utility_equivalent_change[tt,cc]*(pp.population[tt, cc]/vv.population_global[tt])
