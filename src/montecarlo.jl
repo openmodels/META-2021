@@ -44,12 +44,18 @@ function presim_base(trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_di
 
     if persist_dist
         draws.Consumption_damagepersist = rand(Uniform(0, 1), trials)
+    else
+        rand(Uniform(0, 1), trials)
     end
     if emuc_dist
         draws.Consumption_EMUC = rand(TriangularDist(0.5, 2, 1.5), trials)
+    else
+        rand(TriangularDist(0.5, 2, 1.5), trials)
     end
     if prtp_dist
         draws.Consumption_PRTP = rand(TriangularDist(0.001, 0.02, 0.01), trials)
+    else
+        rand(TriangularDist(0.001, 0.02, 0.01), trials)
     end
 
     draws
@@ -87,7 +93,7 @@ function getsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
     if amazon_calib != "none"
         mcres[:I_AMAZ] = copy(inst[:AmazonDieback, :I_AMAZ])
     end
-  
+
     ##Economic results
     mcres[:total_damages_global_peryear_percent] = inst[:TotalDamages, :total_damages_global_peryear_percent] #Population-weighted global change in consumption due to climate damages (in % of counterfactual consumption per capita)
     mcres[:total_damages_equiv_conspc_equity] = inst[:TotalDamages, :total_damages_equiv_conspc_equity] #Equity-weighted global equivalent change in consumption due to climate damages (in % of counterfactual consumption per capita)
@@ -156,6 +162,9 @@ function presim_full(trials::Int64, pcf_calib::String, amazon_calib::String, gis
     if ais_dist
         draws.AISmodel_ω = rand(Normal(-0.05, 0.004), trials)
         draws.AISmodel_λ = rand(Uniform(7, 16), trials)
+    else
+        rand(Normal(-0.05, 0.004), trials)
+        rand(Uniform(7, 16), trials)
     end
 
     # Permafrost
@@ -166,24 +175,36 @@ function presim_full(trials::Int64, pcf_calib::String, amazon_calib::String, gis
         draws.PCFModel_C_PF = rand(Normal(1035, 76.53), trials)
         draws.PCFModel_propPassive = rand(Normal(0.4, 0.055), trials)
         draws.PCFModel_tau = rand(Normal(70, 30), trials)
+    else
+        rand(Normal(0.023, 0.006), trials)
+        rand(Normal(0.172, 0.0261), trials)
+        rand(Normal(1035, 76.53), trials)
+        rand(Normal(0.4, 0.055), trials)
+        rand(Normal(70, 30), trials)
     end
 
     # Amazon
 
     if amazon_calib == "Distribution"
         draws.AmazonDieback_Delta_AMAZ = rand(TriangularDist(10, 250, 50), trials)
+    else
+        rand(TriangularDist(10, 250, 50), trials)
     end
 
     # GIS
 
     if gis_calib == "Distribution"
         draws.GISModel_avoldot = rand(Normal(-0.0000106, 0.0000244/0.5/100), trials) # Only works with a meltmult of 1
+    else
+        rand(Normal(-0.0000106, 0.0000244/0.5/100), trials)
     end
 
     # WAIS
 
     if wais_calib == "Distribution"
         draws.WAISmodel_waisrate = rand(make_lognormal(3.3 / 1000, 1.65 / 1000), trials)
+    else
+        rand(make_lognormal(3.3 / 1000, 1.65 / 1000), trials)
     end
 
     # SAF
@@ -191,6 +212,9 @@ function presim_full(trials::Int64, pcf_calib::String, amazon_calib::String, gis
     if saf_calib == "Distribution"
         draws.SAFModel_saf_delta = rand(TriangularDist(-1, 1, 0), trials)
         draws.SAFModel_FRT = rand(TriangularDist(10, 55, 20), trials)
+    else
+        rand(TriangularDist(-1, 1, 0), trials)
+        rand(TriangularDist(10, 55, 20), trials)
     end
 
     draws
@@ -218,6 +242,9 @@ function setsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
         update_param!(inst, :AISmodel_R_functions_Amundsen, aisresponse_Amundsen[!, icechoice + 1])
         update_param!(inst, :AISmodel_R_functions_Weddell, aisresponse_Weddell[!, icechoice + 1])
         update_param!(inst, :AISmodel_R_functions_Peninsula, aisresponse_Peninsula[!, icechoice + 1])
+    else
+        rand(DiscreteUniform(1, 19), 1)
+        rand(DiscreteUniform(1, 17), 1)
     end
 
     # SAF
@@ -230,30 +257,40 @@ function setsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
 
     if ism_used
         update_param!(inst, :ISMModel_uniforms, rand(Uniform(0, 1), (dim_count(inst, :time), dim_count(inst, :monsoonsteps))))
+    else
+        rand(Uniform(0, 1), (dim_count(inst, :time), dim_count(inst, :monsoonsteps)))
     end
 
     # OMH
 
     if omh_used
         update_param!(inst, :OMH_uniforms, rand(Uniform(0, 1), dim_count(inst, :time)))
+    else
+        rand(Uniform(0, 1), dim_count(inst, :time))
     end
 
     # AMOC
 
     if amoc_used
         update_param!(inst, :AMOC_uniforms, rand(Uniform(0, 1), dim_count(inst, :time)))
+    else
+        rand(Uniform(0, 1), dim_count(inst, :time))
     end
 
     # Amazon
 
     if amazon_calib != "none"
         update_param!(inst, :AmazonDieback_uniforms, rand(Uniform(0, 1), dim_count(inst, :time)))
+    else
+        rand(Uniform(0, 1), dim_count(inst, :time))
     end
 
     # WAIS
 
     if wais_calib == "Distribution"
         update_param!(inst, :WAISmodel_uniforms, rand(Uniform(0, 1), dim_count(inst, :time)))
+    else
+        rand(Uniform(0, 1), dim_count(inst, :time))
     end
 end
 

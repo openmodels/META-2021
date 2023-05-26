@@ -3,7 +3,7 @@
 using Mimi
 include("../src/MimiMETA.jl")
 include("../src/montecarlo.jl")
-include("../src/lib/presets.jl") # Needed?
+## include("../src/lib/presets.jl") # Needed?
 include("../src/scch4.jl")
 include("../src/scc.jl")
 include("../src/bge.jl")
@@ -45,7 +45,19 @@ model = full_model(;
 
 
 ### Run the model in MC mode
-sim_full(model, 100) # why does sim_ful() not read the model settings?
+sim_full(model, 100,
+         "Fit of Hope and Schaefer (2016)", # PCF
+         "Cai et al. central value", # AMAZ
+         "Nordhaus central value", # GIS
+         "none", # WAIS
+         "Distribution", # SAF
+         true, # ais_used
+         true, # ism_used
+         true, # omh_used
+         true, # amoc_used
+         false, # persit
+         false, # emuc
+         false) # prtp
 #getsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFrame; save_rvs::Bool=true)
 
 ### Calculate the balanced growth equivalent in MC mode
