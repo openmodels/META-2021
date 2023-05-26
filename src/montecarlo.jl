@@ -8,7 +8,7 @@ using MimiFAIRv2
 include("../src/lib/presets.jl")
 include("../src/lib/MimiFAIR_monte_carlo.jl")
 
-import Mimi.ModelInstance
+import Mimi.ModelInstance, Mimi.has_comp
 
 aisgcms = CSV.read("../data/Basal_melt_models.csv", DataFrame)
 aisresponse_EAIS = CSV.read("../data/Response functions - EAIS.csv", DataFrame)
@@ -84,20 +84,11 @@ function getsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
     mcres[:temperature_T] = copy(inst[:temperature, :T])
     mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
     mcres[:T_country] = copy(inst[:PatternScaling, :T_country])
-    if amoc_used
-        mcres[:I_AMOC] = copy(inst[:AMOC, :I_AMOC])
-    end
-    if omh_used
-        mcres[:I_OMH] = copy(inst[:OMH, :I_OMH])
-    end
-    if amazon_calib != "none"
-        mcres[:I_AMAZ] = copy(inst[:AmazonDieback, :I_AMAZ])
-    end
 
     ##Economic results
     mcres[:total_damages_global_peryear_percent] = inst[:TotalDamages, :total_damages_global_peryear_percent] #Population-weighted global change in consumption due to climate damages (in % of counterfactual consumption per capita)
     mcres[:total_damages_equiv_conspc_equity] = inst[:TotalDamages, :total_damages_equiv_conspc_equity] #Equity-weighted global equivalent change in consumption due to climate damages (in % of counterfactual consumption per capita)
-    mcres[:vv.total_damages_percap_peryear_percent] = inst[:TotalDamages, vv.total_damages_percap_peryear_percent[tt, :]] #Annual % loss in per capita consumption due to climate damages. All years, can later pick 2030 and 2050 snapshots.
+    mcres[:total_damages_percap_peryear_percent] = inst[:TotalDamages, :total_damages_percap_peryear_percent] #Annual % loss in per capita consumption due to climate damages. All years, can later pick 2030 and 2050 snapshots.
     #BGE, SC-CO2 and SC-CH4 grabbed from post-compile scripts.
 
     ##Store number of MC iteration
@@ -295,7 +286,18 @@ function setsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
 end
 
 function getsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFrame; save_rvs::Bool=true)
-    getsim_base(inst, draws, save_rvs=save_rvs)
+    mcres = getsim_base(inst, draws, save_rvs=save_rvs)
+    if has_comp(inst, :AMOC)
+        mcres[:I_AMOC] = copy(inst[:AMOC, :I_AMOC])
+    end
+    if has_comp(inst, :OMH)
+        mcres[:I_OMH] = copy(inst[:OMH, :I_OMH])
+    end
+    if has_comp(inst, :AmazonDieback)
+        mcres[:I_AMAZ] = copy(inst[:AmazonDieback, :I_AMAZ])
+    end
+
+    mcres
 end
 
 function simdataframe(model::Union{Model, MarginalModel}, results::Vector{Dict{Symbol, Any}}, comp::Symbol, name::Symbol)

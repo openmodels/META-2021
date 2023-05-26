@@ -1,6 +1,7 @@
 ##This file produces all May 2023 results for the AERE talk.
 
 using Mimi
+import Random
 include("../src/MimiMETA.jl")
 include("../src/montecarlo.jl")
 ## include("../src/lib/presets.jl") # Needed?
@@ -20,6 +21,8 @@ include("../src/bge.jl")
 # Phi parameters
 2 PHI SETTINGS
 =#
+
+Random.seed!(26052023)
 
 ### Create the model (this just sets a long string that the other functions can use)
 model = full_model(;

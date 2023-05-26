@@ -67,6 +67,10 @@ function Base.getindex(mi::MarginalInstance, comp_path::Symbol, name::Symbol)
     return (mi.modified[comp_path, name] .- mi.base[comp_path, name]) ./ mi.delta
 end
 
+function has_comp(mi::MarginalInstance, name::Symbol)
+    has_comp(mi.base, name)
+end
+
 function dim_count(mi::MarginalInstance, dim::Symbol)
     dim_count(mi.base, dim)
 end
