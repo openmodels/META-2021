@@ -64,6 +64,7 @@ sim_full(model, 100,
 #getsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFrame; save_rvs::Bool=true)
 
 ### Calculate the balanced growth equivalent in MC mode
+run(model)
 bgeresults = calculate_bge(model)
 
 ### Calculate the SC-CO2 in MC mode

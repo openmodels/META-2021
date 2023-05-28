@@ -11,10 +11,11 @@ function calculate_bge(model::Model, outpath::String="")
     results = DataFrame(country=String[], bge=Float64[])
 
     emuc = model[:BGE, :EMUC]
+    startyear = findfirst(dim_keys(model, :time) .== 2010)
 
     # Present value of discounted utility streams
-    sum_world_disc_utility                  = sum(model[:BGE, :world_disc_utility][1:191])
-    sum_world_disc_utility_counterfactual   = sum(model[:BGE, :world_disc_utility_counterfactual][1:191])
+    sum_world_disc_utility                  = sum(model[:BGE, :world_disc_utility][startyear:end])
+    sum_world_disc_utility_counterfactual   = sum(model[:BGE, :world_disc_utility_counterfactual][startyear:end])
 
     # Prefill one dimensional array of zeros for each country
     isos = dim_keys(model, :country)
@@ -22,8 +23,8 @@ function calculate_bge(model::Model, outpath::String="")
     sum_disc_utility_counterfactual         = zeros(length(isos), 1)
 
     for cc in 1:length(isos)
-        sum_disc_utility[cc]                = sum(model[:BGE, :disc_utility][1:191, cc])
-        sum_disc_utility_counterfactual[cc] = sum(model[:BGE, :disc_utility_counterfactual][1:191, cc])
+        sum_disc_utility[cc]                = sum(model[:BGE, :disc_utility][startyear:end, cc])
+        sum_disc_utility_counterfactual[cc] = sum(model[:BGE, :disc_utility_counterfactual][startyear:end, cc])
     end
 
     # Apply BGE method (eq. 5 in Anthoff and Tol 2009 ERE)
