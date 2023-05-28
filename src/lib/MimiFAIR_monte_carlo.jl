@@ -32,7 +32,7 @@
 
 # Load packages.
 using CSVFiles, DataFrames, Mimi, MimiFAIRv2, StatsBase, Downloads, ProgressMeter
-import Mimi.build, Mimi.update_param!, Mimi.ModelInstance, Mimi.run, Mimi.dim_count
+import Mimi.build, Mimi.update_param!, Mimi.ModelInstance, Mimi.run, Mimi.dim_count, Mimi.has_comp
 
 struct MarginalInstance
     base::ModelInstance

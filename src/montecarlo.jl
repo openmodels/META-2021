@@ -8,7 +8,7 @@ using MimiFAIRv2
 include("../src/lib/presets.jl")
 include("../src/lib/MimiFAIR_monte_carlo.jl")
 
-import Mimi.ModelInstance, Mimi.has_comp
+import Mimi.ModelInstance
 
 aisgcms = CSV.read("../data/Basal_melt_models.csv", DataFrame)
 aisresponse_EAIS = CSV.read("../data/Response functions - EAIS.csv", DataFrame)
