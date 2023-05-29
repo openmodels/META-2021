@@ -300,6 +300,14 @@ function getsim_full(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
     mcres
 end
 
+function simdataframe(model::Union{Model, MarginalModel}, results::Dict{Symbol, Array}, comp::Symbol, name::Symbol)
+    if comp == :FAIR
+        return results[name]
+    else
+        return simdataframe(model, convert(Vector{Dict{Symbol, Any}}, results[:other]), comp, name)
+    end
+end
+
 function simdataframe(model::Union{Model, MarginalModel}, results::Vector{Dict{Symbol, Any}}, comp::Symbol, name::Symbol)
     key = Symbol("$(comp)_$(name)")
     if results[1][key] isa Number

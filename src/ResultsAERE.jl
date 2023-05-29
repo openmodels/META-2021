@@ -88,7 +88,7 @@ end
 run(model)
 
 ### Run the model in MC mode
-sim_full(model, 10,
+results = sim_full(model, 10,
          "Fit of Hope and Schaefer (2016)", # PCF
          "Cai et al. central value", # AMAZ
          "Nordhaus central value", # GIS
@@ -103,6 +103,8 @@ sim_full(model, 10,
          false) # prtp
 
 results = getsim_full(model, draws, true)
+df = simdataframe(model, results, :SLRModel, :SLR)
+
 
 #=
 
