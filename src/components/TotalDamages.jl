@@ -67,9 +67,9 @@ using Mimi
                         #The variable below computes population-weighted percentage-change per year
                         vv.population_weights[tt, cc] = pp.population[tt, cc] / vv.population_global[tt]
                         vv.total_damages_global_peryear_percent[tt] += vv.total_damages_percap_peryear_percent[tt, cc] * vv.population_weights[tt, cc]
-                        vv.utility_equivalent_change_global[tt] += vv.utility_equivalent_change[tt,cc]*(pp.population[tt, cc]/vv.population_global[tt])
+                        vv.utility_equivalent_change_global[tt] += vv.utility_equivalent_change[tt,cc] * vv.population_weights[tt, cc]
                         #Global consumption per capita pop-weighted
-                        vv.global_conspc_counterfactual[tt] += pp.baseline_consumption_percap_percountry[tt,cc]*(pp.population[tt, cc]/vv.population_global[tt])
+                        vv.global_conspc_counterfactual[tt] += pp.baseline_consumption_percap_percountry[tt,cc]*vv.population_weights[tt, cc]
                 
                 end
                 
