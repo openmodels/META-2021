@@ -12,6 +12,7 @@ using Mimi
         # Other parameters and variables
         population                                = Parameter(index = [time, country], unit = "inhabitants")
         population_global                         = Variable(index = [time], unit = "inhabitants")
+        population_weights                        = Variable(index = [time, country], unit = "Per cent")
         EMUC                                      = Parameter() # elasticity of marginal utility of consumption
         lossfactor                                = Parameter(index=[time, country]) # non-market loss factor for MERGE add-on
         lossfactor_global                         = Variable(index = [time]) # Global loss-factor, from population-weighted country loss-factors
@@ -49,6 +50,9 @@ using Mimi
                 vv.global_conspc_counterfactual[tt] = 0
 
                 for cc in dd.country
+                        if isnan(pp.population[tt, cc])
+                                pp.population[tt, cc] = 0
+                        end
                         vv.total_damages_peryear[tt, cc] = vv.total_damages_percap_peryear[tt, cc] * pp.population[tt, cc]
                         vv.total_damages_global_peryear[tt] += vv.total_damages_peryear[tt, cc]
                         vv.population_global[tt] += pp.population[tt, cc]
@@ -56,15 +60,17 @@ using Mimi
                         if isnan(vv.total_damages_percap_peryear_percent[tt, cc])
                                 vv.total_damages_percap_peryear_percent[tt, cc] = 0
                         end
-                        if isnan(pp.population[tt, cc])
-                                pp.population[tt, cc] = 0
-                        end
+                end
 
+                for cc in dd.country
+                        
                         #The variable below computes population-weighted percentage-change per year
-                        vv.total_damages_global_peryear_percent[tt] += vv.total_damages_percap_peryear_percent[tt, cc]*(pp.population[tt, cc]/vv.population_global[tt])
+                        vv.population_weights[tt, cc] = pp.population[tt, cc] / vv.population_global[tt]
+                        vv.total_damages_global_peryear_percent[tt] += vv.total_damages_percap_peryear_percent[tt, cc] * vv.population_weights[tt, cc]
                         vv.utility_equivalent_change_global[tt] += vv.utility_equivalent_change[tt,cc]*(pp.population[tt, cc]/vv.population_global[tt])
                         #Global consumption per capita pop-weighted
                         vv.global_conspc_counterfactual[tt] += pp.baseline_consumption_percap_percountry[tt,cc]*(pp.population[tt, cc]/vv.population_global[tt])
+                
                 end
                 
                 #Transform equity-weighted number in consumption equivalent in % change
