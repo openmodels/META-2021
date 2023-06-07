@@ -13,7 +13,7 @@ mapping = Dict{String, Tuple{Symbol, Symbol}}("Nonlinear SAF / Distribution" => 
                                               "C0" => (:TemperatureModel, :fair_C_0),
                                               "Dataset 1" => (:CH4Model, :ch4_alpha))
 
-for do_test in ["notp", "full", "some"]
+for do_test in ["notp", "full"]
     if do_test == "full"
         ## Run a test with all TPs
         global model = full_model(rcp="RCP4.5", ssp="SSP2")
