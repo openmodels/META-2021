@@ -70,38 +70,40 @@ function calculate_scc_full_mc(model::Model, trials::Int64, pcf_calib::String, a
              getsim=(inst, draws; save_rvs) -> calculate_scc_marginal(inst, pulse_year, emuc))
 end
 
-# model = full_model(rcp="RCP4.5", ssp="SSP2", ais="WAIS")
-# calculate_scc(model, 2020, 1.0, 1.5)
-# sccs = calculate_scc_full_mc(model, 100,
-#                              "Fit of Hope and Schaefer (2016)", # PCF
-#                              "Cai et al. central value", # AMAZ
-#                              "Nordhaus central value", # GIS
-#                              "Distribution", # WAIS
-#                              "Distribution", # SAF
-#                              false, # ais_used
-#                              true, # ism_used
-#                              true, # omh_used
-#                              true, # amoc_used
-#                              false, # persit
-#                              false, # emuc
-#                              false, # prtp
-#                              2020, 10., 1.5)
-# [mean(sccs[:other]), std(sccs[:other]), median(sccs[:other])]
+if false
+    model = full_model(rcp="RCP4.5", ssp="SSP2", ais="WAIS")
+    calculate_scc(model, 2020, 1.0, 1.5)
+    sccs = calculate_scc_full_mc(model, 100,
+                                 "Fit of Hope and Schaefer (2016)", # PCF
+                                 "Cai et al. central value", # AMAZ
+                                 "Nordhaus central value", # GIS
+                                 "Distribution", # WAIS
+                                 "Distribution", # SAF
+                                 false, # ais_used
+                                 true, # ism_used
+                                 true, # omh_used
+                                 true, # amoc_used
+                                 false, # persit
+                                 false, # emuc
+                                 false, # prtp
+                                 2020, 10., 1.5)
+    [mean(sccs[:other]), std(sccs[:other]), median(sccs[:other])]
 
-# model = full_model(rcp="RCP4.5", ssp="SSP2")
-# calculate_scc(model, 2020, 1.0, 1.5)
-# sccs = calculate_scc_full_mc(model, 100,
-#                              "Fit of Hope and Schaefer (2016)", # PCF
-#                              "Cai et al. central value", # AMAZ
-#                              "Nordhaus central value", # GIS
-#                              "none", # WAIS
-#                              "Distribution", # SAF
-#                              true, # ais_used
-#                              true, # ism_used
-#                              true, # omh_used
-#                              true, # amoc_used
-#                              false, # persist
-#                              false, # emuc
-#                              false, # prtp
-#                              2020, 10., 1.5)
-# [mean(sccs[:other]), std(sccs[:other]), median(sccs[:other])]
+    model = full_model(rcp="RCP4.5", ssp="SSP2")
+    calculate_scc(model, 2020, 1.0, 1.5)
+    sccs = calculate_scc_full_mc(model, 100,
+                                 "Fit of Hope and Schaefer (2016)", # PCF
+                                 "Cai et al. central value", # AMAZ
+                                 "Nordhaus central value", # GIS
+                                 "none", # WAIS
+                                 "Distribution", # SAF
+                                 true, # ais_used
+                                 true, # ism_used
+                                 true, # omh_used
+                                 true, # amoc_used
+                                 false, # persist
+                                 false, # emuc
+                                 false, # prtp
+                                 2020, 10., 1.5)
+    [mean(sccs[:other]), std(sccs[:other]), median(sccs[:other])]
+end

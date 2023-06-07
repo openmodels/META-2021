@@ -14,6 +14,9 @@ include("../lib/saverate.jl")
     conspc = Variable(index=[time, country], unit="2010 USD PPP")
     baseline_consumption_percap_percountry = Variable(index = [time, country], unit = "2010 USD PPP") # Counterfactual consumption per cap per country from SSPs
 
+    # Caches
+    country2region = Variable{Int64}(index=[country]) # gives region index
+
     # Parameters
     ssp = Parameter{String}()
 
@@ -79,6 +82,9 @@ include("../lib/saverate.jl")
                 end
 
                 vv.conspc_preadj[tt, cc] = (1-pp.saverate[cc])*pp.gdppc_2009[cc]
+
+                region = getregion(isos[cc])
+                vv.country2region[cc] = (ismissing(region) ? 0 : findfirst(dim_keys(model, :region) .== region))
             end
         else
             for rr in dd.region
@@ -92,11 +98,10 @@ include("../lib/saverate.jl")
             end
 
             for cc in dd.country
-                region = getregion(isos[cc])
-                if ismissing(region)
+                rr = vv.country2region[cc]
+                if rr == 0
                     growth = 0
                 else
-                    rr = findfirst(dim_keys(model, :region) .== region)
                     growth = vv.gdppc_growth_region[tt, rr]
                 end
 

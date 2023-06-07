@@ -15,6 +15,9 @@ include("../lib/gdppc.jl")
     world_disc_utility = Variable(index=[time]) # world discounted utility
     equiv_conspc = Variable(index=[time]) # equivalent world consumption per capita
 
+    # Caches
+    country2region = Variable{Int64}(index=[country]) # gives region index
+
     # Parameters
 
     ssp = Parameter{String}()
@@ -46,6 +49,9 @@ include("../lib/gdppc.jl")
                 else
                     vv.pop[tt, cc] = pop
                 end
+
+                region = getregion(isos[cc])
+                vv.country2region[cc] = (ismissing(region) ? 0 : findfirst(dim_keys(model, :region) .== region))
             end
         else
             for rr in dd.region
@@ -59,11 +65,10 @@ include("../lib/gdppc.jl")
             end
 
             for cc in dd.country
-                region = getregion(isos[cc])
-                if ismissing(region)
+                rr = vv.country2region[cc]
+                if rr == 0
                     growth = 0
                 else
-                    rr = findfirst(dim_keys(model, :region) .== region)
                     growth = vv.pop_growth_region[tt, rr]
                 end
 
