@@ -22,7 +22,9 @@ slrcoeffs = CSV.read("../data/SLRcoeffs.csv", DataFrame)
 
 function getslrcoeff(iso, option::String)
     if iso ∉ slrcoeffs.ISO
-        if option == "mode"
+        if iso ∈ ["KOS", "SDS", "SWZ"]
+            return 0. # land-locked new countries
+        elseif option == "mode"
             return mean(slrcoeffs.mode)
         elseif option == "low"
             return mean(slrcoeffs.low)
