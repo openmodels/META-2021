@@ -136,25 +136,8 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                 ## Miniloop over pulse year
                 sccresults = DataFrame(pulse_year=Int64[], scc=Float64[], scch4=Float64[])
                 for yy in 2020:10:2100
-                    subscc = calculate_scc_full_mc(model,
-                                                   10, # MC reps
-                                                   "Fit of Hope and Schaefer (2016)", # PCF
-                                                   "Cai et al. central value", # AMAZ
-                                                   "Nordhaus central value", # GIS
-                                                   "none", # WAIS
-                                                   "Distribution", # SAF
-                                                   true, # ais_used
-                                                   true, # ism_used
-                                                   true, # omh_used
-                                                   true, # amoc_used
-                                                   false, # persist
-                                                   false, # emuc
-                                                   false, # prtp
-                                                   yy, # pulse year
-                                                   10.0, # pulse size
-                                                   1.5) # EMUC
-
-                    subscch4 = calculate_scch4_full_mc(model,
+                    if TP == "TPs"
+                        subscc = calculate_scc_full_mc(model,
                                                        10, # MC reps
                                                        "Fit of Hope and Schaefer (2016)", # PCF
                                                        "Cai et al. central value", # AMAZ
@@ -169,8 +152,64 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                                                        false, # emuc
                                                        false, # prtp
                                                        yy, # pulse year
-                                                       0.36, # pulse size
+                                                       10.0, # pulse size
                                                        1.5) # EMUC
+
+                        subscch4 = calculate_scch4_full_mc(model,
+                                                           10, # MC reps
+                                                           "Fit of Hope and Schaefer (2016)", # PCF
+                                                           "Cai et al. central value", # AMAZ
+                                                           "Nordhaus central value", # GIS
+                                                           "none", # WAIS
+                                                           "Distribution", # SAF
+                                                           true, # ais_used
+                                                           true, # ism_used
+                                                           true, # omh_used
+                                                           true, # amoc_used
+                                                           false, # persist
+                                                           false, # emuc
+                                                           false, # prtp
+                                                           yy, # pulse year
+                                                           0.36, # pulse size
+                                                           1.5) # EMUC
+                    else
+                        subscc = calculate_scc_full_mc(model,
+                                                       10, # MC reps
+                                                       "none", # PCF
+                                                       "none", # AMAZ
+                                                       "none", # GIS
+                                                       "none", # WAIS
+                                                       "Distribution", # SAF
+                                                       false, # ais_used
+                                                       false, # ism_used
+                                                       false, # omh_used
+                                                       false, # amoc_used
+                                                       false, # persist
+                                                       false, # emuc
+                                                       false, # prtp
+                                                       yy, # pulse year
+                                                       10.0, # pulse size
+                                                       1.5) # EMUC
+
+                        subscch4 = calculate_scch4_full_mc(model,
+                                                           10, # MC reps
+                                                           "none", # PCF
+                                                           "none", # AMAZ
+                                                           "none", # GIS
+                                                           "none", # WAIS
+                                                           "Distribution", # SAF
+                                                           false, # ais_used
+                                                           false, # ism_used
+                                                           false, # omh_used
+                                                           false, # amoc_used
+                                                           false, # persist
+                                                           false, # emuc
+                                                           false, # prtp
+                                                           yy, # pulse year
+                                                           0.36, # pulse size
+                                                           1.5) # EMUC
+                    end
+
                     sccresults = vcat(sccresults, DataFrame(pulse_year=ones(length(subscc[:other])) * yy, scc=subscc[:other], scch4=subscch4[:other]))
                 end
 
