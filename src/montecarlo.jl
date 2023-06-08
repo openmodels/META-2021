@@ -81,14 +81,14 @@ function getsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
     mcres = Dict{Symbol, Any}()
 
     ##Geophysical results
-    mcres[:temperature_T] = copy(inst[:temperature, :T])
     mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
     mcres[:T_country] = copy(inst[:PatternScaling, :T_country])
+    mcres[:TemperatureConverter_T_AT] = copy(inst[:TemperatureConverter, :T_AT])
 
     ##Economic results
-    mcres[:total_damages_global_peryear_percent] = inst[:TotalDamages, :total_damages_global_peryear_percent] #Population-weighted global change in consumption due to climate damages (in % of counterfactual consumption per capita)
-    mcres[:total_damages_equiv_conspc_equity] = inst[:TotalDamages, :total_damages_equiv_conspc_equity] #Equity-weighted global equivalent change in consumption due to climate damages (in % of counterfactual consumption per capita)
-    mcres[:total_damages_percap_peryear_percent] = inst[:TotalDamages, :total_damages_percap_peryear_percent] #Annual % loss in per capita consumption due to climate damages. All years, can later pick 2030 and 2050 snapshots.
+    mcres[:TotalDamages_total_damages_global_peryear_percent] = inst[:TotalDamages, :total_damages_global_peryear_percent] #Population-weighted global change in consumption due to climate damages (in % of counterfactual consumption per capita)
+    # mcres[:total_damages_equiv_conspc_equity] = inst[:TotalDamages, :total_damages_equiv_conspc_equity] #Equity-weighted global equivalent change in consumption due to climate damages (in % of counterfactual consumption per capita)
+    mcres[:TotalDamages_total_damages_percap_peryear_percent] = inst[:TotalDamages, :total_damages_percap_peryear_percent] #Annual % loss in per capita consumption due to climate damages. All years, can later pick 2030 and 2050 snapshots.
     #BGE, SC-CO2 and SC-CH4 grabbed from post-compile scripts.
 
     ##Store number of MC iteration
@@ -318,7 +318,11 @@ function simdataframe(model::Union{Model, MarginalModel}, results::Vector{Dict{S
         df = nothing
         for ii in 1:length(results)
             mcdf = dfbase[!, :]
-            mcdf[!, name] = results[ii][key]
+            if isa(results[ii][key], Vector)
+                mcdf[!, name] = results[ii][key]
+            else
+                mcdf[!, name] = vec(transpose(results[ii][key]))
+            end
             mcdf.trialnum .= ii
             if df == nothing
                 df = mcdf

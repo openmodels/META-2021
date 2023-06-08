@@ -7,7 +7,7 @@ include("../src/lib/presets.jl")
 #model = base_model(; rcp="CP-GMP", tdamage="pointestimate", slrdamage="mode")
 #run(model)
 
-function calculate_bge(model::Model, outpath::String="")
+function calculate_bge(model::Union{Model, ModelInstance}, outpath::String="")
     results = DataFrame(country=String[], bge=Float64[])
 
     emuc = model[:BGE, :EMUC]
