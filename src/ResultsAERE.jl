@@ -15,7 +15,7 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
         rcp=x*z # Concatenate correct scenario-variant name
 
         # TP configurations
-        for TP in ["TPs", "NoTPs"]
+        for TP in ["NoTPs", "TPs"]
             if TP == "TPs"
                 global model = full_model(;
                                           rcp = "CP-Base",
@@ -97,9 +97,9 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                                        getsim=get_nonscc_results)
                 else
                     results = sim_full(model, 10,
-                                       false, # PCF
-                                       false, # AMAZ
-                                       false, # GIS
+                                       "none", # PCF
+                                       "none", # AMAZ
+                                       "none", # GIS
                                        "none", # WAIS
                                        "Distribution", # SAF
                                        false, # ais_used
@@ -190,8 +190,6 @@ end
 #-SAF on always
 #-Non-market damages on always
 
-
-
 ##Results post Julia
 #-Truncate runs as in PNAS paper
 #-Write Stata script to make pretty graphs and maps
@@ -199,6 +197,4 @@ end
 
 #=Monte Carlo to do post AERE
 #-Ensure individual runs are comparable within MC draw
-=#
-
 =#
