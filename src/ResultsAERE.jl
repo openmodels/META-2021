@@ -12,14 +12,13 @@ include("../src/bge.jl")
 # Scenarios
 for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
     for z in ["Base", "GMP", "GMP-LowCH4", "GMP-HighCH4"]
-        rcps=x*z # Concatenate correct scenario-variant name
-
+        
         # TP configurations
         for TP in ["NoTPs", "TPs"]
             if TP == "TPs"
                 global model = full_model(;
-                                          rcp = rcps,
-                                          ssp = z,
+                                          rcp = x*z, # Concatenate correct scenario-variant name
+                                          ssp = y,
                                           co2 = "Expectation",
                                           ch4 = "default",
                                           warming = "Best fit multi-model mean",
@@ -37,8 +36,8 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                                           nonmarketdamage = true)
             else
                 global model = full_model(;
-                                          rcp = rcps,
-                                          ssp = z,
+                                          rcp = x*z, # Concatenate correct scenario-variant name
+                                          ssp = y,
                                           co2 = "Expectation",
                                           ch4 = "default",
                                           warming = "Best fit multi-model mean",
