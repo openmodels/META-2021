@@ -10,11 +10,11 @@ include("../src/bge.jl")
 
 
 # Scenarios
-for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
-    for z in ["Base", "GMP", "GMP-LowCH4", "GMP-HighCH4"]
+for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
+    for z in ["Base"#=, "GMP", "GMP-LowCH4", "GMP-HighCH4"=#]
         
         # TP configurations
-        for TP in ["NoTPs", "TPs"]
+        for TP in [#="NoTPs", =#"TPs"]
             if TP == "TPs"
                 global model = full_model(;
                                           rcp = x*z, # Concatenate correct scenario-variant name
@@ -55,7 +55,7 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
                                           nonmarketdamage = true)
             end
 
-            for persistence in ["high", "default"]
+            for persistence in ["high"#=, "default"=#]
                 println("$x$z $y $TP $persistence")
 
                 if persistence == "high"
@@ -209,7 +209,17 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
                                                            1.5) # EMUC
                     end
 
-                    sccresults = vcat(sccresults, DataFrame(pulse_year=ones(length(subscc[:other])) * yy, scc=subscc[:other], scch4=subscch4[:other]))
+                    #Ensure results write correctly even if an MC draw crashes
+                    scc=subscc[:other]      
+                    while length(scc)<500
+                        push!(scc,[missing])
+                    end
+                    scch4=subscch4[:other]
+                    while length(scch4)<500
+                        push!(scch4,[missing])
+                    end
+
+                    sccresults = vcat(sccresults, DataFrame(pulse_year=ones(length(subscc[:other])) * yy, scc, scch4))
                 end
 
                 CSV.write("../results/sccs-$x$z-$y-$TP-$persistence.csv", sccresults)
