@@ -460,17 +460,21 @@ function create_fair_monte_carlo(fair_model::Union{Model, MarginalModel}, n_samp
             other_mc_set(fair_instance, i)
 
             # Run model.
-            run(fair_instance)
+            try
+                run(fair_instance)
 
-            # Store projections.
-            temperatures[:,i] = fair_instance[:temperature, :T] # Global mean surface temperature anomaly (K)
-            rf[:, i] = fair_instance[:radiative_forcing, :total_RF] # Total radiative forcing, with individual components scaled by their respective efficacy (Wm⁻²)
-            co2[:, i] = fair_instance[:co2_cycle, :co2]  # Total atmospheric carbon dioxide concentrations (ppm).
-            ch4[:, i] = fair_instance[:ch4_cycle, :ch4]  # Total atmospheric methane concentrations (ppb)
-            n2o[:, i] = fair_instance[:n2o_cycle, :n2o]  # Total atmospheric nitrous oxide concentrations (ppb)
+                # Store projections.
+                temperatures[:,i] = fair_instance[:temperature, :T] # Global mean surface temperature anomaly (K)
+                rf[:, i] = fair_instance[:radiative_forcing, :total_RF] # Total radiative forcing, with individual components scaled by their respective efficacy (Wm⁻²)
+                co2[:, i] = fair_instance[:co2_cycle, :co2]  # Total atmospheric carbon dioxide concentrations (ppm).
+                ch4[:, i] = fair_instance[:ch4_cycle, :ch4]  # Total atmospheric methane concentrations (ppb)
+                n2o[:, i] = fair_instance[:n2o_cycle, :n2o]  # Total atmospheric nitrous oxide concentrations (ppb)
 
-            othermc = other_mc_get(fair_instance)
-            push!(otherresults, othermc)
+                othermc = other_mc_get(fair_instance)
+                push!(otherresults, othermc)
+            catch
+                println("Error in model run.")
+            end
             next!(progress)
         end
 
