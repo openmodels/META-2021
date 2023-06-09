@@ -10,7 +10,7 @@ include("../src/bge.jl")
 
 
 # Scenarios
-for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
+for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
     for z in ["Base", "GMP", "GMP-LowCH4", "GMP-HighCH4"]
         
         # TP configurations
@@ -79,7 +79,7 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
 
                 ### Run the model in MC mode
                 if TP == "TPs"
-                    results = sim_full(model, 10,
+                    results = sim_full(model, 500,
                                        "Fit of Hope and Schaefer (2016)", # PCF
                                        "Cai et al. central value", # AMAZ
                                        "Nordhaus central value", # GIS
@@ -95,7 +95,7 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                                        save_rvs=true,
                                        getsim=get_nonscc_results)
                 else
-                    results = sim_full(model, 10,
+                    results = sim_full(model, 500,
                                        "none", # PCF
                                        "none", # AMAZ
                                        "none", # GIS
@@ -137,7 +137,7 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                 for yy in 2020:10:2100
                     if TP == "TPs"
                         subscc = calculate_scc_full_mc(model,
-                                                       10, # MC reps
+                                                       500, # MC reps
                                                        "Fit of Hope and Schaefer (2016)", # PCF
                                                        "Cai et al. central value", # AMAZ
                                                        "Nordhaus central value", # GIS
@@ -155,7 +155,7 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                                                        1.5) # EMUC
 
                         subscch4 = calculate_scch4_full_mc(model,
-                                                           10, # MC reps
+                                                           500, # MC reps
                                                            "Fit of Hope and Schaefer (2016)", # PCF
                                                            "Cai et al. central value", # AMAZ
                                                            "Nordhaus central value", # GIS
@@ -173,7 +173,7 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                                                            1.5) # EMUC
                     else
                         subscc = calculate_scc_full_mc(model,
-                                                       10, # MC reps
+                                                       500, # MC reps
                                                        "none", # PCF
                                                        "none", # AMAZ
                                                        "none", # GIS
@@ -191,7 +191,7 @@ for (x,y) in [("CP-", "SSP3"), ("NP-", "SSP2"), ("1.5-", "SSP1")]
                                                        1.5) # EMUC
 
                         subscch4 = calculate_scch4_full_mc(model,
-                                                           10, # MC reps
+                                                           500, # MC reps
                                                            "none", # PCF
                                                            "none", # AMAZ
                                                            "none", # GIS
@@ -220,13 +220,6 @@ end
 
 
 
-
-
-
-##Settings
-#-phi=0.5 and phi=0.25
-#-SAF on always
-#-Non-market damages on always
 
 ##Results post Julia
 #-Truncate runs as in PNAS paper
