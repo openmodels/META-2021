@@ -12,7 +12,7 @@ include("../src/bge.jl")
 # Scenarios
 for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
     for z in ["Base"#=, "GMP", "GMP-LowCH4", "GMP-HighCH4"=#]
-        
+
         # TP configurations
         for TP in [#="NoTPs", =#"TPs"]
             if TP == "TPs"
@@ -210,16 +210,15 @@ for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
                     end
 
                     #Ensure results write correctly even if an MC draw crashes
-                    scc=subscc[:other]      
-                    while length(scc)<500
-                        push!(scc,[missing])
-                    end
+                    scc=subscc[:other]
                     scch4=subscch4[:other]
-                    while length(scch4)<500
-                        push!(scch4,[missing])
+                    if length(scc) < length(scch4)
+                        scc = [scc; fill(missing, length(scch4) - length(scc))]
+                    elseif length(scch4) < length(scc)
+                        scch4 = [scch4; fill(missing, length(scc) - length(scch4))]
                     end
 
-                    sccresults = vcat(sccresults, DataFrame(pulse_year=ones(length(subscc[:other])) * yy, scc, scch4))
+                    sccresults = vcat(sccresults, DataFrame(pulse_year=yy, scc=scc, scch4=scch4))
                 end
 
                 CSV.write("../results/sccs-$x$z-$y-$TP-$persistence.csv", sccresults)
