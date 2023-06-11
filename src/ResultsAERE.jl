@@ -10,11 +10,11 @@ include("../src/bge.jl")
 
 
 # Scenarios
-for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
-    for z in ["Base"#=, "GMP", "GMP-LowCH4", "GMP-HighCH4"=#]
+for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
+    for z in ["Base", "GMP", "GMP-LowCH4", "GMP-HighCH4"]
 
         # TP configurations
-        for TP in [#="NoTPs", =#"TPs"]
+        for TP in ["NoTPs", "TPs"]
             if TP == "TPs"
                 global model = full_model(;
                                           rcp = x*z, # Concatenate correct scenario-variant name
@@ -55,7 +55,7 @@ for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
                                           nonmarketdamage = true)
             end
 
-            for persistence in ["high"#=, "default"=#]
+            for persistence in ["high", "default"]
                 println("$x$z $y $TP $persistence")
 
                 if persistence == "high"
