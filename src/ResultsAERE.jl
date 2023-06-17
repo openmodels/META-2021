@@ -10,11 +10,11 @@ include("../src/bge.jl")
 
 
 # Scenarios
-for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
-    for z in ["Base", "GMP", "GMP-LowCH4", "GMP-HighCH4"]
+for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
+    for z in ["Base", "GMP"#=, "GMP-LowCH4", "GMP-HighCH4"=#]
 
         # TP configurations
-        for TP in ["NoTPs", "TPs"]
+        for TP in [#="NoTPs", =#"TPs"]
             if TP == "TPs"
                 global model = full_model(;
                                           rcp = x*z, # Concatenate correct scenario-variant name
@@ -55,7 +55,7 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
                                           nonmarketdamage = true)
             end
 
-            for persistence in ["high", "default"]
+            for persistence in [#="high", =#"default"]
                 println("$x$z $y $TP $persistence")
 
                 if persistence == "high"
@@ -128,9 +128,13 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
                 end
                 CSV.write("../results/bytime-$x$z-$y-$TP-$persistence.csv", df[(df.time .>= 2010) .& (df.time .<= 2100), :])
 
-                df = simdataframe(model, results, :TotalDamages, :total_damages_percap_peryear_percent)
+                df = simdataframe(model, results, :TotalDamages, :total_damages_percap_peryear_percent) 
                 CSV.write("../results/bytimexcountry-$x$z-$y-$TP-$persistence.csv", df[(df.time .>= 2010) .& (df.time .<= 2100), :])
 
+                # Export country-level temperatures
+                df = simdataframe(model, results, :PatternScaling, :T_country) 
+                CSV.write("../results/bytimexcountry2-$x$z-$y-$TP-$persistence.csv", df[(df.time .>= 2010) .& (df.time .<= 2100), :])
+              
                 ### Calculate the SC-CO2 in MC mode
                 ## Miniloop over pulse year
                 sccresults = DataFrame(pulse_year=Int64[], scc=Float64[], scch4=Float64[])
