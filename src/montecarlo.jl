@@ -82,7 +82,7 @@ function getsim_base(inst::Union{ModelInstance, MarginalInstance}, draws::DataFr
 
     ##Geophysical results
     mcres[:SLRModel_SLR] = copy(inst[:SLRModel, :SLR])
-    mcres[:T_country] = copy(inst[:PatternScaling, :T_country])
+    mcres[:PatternScaling_T_country] = copy(inst[:PatternScaling, :T_country])
     mcres[:TemperatureConverter_T_AT] = copy(inst[:TemperatureConverter, :T_AT])
 
     ##Economic results
