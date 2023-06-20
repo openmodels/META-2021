@@ -10,11 +10,11 @@ include("../src/bge.jl")
 
 
 # Scenarios
-for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
-    for z in ["Base", "GMP"#=, "GMP-LowCH4", "GMP-HighCH4"=#]
+for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
+    for z in ["Base", "GMP", "GMP-LowCH4", "GMP-HighCH4"]
 
         # TP configurations
-        for TP in [#="NoTPs", =#"TPs"]
+        for TP in [#="NoTPs", "TPs"=# "NoOMH"]
             if TP == "TPs"
                 global model = full_model(;
                                           rcp = x*z, # Concatenate correct scenario-variant name
@@ -28,6 +28,25 @@ for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
                                           interaction = true,
                                           pcf = "Fit of Hope and Schaefer (2016)",
                                           omh = "Whiteman et al. beta 20 years",
+                                          amaz = "Cai et al. central value",
+                                          gis = "Nordhaus central value",
+                                          ais = "AIS",
+                                          ism = "Value",
+                                          amoc = "IPSL",
+                                          nonmarketdamage = true)
+            elseif TP == "NoOMH"
+                global model = full_model(;
+                                          rcp = x*z, # Concatenate correct scenario-variant name
+                                          ssp = y,
+                                          co2 = "Expectation",
+                                          ch4 = "default",
+                                          warming = "Best fit multi-model mean",
+                                          tdamage = "pointestimate",
+                                          slrdamage = "mode",
+                                          saf = "Distribution mean",
+                                          interaction = true,
+                                          pcf = "Fit of Hope and Schaefer (2016)",
+                                          omh = false,
                                           amaz = "Cai et al. central value",
                                           gis = "Nordhaus central value",
                                           ais = "AIS",
@@ -55,7 +74,7 @@ for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
                                           nonmarketdamage = true)
             end
 
-            for persistence in [#="high", =#"default"]
+            for persistence in ["high", "default"]
                 println("$x$z $y $TP $persistence")
 
                 if persistence == "high"
@@ -94,6 +113,22 @@ for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
                                        false; # prtp
                                        save_rvs=true,
                                        getsim=get_nonscc_results)
+                elseif TP == "NoOMH"
+                    results = sim_full(model, 500,
+                    "Fit of Hope and Schaefer (2016)", # PCF
+                    "Cai et al. central value", # AMAZ
+                    "Nordhaus central value", # GIS
+                    "none", # WAIS
+                    "Distribution", # SAF
+                    true, # ais_used
+                    true, # ism_used
+                    false, # omh_used
+                    true, # amoc_used
+                    false, # persist
+                    false, # emuc
+                    false; # prtp
+                    save_rvs=true,
+                    getsim=get_nonscc_results)
                 else
                     results = sim_full(model, 500,
                                        "none", # PCF
@@ -134,7 +169,7 @@ for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
                 # Export country-level temperatures
                 df = simdataframe(model, results, :PatternScaling, :T_country) 
                 CSV.write("../results/bytimexcountry2-$x$z-$y-$TP-$persistence.csv", df[(df.time .>= 2010) .& (df.time .<= 2100), :])
-              
+
                 ### Calculate the SC-CO2 in MC mode
                 ## Miniloop over pulse year
                 sccresults = DataFrame(pulse_year=Int64[], scc=Float64[], scch4=Float64[])
@@ -159,22 +194,59 @@ for (x,y) in [("CP-", "SSP2")#=, ("NP-", "SSP3"), ("1.5-", "SSP1")=#]
                                                        1.5) # EMUC
 
                         subscch4 = calculate_scch4_full_mc(model,
-                                                           500, # MC reps
-                                                           "Fit of Hope and Schaefer (2016)", # PCF
-                                                           "Cai et al. central value", # AMAZ
-                                                           "Nordhaus central value", # GIS
-                                                           "none", # WAIS
-                                                           "Distribution", # SAF
-                                                           true, # ais_used
-                                                           true, # ism_used
-                                                           true, # omh_used
-                                                           true, # amoc_used
-                                                           false, # persist
-                                                           false, # emuc
-                                                           false, # prtp
-                                                           yy, # pulse year
-                                                           0.36, # pulse size
-                                                           1.5) # EMUC
+                                                        500, # MC reps
+                                                        "Fit of Hope and Schaefer (2016)", # PCF
+                                                        "Cai et al. central value", # AMAZ
+                                                        "Nordhaus central value", # GIS
+                                                        "none", # WAIS
+                                                        "Distribution", # SAF
+                                                        true, # ais_used
+                                                        true, # ism_used
+                                                        true, # omh_used
+                                                        true, # amoc_used
+                                                        false, # persist
+                                                        false, # emuc
+                                                        false, # prtp
+                                                        yy, # pulse year
+                                                        0.36, # pulse size
+                                                        1.5) # EMUC
+                    elseif TP=="NoOMH"
+                        subscc = calculate_scc_full_mc(model,
+                                                        500, # MC reps
+                                                        "Fit of Hope and Schaefer (2016)", # PCF
+                                                        "Cai et al. central value", # AMAZ
+                                                        "Nordhaus central value", # GIS
+                                                        "none", # WAIS
+                                                        "Distribution", # SAF
+                                                        true, # ais_used
+                                                        true, # ism_used
+                                                        false, # omh_used
+                                                        true, # amoc_used
+                                                        false, # persist
+                                                        false, # emuc
+                                                        false, # prtp
+                                                        yy, # pulse year
+                                                        10.0, # pulse size
+                                                        1.5) # EMUC
+
+                        subscch4 = calculate_scch4_full_mc(model,
+                                                        500, # MC reps
+                                                         "Fit of Hope and Schaefer (2016)", # PCF
+                                                        "Cai et al. central value", # AMAZ
+                                                        "Nordhaus central value", # GIS
+                                                        "none", # WAIS
+                                                        "Distribution", # SAF
+                                                        true, # ais_used
+                                                        true, # ism_used
+                                                        false, # omh_used
+                                                        true, # amoc_used
+                                                        false, # persist
+                                                        false, # emuc
+                                                        false, # prtp
+                                                        yy, # pulse year
+                                                        0.36, # pulse size
+                                                        1.5) # EMUC
+                    
                     else
                         subscc = calculate_scc_full_mc(model,
                                                        500, # MC reps
