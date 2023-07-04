@@ -208,7 +208,7 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
                                                         false, # emuc
                                                         false, # prtp
                                                         yy, # pulse year
-                                                        0.36, # pulse size
+                                                        0.06, # pulse size
                                                         1.5) # EMUC
                     elseif TP=="NoOMH"
                         subscc = calculate_scc_full_mc(model,
@@ -244,7 +244,7 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
                                                         false, # emuc
                                                         false, # prtp
                                                         yy, # pulse year
-                                                        0.36, # pulse size
+                                                        0.06, # pulse size
                                                         1.5) # EMUC
                     
                     else
@@ -281,7 +281,7 @@ for (x,y) in [("CP-", "SSP2"), ("NP-", "SSP3"), ("1.5-", "SSP1")]
                                                            false, # emuc
                                                            false, # prtp
                                                            yy, # pulse year
-                                                           0.36, # pulse size
+                                                           0.06, # pulse size
                                                            1.5) # EMUC
                     end
 
