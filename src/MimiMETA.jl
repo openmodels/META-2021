@@ -163,8 +163,12 @@ function full_model(; rcp="RCP4.5", ssp="SSP2", co2="Expectation", ch4="default"
     if amoc != false
         amocmodel = addAMOC(model, amoc, after=:PatternScaling);
 
-        connect_param!(model, :AMOC=>:T_AT, :TemperatureModel=>:T_AT);
-        connect_param!(model, :AMOC=>:scale_country, :PatternScaling=>:T_country);
+        connect_param!(model, :AMOC=>:T_AT, :TemperatureModel => :T_AT);
+        connect_param!(model, :AMOC=>:T_country_base, :PatternScaling=>:T_country);
+
+        ## Use AMOC temperatures rather than PatternScaling temperatures
+        connect_param!(model, :Consumption=>:T_country, :AMOC=>:T_country_AMOC);
+
         amocmodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
         if interaction != false
             amocmodel[:f_AMOC] = interact[:f_AMOC];
