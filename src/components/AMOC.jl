@@ -14,11 +14,9 @@
     uniforms = Parameter(index=[time])
     b_AMOC = Parameter()
     Delta_AMOC = Parameter(unit="year", default=35)
-    GMST_2010 = Parameter(unit="degC", default=20.02780209) # Source: RCP4.5
     max_deltaT_country_AMOC = Parameter(index=[country], unit="degC")
 
-    ## Additional parameters for computing T_country_AMOC
-    scale_country = Parameter(index=[time, country], unit="degC")
+    T_country_base = Parameter(index=[time, country], unit="degC")
 
     function run_timestep(pp, vv, dd, tt)
         if is_first(tt)
@@ -45,7 +43,7 @@
         end
 
         for cc in dd.country
-            vv.T_country_AMOC[tt, cc] = (pp.GMST_2010+pp.T_AT[tt]-pp.T_AT[TimestepIndex(1)])*pp.scale_country[tt, cc] + vv.deltaT_country_AMOC[tt, cc]
+            vv.T_country_AMOC[tt, cc] = pp.T_country_base[tt, cc] + vv.deltaT_country_AMOC[tt, cc]
         end
     end
 end

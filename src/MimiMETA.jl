@@ -186,7 +186,11 @@ function full_model(; rcp="CP-Base", ssp="SSP2", tdamage="pointestimate", slrdam
         amocmodel = addAMOC(model, amoc, after=:PatternScaling);
 
         connect_param!(model, :AMOC=>:T_AT, :TemperatureConverter => :T_AT);
-        connect_param!(model, :AMOC=>:scale_country, :PatternScaling=>:T_country);
+        connect_param!(model, :AMOC=>:T_country_base, :PatternScaling=>:T_country);
+
+        ## Use AMOC temperatures rather than PatternScaling temperatures
+        connect_param!(model, :Consumption=>:T_country, :AMOC=>:T_country_AMOC);
+
         amocmodel[:uniforms] = rand(Uniform(0, 1), dim_count(model, :time));
         if interaction != false
             amocmodel[:f_AMOC] = interact[:f_AMOC];
