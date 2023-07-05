@@ -27,7 +27,7 @@ include("../src/components/BGE.jl")
 include("../src/components/UseExRadiativeForcing.jl")
 #include("../src/components/DEBUG.jl")
 
-function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none", useexrf::Bool=false)
+function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none", useexrf::Bool=true)
     model = MimiFAIRv2.get_model(end_year=2200)
 
     # Get backup data
@@ -102,7 +102,7 @@ function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none
     model
 end
 
-function full_model(; rcp="CP-Base", ssp="SSP2", tdamage="pointestimate", slrdamage="mode", useexrf::Bool=false, saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", ais="AIS", ism="Value", amoc="IPSL", nonmarketdamage=false)
+function full_model(; rcp="CP-Base", ssp="SSP2", tdamage="pointestimate", slrdamage="mode", useexrf::Bool=true, saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", ais="AIS", ism="Value", amoc="IPSL", nonmarketdamage=false)
     model = base_model(rcp=rcp, ssp=ssp, tdamage=tdamage, slrdamage=slrdamage, useexrf=useexrf)
 
     if saf != false
