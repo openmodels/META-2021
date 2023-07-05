@@ -11,6 +11,7 @@ include("../lib/gdppc.jl")
     world_population = Variable(index=[time], unit="inhabitants")
 
     utility = Variable(index=[time, country]) # national utility
+    disc_utility = Variable(index=[time, country]) # national discounted utility
     utility_sum = Variable(index=[time]) # sum of utility across countries
     world_disc_utility = Variable(index=[time]) # world discounted utility
     equiv_conspc = Variable(index=[time]) # equivalent world consumption per capita
@@ -90,6 +91,7 @@ include("../lib/gdppc.jl")
                vv.utility[tt, cc] = (1 / (1 - pp.EMUC) * (max(pp.conspc[tt, cc], 1) * pp.lossfactor[tt, cc]) ^ (1 - pp.EMUC)) * vv.pop[tt, cc]
             end
 
+            vv.disc_utility[tt, cc] = vv.utility[tt, cc] * (1 + pp.PRTP) ^ - (gettime(tt) - 2020)
             vv.utility_sum[tt] += vv.utility[tt, cc]
             vv.world_population[tt] += vv.pop[tt, cc]
 

@@ -10,6 +10,12 @@ function calculate_scch4(model::Model, pulse_year::Int64, pulse_size::Float64, e
     calculate_scch4_marginal(mm, pulse_year, emuc)
 end
 
+function calculate_scch4_national(model::Model, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
+    mm = calculate_scch4_setup(model, pulse_year, pulse_size)
+    run(mm)
+    calculate_scch4_marginal_national(mm, pulse_year, emuc)
+end
+
 ## Helper functions
 
 function calculate_scch4_setup(model::Model, pulse_year::Int64, pulse_size::Float64)
@@ -32,6 +38,27 @@ function calculate_scch4_marginal(mm::Union{MarginalModel, MarginalInstance}, pu
     -(globalwelfare_marginal / (global_conspc^-emuc)) / 1e6 #CH4 in Mt rather than Gt
 end
 
+function calculate_scch4_marginal_national(mm::Union{MarginalModel, MarginalInstance}, pulse_year::Int64, emuc::Float64)
+    pulse_index = findfirst(dim_keys(model, :time) .== pulse_year)
+    
+    #Loop over countries
+    for cc in dd.country
+        #Calculate marginal welfare for each country
+        nationalwelfare_marginal[cc] = sum(mm[:Utility, :disc_utility][pulse_index:dim_count(model, :time), cc]) # What kind of object is this? Just a Julia variable, but not a Mimi one, correct?
+        
+        #Calculate consumption per capita for each country
+        national_conspc[cc] = mm.base[:Consumption, :conspc][pulse_index, cc]
+
+        #Calculate SC-CH4 for each country
+        -(nationalwelfare_marginal[cc] / (national_conspc[cc]^-emuc)) / 1e6 #CH4 in Mt rather than Gt
+    end
+
+    #=Questions:
+    -How to store output for each country? the global function just returns a scalar.
+    -How to loop over countries since these objects are not Mimi objects and therefore don't understand cc indexing, I think
+    =#
+end
+
 ## Monte Carlo SCC calculations
 
 function calculate_scch4_base_mc(model::Model, trials::Int64, persist_dist::Bool, emuc_dist::Bool, prtp_dist::Bool, pulse_year::Int64, pulse_size::Float64, emuc::Float64)
@@ -50,8 +77,8 @@ end
 
 if false
     model = base_model(; rcp="RCP4.5", tdamage="pointestimate", slrdamage="mode")
-    calculate_scch4(model, 2020, .36, 1.5) #0.36 corresponds to 10 Gt CO2eq. in GWP100
-    scch4s = calculate_scch4_base_mc(model, 10000, false, false, false, 2020, 0.36, 1.5)
+    calculate_scch4(model, 2020, 0.06, 1.5) 
+    scch4s = calculate_scch4_base_mc(model, 10000, false, false, false, 2020, 0.06, 1.5)
     [mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
 end
 
@@ -72,7 +99,7 @@ end
 
 #=
 model = full_model(rcp="RCP4.5", ssp="SSP2")
-calculate_scch4(model, 2020, 0.36, 1.5)
+calculate_scch4(model, 2020, 0.06, 1.5)
 scch4s = calculate_scch4_full_mc(model, 100,
                               "Fit of Hope and Schaefer (2016)", # PCF
                               "Cai et al. central value", # AMAZ
@@ -86,6 +113,6 @@ scch4s = calculate_scch4_full_mc(model, 100,
                               false, # persist
                               false, # emuc
                               false, # prtp
-                              2020, 0.36, 1.5)
+                              2020, 0.06, 1.5)
 [mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
 =#
