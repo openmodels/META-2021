@@ -24,9 +24,10 @@ include("../src/components/NonMarketDamages.jl")
 include("../src/components/Utility.jl")
 include("../src/components/TotalDamages.jl")
 include("../src/components/BGE.jl")
+include("../src/components/UseExRadiativeForcing.jl")
 #include("../src/components/DEBUG.jl")
 
-function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none")
+function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none", useexrf::Bool=true)
     model = MimiFAIRv2.get_model(end_year=2200)
 
     # Get backup data
@@ -37,6 +38,9 @@ function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none
     rcpmodel = addRCP(model, rcp, before=:co2_cycle);
     co2converter = addCO2Converter(model, after=:RCP);
     ch4converter = addCH4Converter(model, after=:RCP);
+    if useexrf
+        exrf = addUseExRadiativeForcing(model, after=:radiative_forcing)
+    end
     tempconverter = addTemperatureConverter(model, after=:temperature);
     slr = addSLR(model);
     pattscale = addPatternScaling(model);
@@ -52,6 +56,18 @@ function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none
     # Setup CH4 converter
     ch4converter[:ch4_rcp] = rcpmodel[:ch4_rcp];
     ch4converter[:ch4_2009] = emissions_data.methane[emissions_data[!, 1] .== 2009][1]
+
+    # Replace RF with UseExRF
+    if useexrf
+        connect_param!(model, :UseExRadiativeForcing => :co2_RF, :radiative_forcing => :co2_RF)
+        connect_param!(model, :UseExRadiativeForcing => :ch4_RF, :radiative_forcing => :ch4_RF)
+        connect_param!(model, :UseExRadiativeForcing => :ch4_o3_RF, :radiative_forcing => :ch4_o3_RF)
+        connect_param!(model, :UseExRadiativeForcing => :ch4_h2o_RF, :radiative_forcing => :ch4_h2o_RF)
+        connect_param!(model, :UseExRadiativeForcing => :F_EX, :RCP => :F_EX, zeros(length(dim_keys(model, :time)))) # backup not used
+        connect_param!(model, :UseExRadiativeForcing => :total_RF_FAIR, :radiative_forcing => :total_RF)
+
+        connect_param!(model, :temperature => :F, :UseExRadiativeForcing => :total_RF)
+    end
 
     # Setup temperature converter
     connect_param!(model, :TemperatureConverter => :T, :temperature => :T)
@@ -86,8 +102,8 @@ function base_model(; rcp="CP-Base", ssp="SSP2", tdamage="none", slrdamage="none
     model
 end
 
-function full_model(; rcp="CP-Base", ssp="SSP2", co2="Expectation", ch4="default", warming="Best fit multi-model mean", tdamage="pointestimate", slrdamage="mode", saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", ais="AIS", ism="Value", amoc="IPSL", nonmarketdamage=false)
-    model = base_model(rcp=rcp, ssp=ssp, tdamage=tdamage, slrdamage=slrdamage);
+function full_model(; rcp="CP-Base", ssp="SSP2", tdamage="pointestimate", slrdamage="mode", useexrf::Bool=true, saf="Distribution mean", interaction=true, pcf="Fit of Hope and Schaefer (2016)", omh="Whiteman et al. beta 20 years", amaz="Cai et al. central value", gis="Nordhaus central value", ais="AIS", ism="Value", amoc="IPSL", nonmarketdamage=false)
+    model = base_model(rcp=rcp, ssp=ssp, tdamage=tdamage, slrdamage=slrdamage, useexrf=useexrf)
 
     if saf != false
         safmodel = addSAFModel(model, saf, before=:temperature);
