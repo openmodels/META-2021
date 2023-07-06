@@ -40,22 +40,25 @@ end
 
 function calculate_scch4_marginal_national(mm::Union{MarginalModel, MarginalInstance}, pulse_year::Int64, emuc::Float64)
     pulse_index = findfirst(dim_keys(model, :time) .== pulse_year)
-    
+
     #Loop over countries
-    for cc in dd.country
+    results = Float64[]
+    for cc in 1:dim_count(model, :country)
         #Calculate marginal welfare for each country
-        nationalwelfare_marginal[cc] = sum(mm[:Utility, :disc_utility][pulse_index:dim_count(model, :time), cc]) # What kind of object is this? Just a Julia variable, but not a Mimi one, correct?
-        
+        nationalwelfare_marginal = sum(mm[:Utility, :disc_utility][pulse_index:dim_count(model, :time), cc]) # What kind of object is this? Just a Julia variable, but not a Mimi one, correct? -> It's a number.
+
         #Calculate consumption per capita for each country
-        national_conspc[cc] = mm.base[:Consumption, :conspc][pulse_index, cc]
+        national_conspc = mm.base[:Consumption, :conspc][pulse_index, cc]
 
         #Calculate SC-CH4 for each country
-        -(nationalwelfare_marginal[cc] / (national_conspc[cc]^-emuc)) / 1e6 #CH4 in Mt rather than Gt
+        push!(results, -(nationalwelfare_marginal / (national_conspc^-emuc)) / 1e6) #CH4 in Mt rather than Gt
     end
 
+    results
+
     #=Questions:
-    -How to store output for each country? the global function just returns a scalar.
-    -How to loop over countries since these objects are not Mimi objects and therefore don't understand cc indexing, I think
+    -How to store output for each country? the global function just returns a scalar. -> Put them in a vector.
+    -How to loop over countries since these objects are not Mimi objects and therefore don't understand cc indexing, I think -> Loop over the indexes.
     =#
 end
 
@@ -77,7 +80,8 @@ end
 
 if false
     model = base_model(; rcp="RCP4.5", tdamage="pointestimate", slrdamage="mode")
-    calculate_scch4(model, 2020, 0.06, 1.5) 
+    calculate_scch4(model, 2020, 0.06, 1.5)
+    calculate_scch4_national(model, 2020, 0.06, 1.5)
     scch4s = calculate_scch4_base_mc(model, 10000, false, false, false, 2020, 0.06, 1.5)
     [mean(scch4s[:other]), std(scch4s[:other]), median(scch4s[:other])]
 end
