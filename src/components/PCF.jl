@@ -23,7 +23,7 @@
 
     function run_timestep(pp, vv, dd, tt)
 
-        vv.PF_extent[tt] = 1 - pp.beta_PF * (pp.T_AT[tt] - pp.T_AT_2010)
+        vv.PF_extent[tt] = max(1 - pp.beta_PF * (pp.T_AT[tt] - pp.T_AT_2010), 0)
 
         if is_first(tt)
 
