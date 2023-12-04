@@ -221,7 +221,7 @@ function getsim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_cali
     draws
 end
 
-function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, amoc_used::Bool, amazon_calib::String, wais_calib::String; save_rvs::Bool=true)
+function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, amoc_used::Bool, saf_used::Bool, amazon_calib::String, wais_calib::String; save_rvs::Bool=true)
     if wais_calib == "Distribution"
         set_param!(model, :WAISmodel, :waisrate, :WAISmodel_waisrate, 0.0033) # set up global connection
     end
@@ -240,7 +240,9 @@ function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, 
 
         # SAF
 
-        update_param!(inst, :SAFModel_ECS, draws.TemperatureModel_fair_ECS[ii]) # SAFModel.ECS
+        if saf_used
+            update_param!(inst, :SAFModel_ECS, draws.TemperatureModel_fair_ECS[ii]) # SAFModel.ECS
+        end
 
         # Damages
 

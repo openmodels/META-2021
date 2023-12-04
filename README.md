@@ -223,6 +223,8 @@ order):
     otherwise false.
   - `amoc_used`: Set to true if the AMOC component is included;
     otherwise false.
+  - `saf_used`: Set to true if the SAF component is included;
+    otherwise false.    
   - `amazon_calib`: May be one of the options described in the
    deterministic use case or "none" if the Amazon dieback component is
    excluded.
@@ -252,6 +254,7 @@ draws = getsim(500, "Fit of Hope and Schaefer (2016)", # PCF
 results = runsim(model, draws, true, # ism_used
                  true, # omh_used
                  true, # amoc_used
+                 true, # saf_used
                  "Cai et al. central value", # AMAZ
                  "Distribution") # WAIS
 ```

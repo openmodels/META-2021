@@ -29,6 +29,7 @@ for do_test in ["notp", "full", "some"]
         results = runsim(model, draws, true, # ism_used
                          true, # omh_used
                          true, # amoc_used
+                         true, # saf_used
                          "Cai et al. central value", # AMAZ
                          "Distribution") # WAIS
     elseif do_test == "some" # PCFGISISMSAF
@@ -46,6 +47,7 @@ for do_test in ["notp", "full", "some"]
         results = runsim(model, draws, true, # ism_used
                          false, # omh_used
                          false, # amoc_used
+                         true, # saf_used
                          "none", # AMAZ
                          "none") # WAIS
     elseif do_test == "notp"
