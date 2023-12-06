@@ -6,7 +6,7 @@ using LinearAlgebra
 using ProgressMeter
 include("../src/lib/presets.jl")
 
-import Mimi.add_RV!, Mimi.add_save!, Mimi.ReshapedDistribution, Mimi.lhs, Mimi.RandomVariable
+import Mimi.add_RV!, Mimi.add_save!, Mimi.ReshapedDistribution, Mimi.lhs, Mimi.RandomVariable, Mimi.has_comp
 
 # Prepare correlations for CO2 model
 ## Note: Correlations with rho2 are applied to Beta, not Kumaraswamy
@@ -222,8 +222,14 @@ function getsim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_cali
 end
 
 function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, amoc_used::Bool, amazon_calib::String, wais_calib::String; save_rvs::Bool=true)
-    if wais_calib == "Distribution"
-        set_param!(model, :WAISmodel, :waisrate, :WAISmodel_waisrate, 0.0033) # set up global connection
+    ## Ensure that all draws variables have global connections, if we included their components
+    for jj in 2:ncol(draws)
+        if !has_parameter(model.md, Symbol(names(draws)[jj]))
+            component = split(names(draws)[jj], "_")[1]
+            if has_comp(model.md, Symbol(component))
+                set_param!(model, Symbol(component), Symbol(names(draws)[jj][length(component)+2:end]), Symbol(names(draws)[jj]), draws[1, jj])
+            end
+        end
     end
 
     inst = Mimi.build(model)
