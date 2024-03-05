@@ -131,7 +131,6 @@ function runsim_base(model::Model, draws::DataFrame; save_rvs::Bool=true)
 
         # Damages
 
-        update_param!(inst, :Consumption_seeds, rand(DiscreteUniform(1, typemax(Int64)), dim_count(model, :country)))
         update_param!(inst, :Consumption_slruniforms, rand(Uniform(0, 1), dim_count(model, :country)))
 
         run(inst)
@@ -252,7 +251,6 @@ function runsim(model::Model, draws::DataFrame, ism_used::Bool, omh_used::Bool, 
 
         # Damages
 
-        update_param!(inst, :Consumption_seeds, rand(DiscreteUniform(1, typemax(Int64)), dim_count(model, :country)))
         update_param!(inst, :Consumption_slruniforms, rand(Uniform(0, 1), dim_count(model, :country)))
 
         # ISM

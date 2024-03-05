@@ -11,16 +11,6 @@ end
 
 function preset_fill_notp(model::Model, benchmark::DataFrame, rr::Int64)
     ## Fill in values
-    beta1indexes = findall(x -> occursin("beta1dist", x), names(benchmark))
-    countries = [x[1:3] for x in names(benchmark)[beta1indexes]]
-    beta1s = collect(benchmark[rr, beta1indexes])
-    beta2indexes = findall(x -> occursin("beta2dist", x), names(benchmark))
-    beta2s = collect(benchmark[rr, beta2indexes])
-
-    myupdate_param!(model, :Consumption, :seeds, zeros(dim_count(model, :country)))
-    myupdate_param!(model, :Consumption, :beta1, [beta1s[findfirst(countries .== country)] for country in dim_keys(model, :country)])
-    myupdate_param!(model, :Consumption, :beta2, [beta2s[findfirst(countries .== country)] for country in dim_keys(model, :country)])
-
     myupdate_param!(model, :CO2Model, :a0, benchmark.a_0[rr])
     myupdate_param!(model, :CO2Model, :a1, benchmark.a_1[rr])
     myupdate_param!(model, :CO2Model, :a3, benchmark.a_3[rr])
