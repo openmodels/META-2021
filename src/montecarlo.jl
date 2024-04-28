@@ -202,7 +202,7 @@ function getsim(trials::Int64, pcf_calib::String, amazon_calib::String, gis_cali
     # GIS
 
     if gis_calib == "Distribution"
-        draws.GISModel_avoldot = rand(Normal(-0.0000106, 0.0000244/0.5/100), trials) # Only works with a meltmult of 1
+        draws.GISModel_avoldot0 = rand(Normal(-0.0000106, 0.0000244/0.5/100), trials) # Only works with a meltmult of 1
     end
 
     # WAIS
